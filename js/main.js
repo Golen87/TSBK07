@@ -57,8 +57,8 @@ function compileShader(sourceCode, type) {
 	gl.compileShader(shader);
 
 	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-	var info = gl.getShaderInfoLog(shader);
-	throw 'Could not compile WebGL program. \n\n' + info;
+		var info = gl.getShaderInfoLog(shader);
+		throw 'Could not compile WebGL program. \n\n' + info;
 	}
 	return shader;
 }
@@ -81,6 +81,9 @@ function initShaders() {
 	shader_prog.positionLocation = gl.getAttribLocation(shader_prog, "Position");
 	gl.enableVertexAttribArray(shader_prog.positionLocation);
 
+	shader_prog.colorLocation = gl.getAttribLocation(shader_prog, "Color");
+	gl.enableVertexAttribArray(shader_prog.colorLocation);
+
 	shader_prog.u_PerspLocation = gl.getUniformLocation(shader_prog, "u_Persp");
 	shader_prog.u_ModelViewLocation = gl.getUniformLocation(shader_prog, "u_ModelView");
 }
@@ -88,9 +91,11 @@ function initShaders() {
 
 
 var triangleVertexPositionBuffer;
+var triangleVertexColorBuffer;
 
 function initBuffers() {
 
+	// Vertex position buffer
 	triangleVertexPositionBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
 	var vertices = [
@@ -101,6 +106,18 @@ function initBuffers() {
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 	triangleVertexPositionBuffer.itemSize = 3;
 	triangleVertexPositionBuffer.numItems = 3;
+
+	// Vertex color buffer
+	triangleVertexColorBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexColorBuffer);
+	var vertices = [
+		 1.0,  0.0,  0.0,
+		 0.0,  1.0,  0.0,
+		 0.0,  0.0,  1.0
+	];
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+	triangleVertexColorBuffer.itemSize = 3;
+	triangleVertexColorBuffer.numItems = 3;
 
 }
 
@@ -128,6 +145,10 @@ function drawScene(time) {
 	//Pass triangle position to vertex shader
 	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
 	gl.vertexAttribPointer(shader_prog.positionLocation, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+	//Pass triangle colors to vertex shader
+	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexColorBuffer);
+	gl.vertexAttribPointer(shader_prog.colorLocation, triangleVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 	//Pass model view projection matrix to vertex shader
 	gl.uniformMatrix4fv(shader_prog.u_PerspLocation, false, projectionMatrix);
