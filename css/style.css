@@ -1,0 +1,11 @@
+
+body {
+	background: #333333;
+	margin: auto;
+	text-align: center;
+	overflow: hidden;
+}
+
+canvas {
+	margin: auto;
+}

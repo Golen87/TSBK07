@@ -1,0 +1,37 @@
+<html>
+	<head>
+		<title>TSBK07</title>
+		<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+		<link href="css/style.css" type="text/css" rel="stylesheet" />
+
+		<script type="text/javascript" src="js/lib/glMatrix-0.9.5.min.js"></script>
+		<script type="text/javascript" src="js/lib/perlin.js"></script>
+
+		<script id="shader-fs" type="x-shader/x-fragment">
+			precision mediump float;
+
+			void main(void) {
+				gl_FragColor = vec4(0.9, 0.3, 0.6, 1.0);
+			}
+		</script>
+
+		<script id="shader-vs" type="x-shader/x-vertex">
+			attribute vec3 Position;
+
+			uniform mat4 u_ModelView;
+			uniform mat4 u_Persp;
+
+			void main(void) {
+				gl_Position = u_Persp * u_ModelView * vec4(Position, 1.0);
+			}
+		</script>
+	</head>
+
+	<body>
+		<canvas id="webgl_hello_world" width="800" height="600"></canvas>
+	</body>
+
+	<script src="js/main.js"></script>
+
+</html>
