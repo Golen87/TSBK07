@@ -50,9 +50,22 @@ function getShader(gl, id) {
 
 var shader_prog;
 
+function compileShader(sourceCode, type) {
+	// Compiles either a shader of type gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
+	var shader = gl.createShader(type);
+	gl.shaderSource(shader, sourceCode);
+	gl.compileShader(shader);
+
+	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+	var info = gl.getShaderInfoLog(shader);
+	throw 'Could not compile WebGL program. \n\n' + info;
+	}
+	return shader;
+}
+
 function initShaders() {
-	var fragmentShader = getShader(gl, "shader-fs");
-	var vertexShader = getShader(gl, "shader-vs");
+	var fragmentShader = compileShader(shaderFrag, gl.FRAGMENT_SHADER);
+	var vertexShader = compileShader(shaderVert, gl.VERTEX_SHADER);
 
 	shader_prog = gl.createProgram();
 	gl.attachShader(shader_prog, vertexShader);
