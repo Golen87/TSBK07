@@ -91,36 +91,47 @@ function initBuffers() {
 
 }
 
-var mvMatrix = mat4.create();
-var pMatrix = mat4.create();
+var modelViewMatrix = mat4.create();
+var projectionMatrix = mat4.create();
 
-function drawScene() {
+function drawScene(time) {
 
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+	mat4.perspective(projectionMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
 
-	mat4.identity(mvMatrix);
+	modelViewMatrix = mat4.create();
 	//Move our triangle
-	mat4.translate(mvMatrix, [0.0, 0.0, -4.0]);
+	var position = [ 0.0, 0.0, -4.0 + Math.sin(time) ]; // Or use vec3.fromValues
+	mat4.translate(	modelViewMatrix,	// Output
+					modelViewMatrix,	// Input
+					position);
+	mat4.rotate(modelViewMatrix,	// Output
+				modelViewMatrix,	// Input
+				time,				// amount to rotate in radians
+				[0, 1, 0]);			// axis to rotate around
 
 	//Pass triangle position to vertex shader
 	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
 	gl.vertexAttribPointer(shader_prog.positionLocation, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 	//Pass model view projection matrix to vertex shader
-	gl.uniformMatrix4fv(shader_prog.u_PerspLocation, false, pMatrix);
-	gl.uniformMatrix4fv(shader_prog.u_ModelViewLocation, false, mvMatrix);
+	gl.uniformMatrix4fv(shader_prog.u_PerspLocation, false, projectionMatrix);
+	gl.uniformMatrix4fv(shader_prog.u_ModelViewLocation, false, modelViewMatrix);
 
 	//Draw our lovely triangle
 	gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
+}
 
+function updateLoop(elapsedTime) {
+	drawScene(elapsedTime / 1000);
+	requestAnimationFrame(updateLoop);
 }
 
 
 (function loadWebGL(){
-	var canvas = document.getElementById("webgl_hello_world");
+	var canvas = document.getElementById("webgl_canvas");
 	initGL(canvas);
 	initShaders();
 	initBuffers();
@@ -128,5 +139,5 @@ function drawScene() {
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.enable(gl.DEPTH_TEST);
 
-	drawScene();
+	requestAnimationFrame(updateLoop);
 })();
