@@ -12,73 +12,13 @@ function initGL(canvas) {
 }
 
 
-function getShader(gl, id) {
-	var shaderScript = document.getElementById(id);
-	if (!shaderScript) {
-		return null;
-	}
-
-	var str = "";
-	var k = shaderScript.firstChild;
-	while (k) {
-		if (k.nodeType == 3) {
-			str += k.textContent;
-		}
-		k = k.nextSibling;
-	}
-
-	var shader;
-	if (shaderScript.type == "x-shader/x-fragment") {
-		shader = gl.createShader(gl.FRAGMENT_SHADER);
-	} else if (shaderScript.type == "x-shader/x-vertex") {
-		shader = gl.createShader(gl.VERTEX_SHADER);
-	} else {
-		return null;
-	}
-
-	gl.shaderSource(shader, str);
-	gl.compileShader(shader);
-
-	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-		alert(gl.getShaderInfoLog(shader));
-		return null;
-	}
-
-	return shader;
-}
-
-
 var shader_prog;
 var normal_prog;
 
-function compileShader(sourceCode, type) {
-	// Compiles either a shader of type gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
-	var shader = gl.createShader(type);
-	gl.shaderSource(shader, sourceCode);
-	gl.compileShader(shader);
-
-	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-		var info = gl.getShaderInfoLog(shader);
-		throw 'Could not compile WebGL program. \n\n' + info;
-	}
-	return shader;
-}
-
 function initShaders() {
-	shader_prog = gl.createProgram();
-	gl.attachShader(shader_prog, compileShader(shaders.shaderVert, gl.VERTEX_SHADER));
-	gl.attachShader(shader_prog, compileShader(shaders.shaderFrag, gl.FRAGMENT_SHADER));
-	gl.linkProgram(shader_prog);
+	shader_prog = loadShader( shaders.shaderVert, shaders.shaderFrag );
+	normal_prog = loadShader( shaders.normalVert, shaders.normalFrag );
 
-	normal_prog = gl.createProgram();
-	gl.attachShader(normal_prog, compileShader(shaders.normalVert, gl.VERTEX_SHADER));
-	gl.attachShader(normal_prog, compileShader(shaders.normalFrag, gl.FRAGMENT_SHADER));
-	gl.linkProgram(normal_prog);
-
-	if (!gl.getProgramParameter(shader_prog, gl.LINK_STATUS) ||
-		!gl.getProgramParameter(normal_prog, gl.LINK_STATUS)) {
-		alert("Could not initialise shaders");
-	}
 
 	gl.useProgram(shader_prog);
 
