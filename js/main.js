@@ -66,13 +66,13 @@ function compileShader(sourceCode, type) {
 
 function initShaders() {
 	shader_prog = gl.createProgram();
-	gl.attachShader(shader_prog, compileShader(shaderVert, gl.VERTEX_SHADER));
-	gl.attachShader(shader_prog, compileShader(shaderFrag, gl.FRAGMENT_SHADER));
+	gl.attachShader(shader_prog, compileShader(shaders.shaderVert, gl.VERTEX_SHADER));
+	gl.attachShader(shader_prog, compileShader(shaders.shaderFrag, gl.FRAGMENT_SHADER));
 	gl.linkProgram(shader_prog);
 
 	normal_prog = gl.createProgram();
-	gl.attachShader(normal_prog, compileShader(normalVert, gl.VERTEX_SHADER));
-	gl.attachShader(normal_prog, compileShader(normalFrag, gl.FRAGMENT_SHADER));
+	gl.attachShader(normal_prog, compileShader(shaders.normalVert, gl.VERTEX_SHADER));
+	gl.attachShader(normal_prog, compileShader(shaders.normalFrag, gl.FRAGMENT_SHADER));
 	gl.linkProgram(normal_prog);
 
 	if (!gl.getProgramParameter(shader_prog, gl.LINK_STATUS) ||
@@ -141,7 +141,7 @@ var cubeMesh;
 function initModels() {
 	gl.useProgram(normal_prog);
 
-	var objStr = document.getElementById('my_cube.obj').innerHTML;
+	var objStr = objects.tree;
 	cubeMesh = new OBJ.Mesh(objStr);
 	OBJ.initMeshBuffers(gl, cubeMesh);
 }
@@ -151,7 +151,7 @@ function drawModels(time) {
 
 	//Move our triangle
 	modelViewMatrix = mat4.create();
-	var position = [ 0.0, 0.0, -4.0 - Math.sin(time) ]; // Or use vec3.fromValues
+	var position = [ 0.0, -1.0, -4.0 - Math.sin(time) ]; // Or use vec3.fromValues
 	mat4.translate(	modelViewMatrix,	// Output
 					modelViewMatrix,	// Input
 					position);
@@ -159,6 +159,9 @@ function drawModels(time) {
 				modelViewMatrix,	// Input
 				time,				// amount to rotate in radians
 				[0, 1, 0]);			// axis to rotate around
+	mat4.scale(	modelViewMatrix,	// Output
+					modelViewMatrix,	// Input
+					[0.2, 0.4, 0.2]);
 
 	gl.uniformMatrix4fv(normal_prog.u_PerspLocation, false, projectionMatrix);
 	gl.uniformMatrix4fv(normal_prog.u_ModelViewLocation, false, modelViewMatrix);
@@ -236,7 +239,7 @@ function updateLoop(elapsedTime) {
 }
 
 
-(function loadWebGL(){
+function loadWebGL() {
 	var canvas = document.getElementById("webgl_canvas");
 	initGL(canvas);
 	initShaders();
@@ -247,4 +250,4 @@ function updateLoop(elapsedTime) {
 	gl.enable(gl.DEPTH_TEST);
 
 	requestAnimationFrame(updateLoop);
-})();
+}
