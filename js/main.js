@@ -14,12 +14,12 @@ function initGL(canvas) {
 
 var shader_prog;
 var normal_prog;
+var texture_prog;
 
 function initShaders() {
+
+	// Shader
 	shader_prog = loadShader( shaders.shaderVert, shaders.shaderFrag );
-	normal_prog = loadShader( shaders.normalVert, shaders.normalFrag );
-
-
 	gl.useProgram(shader_prog);
 
 	shader_prog.positionLocation = gl.getAttribLocation(shader_prog, "Position");
@@ -32,6 +32,8 @@ function initShaders() {
 	shader_prog.u_ModelViewLocation = gl.getUniformLocation(shader_prog, "u_ModelView");
 
 
+	// Normal
+	normal_prog = loadShader( shaders.normalVert, shaders.normalFrag );
 	gl.useProgram(normal_prog);
 
 	normal_prog.positionLocation = gl.getAttribLocation(normal_prog, "Position");
@@ -42,6 +44,24 @@ function initShaders() {
 
 	normal_prog.u_PerspLocation = gl.getUniformLocation(normal_prog, "u_Persp");
 	normal_prog.u_ModelViewLocation = gl.getUniformLocation(normal_prog, "u_ModelView")
+
+
+	// Texture
+	texture_prog = loadShader( shaders.textureVert, shaders.textureFrag );
+	gl.useProgram(texture_prog);
+
+	texture_prog.positionLocation = gl.getAttribLocation(texture_prog, "Position");
+	gl.enableVertexAttribArray(texture_prog.positionLocation);
+
+	texture_prog.normalLocation = gl.getAttribLocation(texture_prog, "Normal");
+	gl.enableVertexAttribArray(texture_prog.normalLocation);
+
+	texture_prog.texCoordLocation = gl.getAttribLocation(texture_prog, "TexCoord");
+	gl.enableVertexAttribArray(texture_prog.texCoordLocation);
+
+	texture_prog.u_PerspLocation = gl.getUniformLocation(texture_prog, "u_Persp");
+	texture_prog.u_ModelViewLocation = gl.getUniformLocation(texture_prog, "u_ModelView")
+	texture_prog.u_SamplerLocation = gl.getUniformLocation(texture_prog, "u_Sampler")
 }
 
 
@@ -79,56 +99,61 @@ function initBuffers() {
 var cubeMesh;
 
 function initModels() {
-	gl.useProgram(normal_prog);
+	gl.useProgram(texture_prog);
 
-	var objStr = objects.tree;
+	var objStr = objects.cylinder;
 	cubeMesh = new OBJ.Mesh(objStr);
 	OBJ.initMeshBuffers(gl, cubeMesh);
+
+	// Bind texture to sampler unit 0
+	const texture = loadTexture(gl, "tex/grass_lab.png");
+	gl.activeTexture(gl.TEXTURE0);
+  	gl.bindTexture(gl.TEXTURE_2D, texture);
 }
 
 function drawModels(time) {
-	gl.useProgram(normal_prog);
+	gl.useProgram(texture_prog);
 
 	//Move our triangle
 	modelViewMatrix = mat4.create();
-	var position = [ 0.0, -1.0, -4.0 - Math.sin(time) ]; // Or use vec3.fromValues
+	var position = [ 0.0, 0.0, -4.0 - Math.sin(time) ]; // Or use vec3.fromValues
 	mat4.translate(	modelViewMatrix,	// Output
 					modelViewMatrix,	// Input
 					position);
 	mat4.rotate(modelViewMatrix,	// Output
 				modelViewMatrix,	// Input
 				time,				// amount to rotate in radians
-				[0, 1, 0]);			// axis to rotate around
+				[0, 1, 1]);			// axis to rotate around
 	mat4.scale(	modelViewMatrix,	// Output
 					modelViewMatrix,	// Input
-					[0.2, 0.4, 0.2]);
+					[0.4, 0.4, 0.4]);
 
-	gl.uniformMatrix4fv(normal_prog.u_PerspLocation, false, projectionMatrix);
-	gl.uniformMatrix4fv(normal_prog.u_ModelViewLocation, false, modelViewMatrix);
+	gl.uniformMatrix4fv(texture_prog.u_PerspLocation, false, projectionMatrix);
+	gl.uniformMatrix4fv(texture_prog.u_ModelViewLocation, false, modelViewMatrix);
 
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, cubeMesh.vertexBuffer);
-	gl.vertexAttribPointer(normal_prog.positionLocation, cubeMesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	gl.vertexAttribPointer(texture_prog.positionLocation, cubeMesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-/*
 	// it's possible that the mesh doesn't contain
 	// any texture coordinates (e.g. suzanne.obj in the development branch).
 	// in this case, the texture vertexAttribArray will need to be disabled
 	// before the call to drawElements
 	if(!cubeMesh.textures.length){
-		gl.disableVertexAttribArray(normal_prog.texCoordLocation);
+		gl.disableVertexAttribArray(texture_prog.texCoordLocation);
 	}
 	else{
 		// if the texture vertexAttribArray has been previously
 		// disabled, then it needs to be re-enabled
-		gl.enableVertexAttribArray(normal_prog.textureCoordsLocation);
+		gl.enableVertexAttribArray(texture_prog.texCoordLocation);
 		gl.bindBuffer(gl.ARRAY_BUFFER, cubeMesh.textureBuffer);
-		gl.vertexAttribPointer(normal_prog.textureCoordsLocation, cubeMesh.textureBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		gl.vertexAttribPointer(texture_prog.texCoordLocation, cubeMesh.textureBuffer.itemSize, gl.FLOAT, false, 0, 0);
 	}
-	*/
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, cubeMesh.normalBuffer);
-	gl.vertexAttribPointer(normal_prog.normalLocation, cubeMesh.normalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	gl.vertexAttribPointer(texture_prog.normalLocation, cubeMesh.normalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+  	gl.uniform1i(texture_prog.u_SamplerLocation, 0); // Texture unit 0
 
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeMesh.indexBuffer);
 	gl.drawElements(gl.TRIANGLES, cubeMesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
@@ -167,6 +192,8 @@ function drawScene(time) {
 	//Pass model view projection matrix to vertex shader
 	gl.uniformMatrix4fv(shader_prog.u_PerspLocation, false, projectionMatrix);
 	gl.uniformMatrix4fv(shader_prog.u_ModelViewLocation, false, modelViewMatrix);
+
+	gl.disableVertexAttribArray(2);
 
 	//Draw our lovely triangle
 	gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);

@@ -17,6 +17,8 @@ preload( shaders, "shaderFrag", "shaders/shader.frag" );
 preload( shaders, "shaderVert", "shaders/shader.vert" );
 preload( shaders, "normalFrag", "shaders/normal.frag" );
 preload( shaders, "normalVert", "shaders/normal.vert" );
+preload( shaders, "textureFrag", "shaders/texture.frag" );
+preload( shaders, "textureVert", "shaders/texture.vert" );
 
 preload( objects, "cylinder", "obj/cylinder.obj" );
 preload( objects, "octagon", "obj/octagon.obj" );
@@ -25,6 +27,7 @@ preload( objects, "utedass", "obj/utedass.obj" );
 preload( objects, "sphere", "obj/sphere.obj" );
 preload( objects, "rock", "obj/rock.obj" );
 preload( objects, "tree", "obj/tree.obj" );
+preload( objects, "ground", "obj/ground.obj" );
 
 //LoadTGATextureSimple("textures/grass.tga", &tex_grass);
 //LoadTGATextureSimple("textures/dirt.tga", &tex_dirt);
