@@ -101,7 +101,7 @@ var cubeMesh;
 function initModels() {
 	gl.useProgram(texture_prog);
 
-	var objStr = objects.skybox;
+	var objStr = objects.ground;
 	cubeMesh = new OBJ.Mesh(objStr);
 	OBJ.initMeshBuffers(gl, cubeMesh);
 
@@ -116,17 +116,10 @@ function drawModels(time) {
 
 	//Move our triangle
 	modelViewMatrix = mat4.create();
-	var position = [ 0.0, 0.0, -4.0 - Math.sin(time) ]; // Or use vec3.fromValues
+	var position = [ 0.0, -1.0, 0.0 ]; // Or use vec3.fromValues
 	mat4.translate(	modelViewMatrix,	// Output
 					modelViewMatrix,	// Input
 					position);
-	mat4.rotate(modelViewMatrix,	// Output
-				modelViewMatrix,	// Input
-				time,				// amount to rotate in radians
-				[0, 1, 1]);			// axis to rotate around
-	mat4.scale(	modelViewMatrix,	// Output
-					modelViewMatrix,	// Input
-					[0.4, 0.4, 0.4]);
 
 	gl.uniformMatrix4fv(texture_prog.u_PerspLocation, false, projectionMatrix);
 	gl.uniformMatrix4fv(texture_prog.u_ModelViewLocation, false, modelViewMatrix);
