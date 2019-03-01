@@ -1,8 +1,8 @@
+var loaders = [];
 
 var shaders = {};
 var objects = {};
 
-var loaders = [];
 function preload( obj, name, url ) {
 	var loader = $.ajax({
 		url: url,
@@ -29,15 +29,16 @@ preload( objects, "rock", "obj/rock.obj" );
 preload( objects, "tree", "obj/tree.obj" );
 preload( objects, "ground", "obj/ground.obj" );
 
-//LoadTGATextureSimple("textures/grass.tga", &tex_grass);
-//LoadTGATextureSimple("textures/dirt.tga", &tex_dirt);
-//LoadTGATextureSimple("textures/stone.tga", &tex_stone);
-//LoadTGATextureSimple("textures/snow.tga", &tex_snow);
-//LoadTGATextureSimple("textures/sand.tga", &tex_sand);
-//LoadTGATextureSimple("textures/water.tga", &tex_water);
-//LoadTGATextureSimple("SkyBox512.tga", &tex_skybox);
+// "tex/grass.png"
+// "tex/dirt.png"
+// "tex/stone.png"
+// "tex/snow.png"
+// "tex/sand.png"
+// "tex/water.png"
 
 
-$.when.apply($, loaders).then(function(schemas) {
-	loadWebGL();
-});
+function onPreload( func ) {
+	$.when.apply($, loaders).then(function() {
+		func();
+	});
+}

@@ -229,3 +229,5 @@ function loadWebGL() {
 
 	requestAnimationFrame(updateLoop);
 }
+
+onPreload( loadWebGL );
