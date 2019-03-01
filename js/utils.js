@@ -1,0 +1,1 @@
+vec3.temp = vec3.create();
