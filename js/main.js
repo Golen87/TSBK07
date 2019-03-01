@@ -101,7 +101,7 @@ var cubeMesh;
 function initModels() {
 	gl.useProgram(texture_prog);
 
-	var objStr = objects.cylinder;
+	var objStr = objects.skybox;
 	cubeMesh = new OBJ.Mesh(objStr);
 	OBJ.initMeshBuffers(gl, cubeMesh);
 
