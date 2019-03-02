@@ -207,8 +207,8 @@ function initGL() {
 	try {
 		var canvas = document.getElementById("canvas");
 		gl = canvas.getContext("webgl");
-		gl.viewportWidth = canvas.width;
-		gl.viewportHeight = canvas.height;
+		gl.viewportWidth = canvas.width  = window.innerWidth;
+		gl.viewportHeight = canvas.height = window.innerHeight;
 	} catch (e) {
 	}
 	if (!gl) {

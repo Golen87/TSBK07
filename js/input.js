@@ -32,6 +32,13 @@ window.addEventListener('keyup', function(event) { Key.onKeyup(event); }, false)
 window.addEventListener('keydown', function(event) { Key.onKeydown(event); }, false);
 
 
+// Add event for window resize
+window.addEventListener('resize', function() {
+	gl.viewportWidth = canvas.width  = window.innerWidth;
+	gl.viewportHeight = canvas.height = window.innerHeight;
+	camera.onWindowResize();
+}, false);
+
 
 // Set up pointer lock calls
 canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
@@ -49,7 +56,6 @@ function onLockChange() {
 		document.removeEventListener("mousemove", onMouseMove, false);
 	}
 }
-
 function onMouseMove(e) {
 	camera.mouseMove(e.movementX, e.movementY);
 }

@@ -9,7 +9,15 @@ function Camera() {
 
 	this.moveSpeed = 4.0;
 
+	this.updatePerspective();
+}
+
+Camera.prototype.updatePerspective = function() {
 	mat4.perspective( this.projMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0 );
+}
+
+Camera.prototype.onWindowResize = function() {
+	this.updatePerspective();
 }
 
 Camera.prototype.update = function( dt ) {
