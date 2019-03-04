@@ -4,10 +4,13 @@ function Camera() {
 
 	this.position = vec3.fromValues( 0, 0, -3 );
 	this.direction = vec3.fromValues( 0, 0, 1 );
+	this.pitch = 0.0;
+	this.yaw = 0.0;
 	this.targetPos = vec3.clone( this.direction );
 	this.up = vec3.fromValues( 0, 1, 0 );
 
 	this.moveSpeed = 4.0;
+	this.rotateSpeed = 0.003;
 
 	this.updatePerspective();
 }
@@ -45,7 +48,19 @@ Camera.prototype.update = function( dt ) {
 };
 
 Camera.prototype.mouseMove = function( dx, dy ) {
-	vec3.rotateY( this.direction, this.direction, [0,0,0], -dx*0.001 );
+	const fullRotation = 2 * Math.PI;
+	const maxPitch = 0.49 * Math.PI;
 
-	vec3.normalize( this.direction, this.direction );
+	this.yaw = (this.yaw - dx*this.rotateSpeed) % fullRotation;
+	this.pitch = this.pitch + dy*this.rotateSpeed;
+	if (this.pitch > 0) {
+		this.pitch = Math.min(this.pitch, maxPitch);
+	}
+	else {
+		this.pitch = Math.max(this.pitch, -maxPitch);
+	}
+
+	this.direction = vec3.fromValues(0, 0, 1);
+	vec3.rotateX(this.direction, this.direction, [0,0,0], this.pitch);
+	vec3.rotateY(this.direction, this.direction, [0,0,0] , this.yaw);
 };
