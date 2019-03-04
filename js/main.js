@@ -10,7 +10,7 @@ var camera;
 
 var triangleVertexPositionBuffer;
 var triangleVertexColorBuffer;
-var cubeMesh;
+var groundModel;
 
 
 function initShaders() {
@@ -102,56 +102,19 @@ function initBuffers() {
 function initModels() {
 	gl.useProgram(texture_prog);
 
-	var objStr = objects.ground;
-	cubeMesh = new OBJ.Mesh(objStr);
-	OBJ.initMeshBuffers(gl, cubeMesh);
+	var groundModelMatrix = mat4.create();
+	var position = [ 0.0, -1.0, 0.0 ]; // Or use vec3.fromValues
+	mat4.translate(	groundModelMatrix, // Output
+					groundModelMatrix, // Input
+					position);
+	groundModel = new Model(objects.ground, texture_prog, groundModelMatrix);
 
 	// Bind texture to sampler unit 0
 	const texture = loadTexture(gl, "tex/grass_lab.png");
 	gl.activeTexture(gl.TEXTURE0);
-  	gl.bindTexture(gl.TEXTURE_2D, texture);
-}
-
-function drawModels(time) {
-	gl.useProgram(texture_prog);
-
-	//Move our triangle
-	mat4.identity( modelMatrix );
-	var position = [ 0.0, -1.0, 0.0 ]; // Or use vec3.fromValues
-	mat4.translate(	modelMatrix,	// Output
-					modelMatrix,	// Input
-					position);
-
-	gl.uniformMatrix4fv(texture_prog.u_ProjMat, false, camera.projMatrix);
-	gl.uniformMatrix4fv(texture_prog.u_ViewMat, false, camera.viewMatrix);
-	gl.uniformMatrix4fv(texture_prog.u_ModelMat, false, modelMatrix);
-
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, cubeMesh.vertexBuffer);
-	gl.vertexAttribPointer(texture_prog.Position, cubeMesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-	// it's possible that the mesh doesn't contain
-	// any texture coordinates (e.g. suzanne.obj in the development branch).
-	// in this case, the texture vertexAttribArray will need to be disabled
-	// before the call to drawElements
-	if(!cubeMesh.textures.length){
-		gl.disableVertexAttribArray(texture_prog.TexCoord);
-	}
-	else{
-		// if the texture vertexAttribArray has been previously
-		// disabled, then it needs to be re-enabled
-		gl.enableVertexAttribArray(texture_prog.TexCoord);
-		gl.bindBuffer(gl.ARRAY_BUFFER, cubeMesh.textureBuffer);
-		gl.vertexAttribPointer(texture_prog.TexCoord, cubeMesh.textureBuffer.itemSize, gl.FLOAT, false, 0, 0);
-	}
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, cubeMesh.normalBuffer);
-	gl.vertexAttribPointer(texture_prog.Normal, cubeMesh.normalBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-  	gl.uniform1i(texture_prog.u_Sampler, 0); // Texture unit 0
-
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeMesh.indexBuffer);
-	gl.drawElements(gl.TRIANGLES, cubeMesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 }
 
 function drawScene(time) {
@@ -188,6 +151,12 @@ function drawScene(time) {
 
 	//Draw our lovely triangle
 	gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
+
+	//Draw models
+	gl.useProgram(texture_prog);
+	gl.uniformMatrix4fv(texture_prog.u_ProjMat, false, camera.projMatrix);
+	gl.uniformMatrix4fv(texture_prog.u_ViewMat, false, camera.viewMatrix);
+	groundModel.draw();
 }
 
 var previousTime = 0;
@@ -196,7 +165,6 @@ function updateLoop( elapsedTime ) {
 
 	camera.update( deltaTime );
 	drawScene(elapsedTime / 1000);
-	drawModels(elapsedTime / 1000);
 	requestAnimationFrame(updateLoop);
 
 	previousTime = elapsedTime;
