@@ -109,7 +109,8 @@ function initModels() {
 	// Bind texture to sampler unit 0
 	const texture = loadTexture(gl, "tex/grass_lab.png");
 	gl.activeTexture(gl.TEXTURE0);
-  	gl.bindTexture(gl.TEXTURE_2D, texture);
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); // Prevents pixelated blur
 }
 
 function drawModels(time) {
