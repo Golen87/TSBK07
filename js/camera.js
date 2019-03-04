@@ -2,7 +2,7 @@ function Camera() {
 	this.viewMatrix = mat4.create();
 	this.projMatrix = mat4.create();
 
-	this.position = vec3.fromValues( 0, 0, 0 );
+	this.position = vec3.fromValues( 0, 0, -3 );
 	this.direction = vec3.fromValues( 0, 0, 1 );
 	this.targetPos = vec3.clone( this.direction );
 	this.up = vec3.fromValues( 0, 1, 0 );

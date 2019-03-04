@@ -10,6 +10,16 @@ function Model(meshStr, shaderProg, modelMatrix) {
 Model.prototype.draw = function() {
 	gl.useProgram(this.shaderProg);
 
+	gl.activeTexture(gl.TEXTURE0);
+	/*
+	if (fbo) {
+		gl.bindTexture(gl.TEXTURE_2D, fbo.texture);
+	}
+	else {
+		*/
+		gl.bindTexture(gl.TEXTURE_2D, model_texture);
+	//}
+
 	gl.uniformMatrix4fv(this.shaderProg.u_ModelMat, false, this.modelMatrix);
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.vertexBuffer);
