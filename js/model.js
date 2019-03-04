@@ -20,6 +20,9 @@ Model.prototype.draw = function() {
 		gl.bindTexture(gl.TEXTURE_2D, model_texture);
 	//}
 
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
 	gl.uniformMatrix4fv(this.shaderProg.u_ModelMat, false, this.modelMatrix);
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.vertexBuffer);
