@@ -3,6 +3,7 @@ var gl;
 var shader_prog;
 var normal_prog;
 var texture_prog;
+var fbo_prog;
 
 var modelMatrix = mat4.create();
 
@@ -10,9 +11,7 @@ var camera;
 
 var triangleVertexPositionBuffer;
 var triangleVertexColorBuffer;
-var groundModel;
-var corridorModel;
-var model_texture;
+var models = [];
 
 var fbo;
 const OFFSCREEN_WIDTH = 256;
@@ -23,6 +22,7 @@ function initShaders() {
 
 	// Shader
 	shader_prog = loadShader( shaders.shaderVert, shaders.shaderFrag );
+	shader_prog.hasNormal = false;
 	gl.useProgram(shader_prog);
 
 	shader_prog.Position = gl.getAttribLocation(shader_prog, "Position");
@@ -38,6 +38,7 @@ function initShaders() {
 
 	// Normal
 	normal_prog = loadShader( shaders.normalVert, shaders.normalFrag );
+	normal_prog.hasNormal = true;
 	gl.useProgram(normal_prog);
 
 	normal_prog.Position = gl.getAttribLocation(normal_prog, "Position");
@@ -51,8 +52,22 @@ function initShaders() {
 	normal_prog.u_ModelMat = getUniformLocation(normal_prog, "u_ModelMat")
 
 
+	// FBO
+	fbo_prog = loadShader( shaders.fboVert, shaders.fboFrag );
+	fbo_prog.hasNormal = false;
+	gl.useProgram(fbo_prog);
+
+	fbo_prog.Position = gl.getAttribLocation(fbo_prog, "Position");
+	gl.enableVertexAttribArray(fbo_prog.Position);
+
+	fbo_prog.u_ProjMat = getUniformLocation(fbo_prog, "u_ProjMat");
+	fbo_prog.u_ViewMat = getUniformLocation(fbo_prog, "u_ViewMat");
+	fbo_prog.u_ModelMat = getUniformLocation(fbo_prog, "u_ModelMat")
+
+
 	// Texture
 	texture_prog = loadShader( shaders.textureVert, shaders.textureFrag );
+	texture_prog.hasNormal = true;
 	gl.useProgram(texture_prog);
 
 	texture_prog.Position = gl.getAttribLocation(texture_prog, "Position");
@@ -163,27 +178,65 @@ function initFramebufferObject() {
 }
 
 function initModels() {
-	gl.useProgram(texture_prog);
+	var ground = new Model( objects.ground, texture_prog );
+	ground.setTexture( loadTexture(gl, "tex/grass_lab.png") );
+	ground.setGLSetting( gl.CULL_FACE, true );
+	mat4.translate(	ground.modelMatrix, ground.modelMatrix, [0.0, -1.0, 0.0] );
+	models.push( ground );
 
-	var groundModelMatrix = mat4.create();
-	var position = [ 0.0, -1.0, 0.0 ]; // Or use vec3.fromValues
-	mat4.translate(	groundModelMatrix, // Output
-					groundModelMatrix, // Input
+	var mirror = new Model( objects.surface, texture_prog );
+	mirror.setFBO( fbo );
+	mirror.setGLSetting( gl.CULL_FACE, true );
+	mat4.translate(	mirror.modelMatrix, mirror.modelMatrix, [0.0, 0.0, 4.0] );
+	mat4.rotate( mirror.modelMatrix, mirror.modelMatrix, Math.PI, [0, 1, 0] );
+	models.push( mirror );
+
+	var corridor = new Model( objects.corridor, texture_prog );
+	corridor.setTexture( loadTexture(gl, "tex/debug.png") );
+	corridor.setGLSetting( gl.CULL_FACE, true );
+	mat4.translate(	corridor.modelMatrix, corridor.modelMatrix, [0.0, -1.0, 3.0] );
+	models.push( corridor );
+}
+
+function drawTriangle(time, projMatrix, viewMatrix) {
+	gl.useProgram(shader_prog);
+	gl.uniformMatrix4fv(shader_prog.u_ProjMat, false, projMatrix);
+	gl.uniformMatrix4fv(shader_prog.u_ViewMat, false, viewMatrix);
+	gl.disable(gl.CULL_FACE)
+
+	//Move our triangle
+	mat4.identity( modelMatrix );
+	var position = [ 0.0, 0.0, 0.0 ]; // Or use vec3.fromValues
+	mat4.translate(	modelMatrix,	// Output
+					modelMatrix,	// Input
 					position);
-	groundModel = new Model(objects.ground, texture_prog, groundModelMatrix);
+	mat4.rotate(modelMatrix,	// Output
+				modelMatrix,	// Input
+				time,				// amount to rotate in radians
+				[0, 1, 0]);			// axis to rotate around
 
-	var corridorModelMatrix = mat4.create();
-	var position = [ 0.0, -1.0, 3.0 ];	 // Or use vec3.fromValues
-	mat4.translate(	corridorModelMatrix, // Output
-					corridorModelMatrix, // Input
-					position);	 // Or use vec3.fromValues
-	corridorModel = new Model(objects.corridor, texture_prog, corridorModelMatrix);
+	//Pass triangle position to vertex shader
+	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
+	gl.vertexAttribPointer(shader_prog.Position, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-	model_texture = loadTexture(gl, "tex/grass_lab.png");
+	//Pass triangle colors to vertex shader
+	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexColorBuffer);
+	gl.vertexAttribPointer(shader_prog.Color, triangleVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+	//Pass model view projection matrix to vertex shader
+	gl.uniformMatrix4fv(shader_prog.u_ModelMat, false, modelMatrix);
+
+	gl.disableVertexAttribArray(2);
+
+	//Draw our lovely triangle
+	gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
+
+	gl.enable(gl.CULL_FACE)
 }
 
 function drawFBO(time) {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+	fbo.active = true;
 
 	gl.viewport(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
 	gl.clearColor(1.0, 0.0, 0.0, 1.0);
@@ -195,41 +248,15 @@ function drawFBO(time) {
 	mat4.lookAt( viewMatrix, camera.position, camera.targetPos, camera.up );
 
 
-	// Avoid drawing the FBO objects, but draw everything else
-	//drawModels(time, projMatrix);
+	drawTriangle(time, projMatrix, viewMatrix);
 
-	gl.useProgram(shader_prog);
-	gl.uniformMatrix4fv(shader_prog.u_ProjMat, false, camera.projMatrix);
-	gl.uniformMatrix4fv(shader_prog.u_ViewMat, false, camera.viewMatrix);
-
-	//Move our triangle
-	mat4.identity( modelMatrix );
-	var position = [ 0.0, 0.0, 0.0 ]; // Or use vec3.fromValues
-	mat4.translate(	modelMatrix,	// Output
-					modelMatrix,	// Input
-					position);
-	mat4.rotate(modelMatrix,	// Output
-				modelMatrix,	// Input
-				time,				// amount to rotate in radians
-				[0, 1, 0]);			// axis to rotate around
-
-	//Pass triangle position to vertex shader
-	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-	gl.vertexAttribPointer(shader_prog.Position, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-	//Pass triangle colors to vertex shader
-	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexColorBuffer);
-	gl.vertexAttribPointer(shader_prog.Color, triangleVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-	//Pass model view projection matrix to vertex shader
-	gl.uniformMatrix4fv(shader_prog.u_ModelMat, false, modelMatrix);
-
-	gl.disableVertexAttribArray(2);
-
-	//Draw our lovely triangle
-	gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
+	//Draw models
+	for (var i = models.length - 1; i >= 0; i--) {
+		models[i].draw( projMatrix, viewMatrix );
+	}
 
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+	fbo.active = false;
 }
 
 function drawScene(time) {
@@ -239,43 +266,13 @@ function drawScene(time) {
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	gl.useProgram(shader_prog);
 
-	//Move our triangle
-	mat4.identity( modelMatrix );
-	var position = [ 0.0, 0.0, 0.0 ]; // Or use vec3.fromValues
-	mat4.translate(	modelMatrix,	// Output
-					modelMatrix,	// Input
-					position);
-	mat4.rotate(modelMatrix,	// Output
-				modelMatrix,	// Input
-				time,				// amount to rotate in radians
-				[0, 1, 0]);			// axis to rotate around
-
-	//Pass triangle position to vertex shader
-	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-	gl.vertexAttribPointer(shader_prog.Position, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-	//Pass triangle colors to vertex shader
-	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexColorBuffer);
-	gl.vertexAttribPointer(shader_prog.Color, triangleVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-	//Pass model view projection matrix to vertex shader
-	gl.uniformMatrix4fv(shader_prog.u_ProjMat, false, camera.projMatrix);
-	gl.uniformMatrix4fv(shader_prog.u_ViewMat, false, camera.viewMatrix);
-	gl.uniformMatrix4fv(shader_prog.u_ModelMat, false, modelMatrix);
-
-	gl.disableVertexAttribArray(2);
-
-	//Draw our lovely triangle
-	gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
+	drawTriangle(time, camera.projMatrix, camera.viewMatrix);
 
 	//Draw models
-	gl.useProgram(texture_prog);
-	gl.uniformMatrix4fv(texture_prog.u_ProjMat, false, camera.projMatrix);
-	gl.uniformMatrix4fv(texture_prog.u_ViewMat, false, camera.viewMatrix);
-	groundModel.draw();
-	corridorModel.draw();
+	for (var i = models.length - 1; i >= 0; i--) {
+		models[i].draw( camera.projMatrix, camera.viewMatrix );
+	}
 }
 
 var previousTime = 0;
@@ -311,7 +308,6 @@ function loadWebGL() {
 	initModels();
 
 	gl.enable(gl.DEPTH_TEST);
-	gl.enable(gl.CULL_FACE)
 
 	camera = new Camera();
 
