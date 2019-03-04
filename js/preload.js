@@ -19,6 +19,8 @@ preload( shaders, "normalFrag", "shaders/normal.frag" );
 preload( shaders, "normalVert", "shaders/normal.vert" );
 preload( shaders, "textureFrag", "shaders/texture.frag" );
 preload( shaders, "textureVert", "shaders/texture.vert" );
+preload( shaders, "fboFrag", "shaders/fbo.frag" );
+preload( shaders, "fboVert", "shaders/fbo.vert" );
 
 preload( objects, "cylinder", "obj/cylinder.obj" );
 preload( objects, "octagon", "obj/octagon.obj" );
@@ -28,6 +30,7 @@ preload( objects, "sphere", "obj/sphere.obj" );
 preload( objects, "rock", "obj/rock.obj" );
 preload( objects, "tree", "obj/tree.obj" );
 preload( objects, "ground", "obj/ground.obj" );
+preload( objects, "surface", "obj/surface.obj" );
 
 // "tex/grass.png"
 // "tex/dirt.png"
