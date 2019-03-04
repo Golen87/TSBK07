@@ -11,6 +11,11 @@ var camera;
 var triangleVertexPositionBuffer;
 var triangleVertexColorBuffer;
 var cubeMesh;
+var model_texture;
+
+var fbo;
+const OFFSCREEN_WIDTH = 256;
+const OFFSCREEN_HEIGHT = 256;
 
 
 function initShaders() {
@@ -96,7 +101,64 @@ function initBuffers() {
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 	triangleVertexColorBuffer.itemSize = 3;
 	triangleVertexColorBuffer.numItems = 3;
+}
 
+function initFramebufferObject() {
+	var framebuffer, texture, depthBuffer;
+
+	// Define the error handling function
+	var error = function() {
+		if (framebuffer) gl.deleteFramebuffer(framebuffer);
+		if (texture) gl.deleteTexture(texture);
+		if (depthBuffer) gl.deleteRenderbuffer(depthBuffer);
+		return null;
+	}
+
+	// Create a frame buffer object (FBO)
+	framebuffer = gl.createFramebuffer();
+	if (!framebuffer) {
+		console.log('Failed to create frame buffer object');
+		return error();
+	}
+
+	// Create a texture object and set its size and parameters
+	texture = gl.createTexture(); // Create a texture object
+	if (!texture) {
+		console.log('Failed to create texture object');
+		return error();
+	}
+	gl.bindTexture(gl.TEXTURE_2D, texture); // Bind the object to target
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	framebuffer.texture = texture; // Store the texture object
+
+	// Create a renderbuffer object and set its size and parameters
+	depthBuffer = gl.createRenderbuffer(); // Create a renderbuffer object
+	if (!depthBuffer) {
+		console.log('Failed to create renderbuffer object');
+		return error();
+	}
+	gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer); // Bind the object to target
+	gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+
+	// Attach the texture and the renderbuffer object to the FBO
+	gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+	gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+	gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
+
+	// Check if FBO is configured correctly
+	var e = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+	if (gl.FRAMEBUFFER_COMPLETE !== e) {
+		console.log('Frame buffer object is incomplete: ' + e.toString());
+		return error();
+	}
+
+	// Unbind the buffer object
+	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+	gl.bindTexture(gl.TEXTURE_2D, null);
+	gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+
+	fbo = framebuffer;
 }
 
 function initModels() {
@@ -106,17 +168,22 @@ function initModels() {
 	cubeMesh = new OBJ.Mesh(objStr);
 	OBJ.initMeshBuffers(gl, cubeMesh);
 
-	// Bind texture to sampler unit 0
-	const texture = loadTexture(gl, "tex/grass_lab.png");
-	gl.activeTexture(gl.TEXTURE0);
-	gl.bindTexture(gl.TEXTURE_2D, texture);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); // Prevents pixelated blur
+	model_texture = loadTexture(gl, "tex/grass_lab.png");
 }
 
 function drawModels(time) {
 	gl.useProgram(texture_prog);
 
-	//Move our triangle
+	gl.activeTexture(gl.TEXTURE0);
+	if (fbo) {
+		gl.bindTexture(gl.TEXTURE_2D, fbo.texture);
+	}
+	else {
+		gl.bindTexture(gl.TEXTURE_2D, model_texture);
+	}
+	//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); // Prevents pixelated blur
+
+
 	mat4.identity( modelMatrix );
 	var position = [ 0.0, -1.0, 0.0 ]; // Or use vec3.fromValues
 	mat4.translate(	modelMatrix,	// Output
@@ -149,21 +216,77 @@ function drawModels(time) {
 	gl.bindBuffer(gl.ARRAY_BUFFER, cubeMesh.normalBuffer);
 	gl.vertexAttribPointer(texture_prog.Normal, cubeMesh.normalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-  	gl.uniform1i(texture_prog.u_Sampler, 0); // Texture unit 0
+	gl.uniform1i(texture_prog.u_Sampler, 0); // Texture unit 0
 
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeMesh.indexBuffer);
 	gl.drawElements(gl.TRIANGLES, cubeMesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
-function drawScene(time) {
-	gl.useProgram(shader_prog);
+function drawFBO(time) {
+	gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 
-	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+	gl.viewport(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+	gl.clearColor(1.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+	var projMatrix = mat4.create();
+	mat4.perspective( projMatrix, 45, OFFSCREEN_WIDTH/OFFSCREEN_HEIGHT, 0.1, 100 );
+	var viewMatrix = mat4.create();
+	mat4.lookAt( viewMatrix, camera.position, camera.targetPos, camera.up );
+
+
+	// Avoid drawing the FBO objects, but draw everything else
+	//drawModels(time, projMatrix);
+
+	gl.useProgram(shader_prog);
+	gl.uniformMatrix4fv(shader_prog.u_ProjMat, false, camera.projMatrix);
+	gl.uniformMatrix4fv(shader_prog.u_ViewMat, false, camera.viewMatrix);
 
 	//Move our triangle
 	mat4.identity( modelMatrix );
-	var position = [ 0.0, 0.0, 4.0 ]; // Or use vec3.fromValues
+	var position = [ 0.0, 0.0, 0.0 ]; // Or use vec3.fromValues
+	mat4.translate(	modelMatrix,	// Output
+					modelMatrix,	// Input
+					position);
+	mat4.rotate(modelMatrix,	// Output
+				modelMatrix,	// Input
+				time,				// amount to rotate in radians
+				[0, 1, 0]);			// axis to rotate around
+
+	//Pass triangle position to vertex shader
+	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
+	gl.vertexAttribPointer(shader_prog.Position, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+	//Pass triangle colors to vertex shader
+	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexColorBuffer);
+	gl.vertexAttribPointer(shader_prog.Color, triangleVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+	//Pass model view projection matrix to vertex shader
+	gl.uniformMatrix4fv(shader_prog.u_ModelMat, false, modelMatrix);
+
+	gl.disableVertexAttribArray(2);
+
+	//Draw our lovely triangle
+	gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
+
+	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+
+function drawScene(time) {
+	drawFBO(time);
+
+	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+	gl.clearColor(0.0, 0.0, 0.0, 1.0);
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+
+	drawModels(time);
+
+	gl.useProgram(shader_prog);
+
+	//Move our triangle
+	mat4.identity( modelMatrix );
+	var position = [ 0.0, 0.0, 0.0 ]; // Or use vec3.fromValues
 	mat4.translate(	modelMatrix,	// Output
 					modelMatrix,	// Input
 					position);
@@ -197,7 +320,6 @@ function updateLoop( elapsedTime ) {
 
 	camera.update( deltaTime );
 	drawScene(elapsedTime / 1000);
-	drawModels(elapsedTime / 1000);
 	requestAnimationFrame(updateLoop);
 
 	previousTime = elapsedTime;
@@ -208,7 +330,7 @@ function initGL() {
 	try {
 		var canvas = document.getElementById("canvas");
 		gl = canvas.getContext("webgl");
-		gl.viewportWidth = canvas.width  = window.innerWidth;
+		gl.viewportWidth = canvas.width = window.innerWidth;
 		gl.viewportHeight = canvas.height = window.innerHeight;
 	} catch (e) {
 	}
@@ -219,11 +341,11 @@ function initGL() {
 
 function loadWebGL() {
 	initGL();
+	initFramebufferObject();
 	initShaders();
 	initBuffers();
 	initModels();
 
-	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.enable(gl.DEPTH_TEST);
 
 	camera = new Camera();
