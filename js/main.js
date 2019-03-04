@@ -21,68 +21,41 @@ const OFFSCREEN_HEIGHT = 256;
 function initShaders() {
 
 	// Shader
-	shader_prog = loadShader( shaders.shaderVert, shaders.shaderFrag );
-	shader_prog.hasNormal = false;
-	gl.useProgram(shader_prog);
-
-	shader_prog.Position = gl.getAttribLocation(shader_prog, "Position");
-	gl.enableVertexAttribArray(shader_prog.Position);
-
-	shader_prog.Color = gl.getAttribLocation(shader_prog, "Color");
-	gl.enableVertexAttribArray(shader_prog.Color);
-
-	shader_prog.u_ProjMat = getUniformLocation(shader_prog, "u_ProjMat");
-	shader_prog.u_ViewMat = getUniformLocation(shader_prog, "u_ViewMat");
-	shader_prog.u_ModelMat = getUniformLocation(shader_prog, "u_ModelMat");
+	shader_prog = new Shader( shaders.shaderVert, shaders.shaderFrag );
+	shader_prog.addAttribute( "Position" );
+	shader_prog.addAttribute( "Color" );
+	shader_prog.addUniform( "u_ProjMat" );
+	shader_prog.addUniform( "u_ViewMat" );
+	shader_prog.addUniform( "u_ModelMat" );
 
 
 	// Normal
-	normal_prog = loadShader( shaders.normalVert, shaders.normalFrag );
-	normal_prog.hasNormal = true;
-	gl.useProgram(normal_prog);
-
-	normal_prog.Position = gl.getAttribLocation(normal_prog, "Position");
-	gl.enableVertexAttribArray(normal_prog.Position);
-
-	normal_prog.Normal = gl.getAttribLocation(normal_prog, "Normal");
-	gl.enableVertexAttribArray(normal_prog.Normal);
-
-	normal_prog.u_ProjMat = getUniformLocation(normal_prog, "u_ProjMat");
-	normal_prog.u_ViewMat = getUniformLocation(normal_prog, "u_ViewMat");
-	normal_prog.u_ModelMat = getUniformLocation(normal_prog, "u_ModelMat")
+	normal_prog = new Shader( shaders.normalVert, shaders.normalFrag );
+	normal_prog.addAttribute( "Position" );
+	normal_prog.addAttribute( "Normal" );
+	normal_prog.addUniform( "u_ProjMat" );
+	normal_prog.addUniform( "u_ViewMat" );
+	normal_prog.addUniform( "u_ModelMat" );
 
 
 	// FBO
-	fbo_prog = loadShader( shaders.fboVert, shaders.fboFrag );
-	fbo_prog.hasNormal = false;
-	gl.useProgram(fbo_prog);
-
-	fbo_prog.Position = gl.getAttribLocation(fbo_prog, "Position");
-	gl.enableVertexAttribArray(fbo_prog.Position);
-
-	fbo_prog.u_ProjMat = getUniformLocation(fbo_prog, "u_ProjMat");
-	fbo_prog.u_ViewMat = getUniformLocation(fbo_prog, "u_ViewMat");
-	fbo_prog.u_ModelMat = getUniformLocation(fbo_prog, "u_ModelMat")
+	fbo_prog = new Shader( shaders.fboVert, shaders.fboFrag );
+	fbo_prog.addAttribute( "Position" );
+	fbo_prog.addAttribute( "TexCoord" );
+	fbo_prog.addUniform( "u_ProjMat" );
+	fbo_prog.addUniform( "u_ViewMat" );
+	fbo_prog.addUniform( "u_ModelMat" );
 
 
 	// Texture
-	texture_prog = loadShader( shaders.textureVert, shaders.textureFrag );
-	texture_prog.hasNormal = true;
-	gl.useProgram(texture_prog);
-
-	texture_prog.Position = gl.getAttribLocation(texture_prog, "Position");
-	gl.enableVertexAttribArray(texture_prog.Position);
-
-	texture_prog.Normal = gl.getAttribLocation(texture_prog, "Normal");
-	gl.enableVertexAttribArray(texture_prog.Normal);
-
-	texture_prog.TexCoord = gl.getAttribLocation(texture_prog, "TexCoord");
-	gl.enableVertexAttribArray(texture_prog.TexCoord);
-
-	texture_prog.u_ProjMat = getUniformLocation(texture_prog, "u_ProjMat");
-	texture_prog.u_ViewMat = getUniformLocation(texture_prog, "u_ViewMat");
-	texture_prog.u_ModelMat = getUniformLocation(texture_prog, "u_ModelMat")
-	texture_prog.u_Sampler = getUniformLocation(texture_prog, "u_Sampler")
+	texture_prog = new Shader( shaders.textureVert, shaders.textureFrag );
+	texture_prog.addAttribute( "Position" );
+	texture_prog.addAttribute( "Normal" );
+	texture_prog.addAttribute( "TexCoord" );
+	texture_prog.addUniform( "u_ProjMat" );
+	texture_prog.addUniform( "u_ViewMat" );
+	texture_prog.addUniform( "u_ModelMat" );
+	texture_prog.addUniform( "u_Sampler" );
 }
 
 function getUniformLocation(program, name) {
@@ -184,7 +157,7 @@ function initModels() {
 	mat4.translate(	ground.modelMatrix, ground.modelMatrix, [0.0, -1.0, 0.0] );
 	models.push( ground );
 
-	var mirror = new Model( objects.surface, texture_prog );
+	var mirror = new Model( objects.surface, fbo_prog );
 	mirror.setFBO( fbo );
 	mirror.setGLSetting( gl.CULL_FACE, true );
 	mat4.translate(	mirror.modelMatrix, mirror.modelMatrix, [0.0, 0.0, 4.0] );
@@ -193,7 +166,7 @@ function initModels() {
 }
 
 function drawTriangle(time, projMatrix, viewMatrix) {
-	gl.useProgram(shader_prog);
+	shader_prog.use();
 	gl.uniformMatrix4fv(shader_prog.u_ProjMat, false, projMatrix);
 	gl.uniformMatrix4fv(shader_prog.u_ViewMat, false, viewMatrix);
 	gl.disable(gl.CULL_FACE)
@@ -219,8 +192,6 @@ function drawTriangle(time, projMatrix, viewMatrix) {
 
 	//Pass model view projection matrix to vertex shader
 	gl.uniformMatrix4fv(shader_prog.u_ModelMat, false, modelMatrix);
-
-	gl.disableVertexAttribArray(2);
 
 	//Draw our lovely triangle
 	gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
