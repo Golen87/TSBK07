@@ -26,7 +26,6 @@ Model.prototype.setTexture = function(texture) {
 Model.prototype.setFBO = function(fbo) {
 	this.fbo = fbo;
 	this.isFBO = true;
-
 	this.texture = fbo.texture;
 	this.hasTexture = true;
 }
@@ -44,6 +43,9 @@ Model.prototype.draw = function(projMatrix, viewMatrix) {
 	gl.uniformMatrix4fv(this.shader.u_ProjMat, false, projMatrix);
 	gl.uniformMatrix4fv(this.shader.u_ViewMat, false, viewMatrix);
 	gl.uniformMatrix4fv(this.shader.u_ModelMat, false, this.modelMatrix);
+
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
 	$.each( this.settings, function( key, value ) {
 		setGLSetting(key, value);

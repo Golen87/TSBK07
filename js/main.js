@@ -163,6 +163,12 @@ function initModels() {
 	mat4.translate(	mirror.modelMatrix, mirror.modelMatrix, [0.0, 0.0, 4.0] );
 	mat4.rotate( mirror.modelMatrix, mirror.modelMatrix, Math.PI, [0, 1, 0] );
 	models.push( mirror );
+
+	var corridor = new Model( objects.corridor, texture_prog );
+	corridor.setTexture( loadTexture(gl, "tex/debug.png") );
+	corridor.setGLSetting( gl.CULL_FACE, true );
+	mat4.translate(	corridor.modelMatrix, corridor.modelMatrix, [0.0, -1.0, 3.0] );
+	models.push( corridor );
 }
 
 function drawTriangle(time, projMatrix, viewMatrix) {
