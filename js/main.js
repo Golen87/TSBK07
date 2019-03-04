@@ -11,6 +11,7 @@ var camera;
 var triangleVertexPositionBuffer;
 var triangleVertexColorBuffer;
 var groundModel;
+var corridorModel;
 var model_texture;
 
 var fbo;
@@ -171,6 +172,13 @@ function initModels() {
 					position);
 	groundModel = new Model(objects.ground, texture_prog, groundModelMatrix);
 
+	var corridorModelMatrix = mat4.create();
+	var position = [ 0.0, -1.0, 3.0 ];	 // Or use vec3.fromValues
+	mat4.translate(	corridorModelMatrix, // Output
+					corridorModelMatrix, // Input
+					position);	 // Or use vec3.fromValues
+	corridorModel = new Model(objects.corridor, texture_prog, corridorModelMatrix);
+
 	model_texture = loadTexture(gl, "tex/grass_lab.png");
 }
 
@@ -267,6 +275,7 @@ function drawScene(time) {
 	gl.uniformMatrix4fv(texture_prog.u_ProjMat, false, camera.projMatrix);
 	gl.uniformMatrix4fv(texture_prog.u_ViewMat, false, camera.viewMatrix);
 	groundModel.draw();
+	corridorModel.draw();
 }
 
 var previousTime = 0;

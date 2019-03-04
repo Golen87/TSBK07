@@ -28,6 +28,7 @@ preload( objects, "sphere", "obj/sphere.obj" );
 preload( objects, "rock", "obj/rock.obj" );
 preload( objects, "tree", "obj/tree.obj" );
 preload( objects, "ground", "obj/ground.obj" );
+preload( objects, "corridor", "obj/corridor.obj" );
 
 // "tex/grass.png"
 // "tex/dirt.png"
