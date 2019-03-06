@@ -32,6 +32,7 @@ preload( objects, "tree", "obj/tree.obj" );
 preload( objects, "ground", "obj/ground.obj" );
 preload( objects, "corridor", "obj/corridor.obj" );
 preload( objects, "surface", "obj/surface.obj" );
+preload( objects, "cube", "obj/cube.obj" );
 
 // "tex/grass.png"
 // "tex/dirt.png"
