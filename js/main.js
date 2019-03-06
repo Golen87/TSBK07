@@ -163,26 +163,25 @@ function initModels() {
 	var mirror = new Model( objects.surface, fbo_prog );
 	mirror.setFBO( fbo );
 	mirror.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate(	mirror.modelMatrix, mirror.modelMatrix, [0.0, 0.0, 4.0] );
-	mat4.rotate( mirror.modelMatrix, mirror.modelMatrix, Math.PI, [0, 1, 0] );
+	mat4.translate(	mirror.modelMatrix, mirror.modelMatrix, [0.0, 0.0, -4.0] );
 	models.push( mirror );
 
 	var corridor = new Model( objects.corridor, texture_prog );
 	corridor.setTexture( loadTexture(gl, "tex/debug.png") );
 	corridor.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( corridor.modelMatrix, corridor.modelMatrix, [0.0, -1.0, 3.0] );
+	mat4.translate( corridor.modelMatrix, corridor.modelMatrix, [0.0, -1.0, -3.0] );
 	mat3.normalFromMat4( corridor.normalMatrix, corridor.modelMatrix );
 	models.push( corridor );
 
 	var sphere = new Model( objects.sphere, normal_prog );
 	sphere.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( sphere.modelMatrix, sphere.modelMatrix, [3.0, 0.0, 6.0] );
+	mat4.translate( sphere.modelMatrix, sphere.modelMatrix, [3.0, 0.0, -6.0] );
 	mat3.normalFromMat4( sphere.normalMatrix, sphere.modelMatrix );
 	models.push( sphere );
 
 	var sphereFlat = new Model( objects.sphere, normal_prog );
 	sphereFlat.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( sphereFlat.modelMatrix, sphereFlat.modelMatrix, [3.0, 2.0, 6.0] );
+	mat4.translate( sphereFlat.modelMatrix, sphereFlat.modelMatrix, [3.0, 2.0, -6.0] );
 	mat4.rotateZ( sphereFlat.modelMatrix, sphereFlat.modelMatrix, Math.PI * 0.25);
 	mat4.scale( sphereFlat.modelMatrix, sphereFlat.modelMatrix, [1.0, 0.5, 1.0] );
 	mat3.normalFromMat4( sphereFlat.normalMatrix, sphereFlat.modelMatrix );
@@ -191,14 +190,14 @@ function initModels() {
 	var sphereTex = new Model( objects.sphere, texture_prog );
 	sphereTex.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 	sphereTex.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( sphereTex.modelMatrix, sphereTex.modelMatrix, [3.0, 0.0, 3.0] );
+	mat4.translate( sphereTex.modelMatrix, sphereTex.modelMatrix, [3.0, 0.0, -3.0] );
 	mat3.normalFromMat4( sphereTex.normalMatrix, sphereTex.modelMatrix );
 	models.push( sphereTex );
 
 	var sphereTexFlat = new Model( objects.sphere, texture_prog );
 	sphereTexFlat.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 	sphereTexFlat.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( sphereTexFlat.modelMatrix, sphereTexFlat.modelMatrix, [3.0, 2.0, 3.0] );
+	mat4.translate( sphereTexFlat.modelMatrix, sphereTexFlat.modelMatrix, [3.0, 2.0, -3.0] );
 	mat4.rotateZ( sphereTexFlat.modelMatrix, sphereTexFlat.modelMatrix, Math.PI * 0.25);
 	mat4.scale( sphereTexFlat.modelMatrix, sphereTexFlat.modelMatrix, [1.0, 0.5, 1.0] );
 	mat3.normalFromMat4( sphereTexFlat.normalMatrix, sphereTexFlat.modelMatrix );
@@ -206,14 +205,14 @@ function initModels() {
 
 	var cube = new Model( objects.cube, normal_prog );
 	cube.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( cube.modelMatrix, cube.modelMatrix, [-3.0, 0.0, 6.0] );
+	mat4.translate( cube.modelMatrix, cube.modelMatrix, [-3.0, 0.0, -6.0] );
 	mat3.normalFromMat4( cube.normalMatrix, cube.modelMatrix );
 	models.push( cube );
 
 	var cubeTex = new Model( objects.cube, texture_prog );
 	cubeTex.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 	cubeTex.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( cubeTex.modelMatrix, cubeTex.modelMatrix, [-3.0, 0.0, 3.0] );
+	mat4.translate( cubeTex.modelMatrix, cubeTex.modelMatrix, [-3.0, 0.0, -3.0] );
 	mat3.normalFromMat4( cubeTex.normalMatrix, cubeTex.modelMatrix );
 	models.push( cubeTex );
 }
