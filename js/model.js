@@ -6,6 +6,7 @@ function Model(meshStr, shader) {
 	OBJ.initMeshBuffers(gl, this.mesh);
 	this.shader = shader;
 	this.modelMatrix = mat4.create();
+	this.normalMatrix = mat3.create();
 
 	this.texture = null;
 	this.hasTexture = false;
@@ -79,6 +80,10 @@ Model.prototype.draw = function(projMatrix, viewMatrix) {
 	if (this.shader.Normal) {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.normalBuffer);
 		gl.vertexAttribPointer(this.shader.Normal, this.mesh.normalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	}
+
+	if (this.shader.u_NormalMat) {
+		gl.uniformMatrix3fv(this.shader.u_NormalMat, false, this.normalMatrix);
 	}
 
 	if (this.shader.u_Sampler) {

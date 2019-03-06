@@ -36,6 +36,7 @@ function initShaders() {
 	normal_prog.addUniform( "u_ProjMat" );
 	normal_prog.addUniform( "u_ViewMat" );
 	normal_prog.addUniform( "u_ModelMat" );
+	normal_prog.addUniform( "u_NormalMat" );
 
 
 	// FBO
@@ -55,6 +56,7 @@ function initShaders() {
 	texture_prog.addUniform( "u_ProjMat" );
 	texture_prog.addUniform( "u_ViewMat" );
 	texture_prog.addUniform( "u_ModelMat" );
+	texture_prog.addUniform( "u_NormalMat" );
 	texture_prog.addUniform( "u_Sampler" );
 }
 
@@ -155,6 +157,7 @@ function initModels() {
 	ground.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 	ground.setGLSetting( gl.CULL_FACE, true );
 	mat4.translate(	ground.modelMatrix, ground.modelMatrix, [0.0, -1.0, 0.0] );
+	mat3.normalFromMat4( ground.normalMatrix, ground.modelMatrix );
 	models.push( ground );
 
 	var mirror = new Model( objects.surface, fbo_prog );
@@ -167,7 +170,8 @@ function initModels() {
 	var corridor = new Model( objects.corridor, texture_prog );
 	corridor.setTexture( loadTexture(gl, "tex/debug.png") );
 	corridor.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate(	corridor.modelMatrix, corridor.modelMatrix, [0.0, -1.0, 3.0] );
+	mat4.translate( corridor.modelMatrix, corridor.modelMatrix, [0.0, -1.0, 3.0] );
+	mat3.normalFromMat4( corridor.normalMatrix, corridor.modelMatrix );
 	models.push( corridor );
 }
 
