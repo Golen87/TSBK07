@@ -53,14 +53,53 @@ Camera.prototype.mouseMove = function( dx, dy ) {
 
 	this.yaw = (this.yaw - dx*this.rotateSpeed) % fullRotation;
 	this.pitch = this.pitch - dy*this.rotateSpeed;
-	if (this.pitch > 0) {
-		this.pitch = Math.min(this.pitch, maxPitch);
-	}
-	else {
-		this.pitch = Math.max(this.pitch, -maxPitch);
-	}
+	this.pitch = this.pitch.clamp( -maxPitch, maxPitch );
 
 	this.direction = vec3.fromValues(0, 0, -1);
 	vec3.rotateX(this.direction, this.direction, [0,0,0], this.pitch);
-	vec3.rotateY(this.direction, this.direction, [0,0,0] , this.yaw);
+	vec3.rotateY(this.direction, this.direction, [0,0,0], this.yaw);
+};
+
+
+Camera.prototype.getPortalView = function( startMatrix, endMatrix ) {
+	var posMatrix = mat4.create();
+	mat4.fromTranslation( posMatrix, this.position );
+
+	var mv = mat4.create();
+	//var t = mat4.create();
+	mat4.multiply( mv, posMatrix, startMatrix );
+
+	var backwards = mat4.create();
+	mat4.rotate( backwards, backwards, Math.PI, [0, 1, 0] );
+
+	var endInverse = mat4.create();
+	mat4.invert( endInverse, endMatrix );
+
+	var portalView = mat4.create();
+	mat4.multiply( portalView, portalView, mv );
+	mat4.multiply( portalView, portalView, backwards );
+	mat4.multiply( portalView, portalView, endInverse );
+
+	//var invView = mat4.create();
+	//mat4.invert( invView, this.viewMatrix );
+
+	//var camPos = this.position;//vec3.create();
+	//mat4.getTranslation( camPos, this.viewMatrix );
+	//var portalPos = vec3.create();
+	//mat4.getTranslation( portalPos, startMatrix );
+	//var normal = vec3.fromValues( 0, 0, -1 );
+
+	//var inDir = vec3.create();
+	//vec3.subtract( inDir, camPos, portalPos );
+	//var outDir = vec3.create();
+	//vec3.scale( outDir, normal, 2 * vec3.dot( inDir, normal ) );
+	//vec3.subtract( outDir, outDir, inDir );
+
+	//var outPos = vec3.create();
+	//vec3.add( outPos, portalPos, inDir );
+
+	//var portalView = mat4.create();
+	//mat4.lookAt( portalView, portalPos, outPos, this.up );
+
+	return portalView;
 };

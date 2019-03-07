@@ -14,8 +14,8 @@ var triangleVertexColorBuffer;
 var models = [];
 
 var fbo;
-const OFFSCREEN_WIDTH = 256;
-const OFFSCREEN_HEIGHT = 256;
+const OFFSCREEN_WIDTH = 256*2;
+const OFFSCREEN_HEIGHT = 256*2;
 
 
 function initShaders() {
@@ -166,6 +166,14 @@ function initModels() {
 	mat4.translate(	mirror.modelMatrix, mirror.modelMatrix, [0.0, 0.0, -4.0] );
 	models.push( mirror );
 
+	var mirror = new Model( objects.surface, fbo_prog );
+	mirror.setFBO( fbo );
+	mirror.setGLSetting( gl.CULL_FACE, true );
+	mat4.rotate( mirror.modelMatrix, mirror.modelMatrix, Math.PI/2, [0, 1, 0] );
+	mat4.translate(	mirror.modelMatrix, mirror.modelMatrix, [0.0, 0.0, 4.0] );
+	mat4.rotate( mirror.modelMatrix, mirror.modelMatrix, Math.PI, [0, 1, 0] );
+	models.push( mirror );
+
 	var corridor = new Model( objects.corridor, texture_prog );
 	corridor.setTexture( loadTexture(gl, "tex/debug.png") );
 	corridor.setGLSetting( gl.CULL_FACE, true );
@@ -261,8 +269,9 @@ function drawFBO(time) {
 
 	var projMatrix = mat4.create();
 	mat4.perspective( projMatrix, 45, OFFSCREEN_WIDTH/OFFSCREEN_HEIGHT, 0.1, 100 );
-	var viewMatrix = mat4.create();
-	mat4.lookAt( viewMatrix, camera.position, camera.targetPos, camera.up );
+	//var viewMatrix = mat4.create();
+	//mat4.lookAt( viewMatrix, camera.position, camera.targetPos, camera.up );
+	var viewMatrix = camera.getPortalView( models[1].modelMatrix, models[1].modelMatrix );
 
 
 	drawTriangle(time, projMatrix, viewMatrix);

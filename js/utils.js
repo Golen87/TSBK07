@@ -8,3 +8,7 @@ function setGLSetting(setting, state) {
 		gl.disable(setting);
 	}
 }
+
+Number.prototype.clamp = function( min, max ) {
+	return Math.min( Math.max( this, min ), max );
+};
