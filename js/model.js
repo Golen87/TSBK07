@@ -45,18 +45,22 @@ Model.prototype.draw = function(projMatrix, viewMatrix) {
 	gl.uniformMatrix4fv(this.shader.u_ViewMat, false, viewMatrix);
 	gl.uniformMatrix4fv(this.shader.u_ModelMat, false, this.modelMatrix);
 
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-
 	$.each( this.settings, function( key, value ) {
 		setGLSetting(key, value);
 	});
 
-	if (this.hasTexture)
+	if (this.hasTexture) {
 		gl.activeTexture(gl.TEXTURE0);
-
-	if (this.isFBO || this.hasTexture) {
 		gl.bindTexture(gl.TEXTURE_2D, this.texture);
+
+		if (this.isFBO) {
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		}
+		else {
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		}
 	}
 
 
