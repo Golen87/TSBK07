@@ -14,8 +14,8 @@ var triangleVertexColorBuffer;
 var models = [];
 
 var fbo;
-const OFFSCREEN_WIDTH = 256*2;
-const OFFSCREEN_HEIGHT = 256*2;
+const FBO_WIDTH = 256*8;
+const FBO_HEIGHT = 256*8;
 
 
 function initShaders() {
@@ -42,7 +42,7 @@ function initShaders() {
 	// FBO
 	fbo_prog = new Shader( shaders.fboVert, shaders.fboFrag );
 	fbo_prog.addAttribute( "Position" );
-	fbo_prog.addAttribute( "TexCoord" );
+	//fbo_prog.addAttribute( "TexCoord" );
 	fbo_prog.addUniform( "u_ProjMat" );
 	fbo_prog.addUniform( "u_ViewMat" );
 	fbo_prog.addUniform( "u_ModelMat" );
@@ -119,8 +119,12 @@ function initFramebufferObject() {
 		return error();
 	}
 	gl.bindTexture(gl.TEXTURE_2D, texture); // Bind the object to target
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
+	gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
+	gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST );
+	gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
+	gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, FBO_WIDTH, FBO_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null );
 	framebuffer.texture = texture; // Store the texture object
 
 	// Create a renderbuffer object and set its size and parameters
@@ -130,7 +134,7 @@ function initFramebufferObject() {
 		return error();
 	}
 	gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer); // Bind the object to target
-	gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+	gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, FBO_WIDTH, FBO_HEIGHT);
 
 	// Attach the texture and the renderbuffer object to the FBO
 	gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
@@ -163,14 +167,14 @@ function initModels() {
 	var mirror = new Model( objects.surface, fbo_prog );
 	mirror.setFBO( fbo );
 	mirror.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate(	mirror.modelMatrix, mirror.modelMatrix, [0.0, 0.0, -4.0] );
+	mat4.translate(	mirror.modelMatrix, mirror.modelMatrix, [0.0, 0.0, -6.0] );
 	models.push( mirror );
 
 	var mirror = new Model( objects.surface, fbo_prog );
 	mirror.setFBO( fbo );
 	mirror.setGLSetting( gl.CULL_FACE, true );
-	mat4.rotate( mirror.modelMatrix, mirror.modelMatrix, Math.PI/2, [0, 1, 0] );
-	mat4.translate(	mirror.modelMatrix, mirror.modelMatrix, [0.0, 0.0, 4.0] );
+	//mat4.rotate( mirror.modelMatrix, mirror.modelMatrix, Math.PI/2, [0, 1, 0] );
+	mat4.translate(	mirror.modelMatrix, mirror.modelMatrix, [1.0, 0.0, -6.0] );
 	mat4.rotate( mirror.modelMatrix, mirror.modelMatrix, Math.PI, [0, 1, 0] );
 	models.push( mirror );
 
@@ -261,18 +265,21 @@ function drawTriangle(time, projMatrix, viewMatrix) {
 
 function drawFBO(time) {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+	gl.bindTexture(gl.TEXTURE_2D, fbo.texture);
 	fbo.active = true;
 
-	gl.viewport(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+	gl.viewport(0, 0, FBO_WIDTH, FBO_HEIGHT);
 	gl.clearColor(1.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	var projMatrix = mat4.create();
-	mat4.perspective( projMatrix, 45, OFFSCREEN_WIDTH/OFFSCREEN_HEIGHT, 0.1, 100 );
-	//var viewMatrix = mat4.create();
-	//mat4.lookAt( viewMatrix, camera.position, camera.targetPos, camera.up );
-	var viewMatrix = camera.getPortalView( models[1].modelMatrix, models[1].modelMatrix );
+	mat4.perspective( projMatrix, 45, FBO_WIDTH/FBO_HEIGHT, 0.1, 100 );
+	var viewMatrix = mat4.create();
+	mat4.lookAt( viewMatrix, camera.position, camera.targetPos, camera.up );
 
+	camera.getPortalView( projMatrix, viewMatrix, models[1].modelMatrix, models[1].modelMatrix );
+	//var projMatrix = portal[0];
+	//var viewMatrix = portal[1];
 
 	drawTriangle(time, projMatrix, viewMatrix);
 
@@ -307,8 +314,8 @@ function updateLoop( elapsedTime ) {
 
 	camera.update( deltaTime );
 	drawScene(elapsedTime / 1000);
-	requestAnimationFrame(updateLoop);
 
+	requestAnimationFrame(updateLoop);
 	previousTime = elapsedTime;
 }
 

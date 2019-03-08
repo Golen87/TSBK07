@@ -61,7 +61,28 @@ Camera.prototype.mouseMove = function( dx, dy ) {
 };
 
 
-Camera.prototype.getPortalView = function( startMatrix, endMatrix ) {
+Camera.prototype.getPortalView = function( projMatrix, viewMatrix, startMatrix, endMatrix ) {
+	var pos = vec3.create();
+	mat4.getTranslation( pos, startMatrix );
+	var normal = vec3.fromValues( 0, 0, -1 ); // negative
+
+	//Extra clipping to prevent artifacts
+	//var extra_clip = Math.min(/*GH_ENGINE->NearestPortalDist() * */0.5, 0.1);
+
+	//Find normal relative to camera
+	var endInverse = mat4.create();
+	mat4.invert( endInverse, endMatrix );
+	var delta = mat4.create();
+	mat4.multiply( delta, startMatrix, endInverse );
+
+	//this.clipOblique( viewMatrix, projMatrix, /*pos - normal*extra_clip*/vec3.fromValues( pos[0]+0.1*normal[0], pos[1]+0.1*normal[1], pos[2]+0.1*normal[2] ), normal );
+
+	mat4.multiply( viewMatrix, viewMatrix, delta );
+
+	return;
+
+
+	/*
 	var posMatrix = mat4.create();
 	mat4.fromTranslation( posMatrix, this.position );
 
@@ -77,29 +98,69 @@ Camera.prototype.getPortalView = function( startMatrix, endMatrix ) {
 
 	var portalView = mat4.create();
 	mat4.multiply( portalView, portalView, mv );
-	mat4.multiply( portalView, portalView, backwards );
+	//mat4.multiply( portalView, portalView, backwards );
 	mat4.multiply( portalView, portalView, endInverse );
+	*/
 
-	//var invView = mat4.create();
-	//mat4.invert( invView, this.viewMatrix );
+	/*
+	var invView = mat4.create();
+	mat4.invert( invView, this.viewMatrix );
 
-	//var camPos = this.position;//vec3.create();
-	//mat4.getTranslation( camPos, this.viewMatrix );
-	//var portalPos = vec3.create();
-	//mat4.getTranslation( portalPos, startMatrix );
-	//var normal = vec3.fromValues( 0, 0, -1 );
+	var camPos = this.position;//vec3.create();
+	mat4.getTranslation( camPos, this.viewMatrix );
+	var portalPos = vec3.create();
+	mat4.getTranslation( portalPos, startMatrix );
+	var normal = vec3.fromValues( 0, 0, -1 );
 
-	//var inDir = vec3.create();
-	//vec3.subtract( inDir, camPos, portalPos );
-	//var outDir = vec3.create();
-	//vec3.scale( outDir, normal, 2 * vec3.dot( inDir, normal ) );
-	//vec3.subtract( outDir, outDir, inDir );
+	var inDir = vec3.create();
+	vec3.subtract( inDir, camPos, portalPos );
+	var outDir = vec3.create();
+	vec3.scale( outDir, normal, 2 * vec3.dot( inDir, normal ) );
+	vec3.subtract( outDir, outDir, inDir );
 
-	//var outPos = vec3.create();
-	//vec3.add( outPos, portalPos, inDir );
+	var outPos = vec3.create();
+	vec3.add( outPos, portalPos, inDir );
 
-	//var portalView = mat4.create();
-	//mat4.lookAt( portalView, portalPos, outPos, this.up );
+	var portalView = mat4.create();
+	mat4.lookAt( portalView, portalPos, outPos, this.up );
+	*/
+
 
 	return portalView;
 };
+
+Camera.prototype.clipOblique = function( viewMatrix, projMatrix, pos, normal ) {
+	var pos4 = vec4.fromValues( pos[0], pos[1], pos[2], 1 );
+	var worldViewPos = vec4.create();
+	vec4.transformMat4( worldViewPos, pos4, viewMatrix )
+	var cpos = vec3.fromValues( worldViewPos[0], worldViewPos[1], worldViewPos[2] );
+
+	var nor4 = vec4.fromValues( normal[0], normal[1], normal[2], 0 );
+	var worldViewNor = vec4.create();
+	vec4.transformMat4( worldViewNor, nor4, viewMatrix );
+	var cnormal = vec3.fromValues( worldViewNor[0], worldViewNor[1], worldViewNor[2] );
+
+	var dot = vec3.dot( cpos, cnormal );
+	var cplane = vec4.fromValues( cnormal[0], cnormal[1], cnormal[2], -dot );
+
+	var projInv = mat4.create();
+	mat4.invert( projInv, projMatrix );
+
+	var qpos = vec4.fromValues(
+		(cplane[0] < 0.0 ? 1.0 : -1.0),
+		(cplane[1] < 0.0 ? 1.0 : -1.0),
+		1.0,
+		1.0
+	);
+	var q = vec4.create();
+	vec4.transformMat4( q, qpos, projInv )
+
+	qdot = vec4.dot( cplane, q );
+	var c = vec4.create();
+	vec4.scale( c, cplane, 2.0 / qdot );
+
+	projMatrix[8] = c[0] - projMatrix[12];
+	projMatrix[9] = c[1] - projMatrix[13];
+	projMatrix[10] = c[2] - projMatrix[14];
+	projMatrix[11] = c[3] - projMatrix[15];
+}
