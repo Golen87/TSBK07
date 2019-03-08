@@ -23,10 +23,7 @@ Camera.prototype.onWindowResize = function() {
 	this.updatePerspective();
 }
 
-Camera.prototype.update = function( dt ) {
-	vec3.add( this.targetPos, this.position, this.direction );
-	mat4.lookAt( this.viewMatrix, this.position, this.targetPos, this.up );
-
+Camera.prototype.update = function( dt ) {;
 	if ( Key.isDown(Key.UP) || Key.isDown(Key.W) ) {
 		vec3.scale( vec3.temp, this.direction, this.moveSpeed * dt );
 		vec3.add( this.position, this.position, vec3.temp );
@@ -45,6 +42,9 @@ Camera.prototype.update = function( dt ) {
 		vec3.cross( vec3.temp, vec3.temp, this.up );
 		vec3.add( this.position, this.position, vec3.temp );
 	}
+	
+	vec3.add( this.targetPos, this.position, this.direction );
+	mat4.lookAt( this.viewMatrix, this.position, this.targetPos, this.up )
 };
 
 Camera.prototype.mouseMove = function( dx, dy ) {
@@ -123,10 +123,10 @@ Camera.prototype.getPortalView = function( projMatrix, viewMatrix, startMatrix, 
 
 	var portalView = mat4.create();
 	mat4.lookAt( portalView, portalPos, outPos, this.up );
-	*/
 
 
 	return portalView;
+	*/
 };
 
 Camera.prototype.clipOblique = function( viewMatrix, projMatrix, pos, normal ) {
