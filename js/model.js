@@ -10,6 +10,7 @@ function Model(meshStr, shader) {
 
 	// Portals
 	this.targetMatrix = mat4.create();
+	this.targetNormal = vec3.create();
 
 	this.texture = null;
 	this.hasTexture = false;

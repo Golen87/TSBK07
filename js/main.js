@@ -263,6 +263,12 @@ function initPortals() {
 function connectPortals(portal1, portal2, deltaRotation, rotationAxis) {
 	mat4.rotate( portal1.targetMatrix, portal2.modelMatrix, deltaRotation, rotationAxis );
 	mat4.rotate( portal2.targetMatrix, portal1.modelMatrix, -deltaRotation, rotationAxis );
+	mat3.normalFromMat4( portal1.normalMatrix, portal1.modelMatrix );
+	mat3.normalFromMat4( portal2.normalMatrix, portal2.modelMatrix );
+	vec3.transformMat3( portal1.targetNormal, vec3.fromValues(0.0, 0.0,-1.0), portal2.normalMatrix );
+	vec3.transformMat3( portal2.targetNormal, vec3.fromValues(0.0, 0.0,-1.0), portal1.normalMatrix );
+	vec3.normalize( portal1.targetNormal, portal1.targetNormal );
+	vec3.normalize( portal2.targetNormal, portal2.targetNormal );
 }
 
 function drawTriangle(time, projMatrix, viewMatrix) {
@@ -313,7 +319,7 @@ function drawFBO(time, portal) {
 	var viewMatrix = mat4.create();
 	mat4.lookAt( viewMatrix, camera.position, camera.targetPos, camera.up );
 
-	camera.getPortalView( projMatrix, viewMatrix, portal.modelMatrix, portal.targetMatrix );
+	camera.getPortalView( projMatrix, viewMatrix, portal.modelMatrix, portal.targetMatrix, portal.targetNormal );
 
 	drawTriangle(time, projMatrix, viewMatrix);
 
