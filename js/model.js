@@ -8,6 +8,9 @@ function Model(meshStr, shader) {
 	this.modelMatrix = mat4.create();
 	this.normalMatrix = mat3.create();
 
+	// Portals
+	this.targetMatrix = mat4.create();
+
 	this.texture = null;
 	this.hasTexture = false;
 

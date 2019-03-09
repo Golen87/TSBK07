@@ -12,6 +12,7 @@ var camera;
 var triangleVertexPositionBuffer;
 var triangleVertexColorBuffer;
 var models = [];
+var portals = [];
 
 var fbo;
 const FBO_WIDTH = 256*8;
@@ -164,26 +165,20 @@ function initModels() {
 	mat3.normalFromMat4( ground.normalMatrix, ground.modelMatrix );
 	models.push( ground );
 
-	var mirror = new Model( objects.surface, fbo_prog );
-	mirror.setFBO( fbo );
-	mirror.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate(	mirror.modelMatrix, mirror.modelMatrix, [0.0, 0.0, -6.0] );
-	models.push( mirror );
-
-	var mirror = new Model( objects.surface, fbo_prog );
-	mirror.setFBO( fbo );
-	mirror.setGLSetting( gl.CULL_FACE, true );
-	//mat4.rotate( mirror.modelMatrix, mirror.modelMatrix, Math.PI/2, [0, 1, 0] );
-	mat4.translate(	mirror.modelMatrix, mirror.modelMatrix, [1.0, 0.0, -6.0] );
-	mat4.rotate( mirror.modelMatrix, mirror.modelMatrix, Math.PI, [0, 1, 0] );
-	models.push( mirror );
-
 	var corridor = new Model( objects.corridor, texture_prog );
 	corridor.setTexture( loadTexture(gl, "tex/debug.png") );
 	corridor.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( corridor.modelMatrix, corridor.modelMatrix, [0.0, -1.0, -3.0] );
+	mat4.translate( corridor.modelMatrix, corridor.modelMatrix, [-1.0, -1.0, -3.0] );
 	mat3.normalFromMat4( corridor.normalMatrix, corridor.modelMatrix );
 	models.push( corridor );
+
+	var corridorLong = new Model( objects.corridor, texture_prog );
+	corridorLong.setTexture( loadTexture(gl, "tex/debug.png") );
+	corridorLong.setGLSetting( gl.CULL_FACE, true );
+	mat4.translate( corridorLong.modelMatrix, corridorLong.modelMatrix, [1.0, -1.0, -3.0] );
+	mat4.scale( corridorLong.modelMatrix, corridorLong.modelMatrix, [1.0, 1.0, 4.0] );
+	mat3.normalFromMat4( corridorLong.normalMatrix, corridorLong.modelMatrix );
+	models.push( corridorLong );
 
 	var sphere = new Model( objects.sphere, normal_prog );
 	sphere.setGLSetting( gl.CULL_FACE, true );
@@ -229,6 +224,47 @@ function initModels() {
 	models.push( cubeTex );
 }
 
+function initPortals() {
+	var leftFront = new Model( objects.surface, fbo_prog );
+	leftFront.setFBO( fbo );
+	leftFront.setGLSetting( gl.CULL_FACE, true );
+	mat4.translate(	leftFront.modelMatrix, leftFront.modelMatrix, [-1.0, -1.0, -2.5] );
+	mat4.scale(	leftFront.modelMatrix, leftFront.modelMatrix, [0.8, 1.9, 0.8] );
+	portals.push( leftFront );
+
+	var leftBack = new Model( objects.surface, fbo_prog );
+	leftBack.setFBO( fbo );
+	leftBack.setGLSetting( gl.CULL_FACE, true );
+	mat4.translate(	leftBack.modelMatrix, leftBack.modelMatrix, [-1.0, -1.0, -2.5] );
+	mat4.scale(	leftBack.modelMatrix, leftBack.modelMatrix, [0.8, 1.9, 0.8] );
+	mat4.rotate( leftBack.modelMatrix, leftBack.modelMatrix, Math.PI, [0, 1, 0] );
+	portals.push( leftBack );
+
+	var rightFront = new Model( objects.surface, fbo_prog );
+	rightFront.setFBO( fbo );
+	rightFront.setGLSetting( gl.CULL_FACE, true );
+	mat4.translate(	rightFront.modelMatrix, rightFront.modelMatrix, [1.0, -1.0, -1.0] );
+	mat4.scale(	rightFront.modelMatrix, rightFront.modelMatrix, [0.8, 1.9, 0.8] );
+	portals.push( rightFront );
+
+	var rightBack = new Model( objects.surface, fbo_prog );
+	rightBack.setFBO( fbo );
+	rightBack.setGLSetting( gl.CULL_FACE, true );
+	mat4.translate(	rightBack.modelMatrix, rightBack.modelMatrix, [1.0, -1.0, -1.0] );
+	mat4.scale(	rightBack.modelMatrix, rightBack.modelMatrix, [0.8, 1.9, 0.8] );
+	mat4.rotate( rightBack.modelMatrix, rightBack.modelMatrix, Math.PI, [0, 1, 0] );
+	portals.push( rightBack );
+
+	// Connect portals
+	connectPortals( leftFront, rightBack, Math.PI, [0, 1, 0] )
+	connectPortals( leftBack, rightFront, Math.PI, [0, 1, 0] )
+}
+
+function connectPortals(portal1, portal2, deltaRotation, rotationAxis) {
+	mat4.rotate( portal1.targetMatrix, portal2.modelMatrix, deltaRotation, rotationAxis );
+	mat4.rotate( portal2.targetMatrix, portal1.modelMatrix, -deltaRotation, rotationAxis );
+}
+
 function drawTriangle(time, projMatrix, viewMatrix) {
 	shader_prog.use();
 	gl.uniformMatrix4fv(shader_prog.u_ProjMat, false, projMatrix);
@@ -263,7 +299,7 @@ function drawTriangle(time, projMatrix, viewMatrix) {
 	gl.enable(gl.CULL_FACE)
 }
 
-function drawFBO(time) {
+function drawFBO(time, portal) {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 	gl.bindTexture(gl.TEXTURE_2D, fbo.texture);
 	fbo.active = true;
@@ -277,9 +313,7 @@ function drawFBO(time) {
 	var viewMatrix = mat4.create();
 	mat4.lookAt( viewMatrix, camera.position, camera.targetPos, camera.up );
 
-	camera.getPortalView( projMatrix, viewMatrix, models[1].modelMatrix, models[1].modelMatrix );
-	//var projMatrix = portal[0];
-	//var viewMatrix = portal[1];
+	camera.getPortalView( projMatrix, viewMatrix, portal.modelMatrix, portal.targetMatrix );
 
 	drawTriangle(time, projMatrix, viewMatrix);
 
@@ -288,23 +322,33 @@ function drawFBO(time) {
 		models[i].draw( projMatrix, viewMatrix );
 	}
 
+	//Draw portals
+	for (var i = portals.length - 1; i >= 0; i--) {
+		portals[i].draw( projMatrix, viewMatrix );
+	}
+
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	fbo.active = false;
 }
 
 function drawScene(time) {
-	drawFBO(time);
 
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
 
 	drawTriangle(time, camera.projMatrix, camera.viewMatrix);
 
 	//Draw models
 	for (var i = models.length - 1; i >= 0; i--) {
 		models[i].draw( camera.projMatrix, camera.viewMatrix );
+	}
+
+	//Draw portals
+	for (var i = portals.length - 1; i >= 0; i--) {
+		drawFBO( time, portals[i] );
+		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+		portals[i].draw( camera.projMatrix, camera.viewMatrix );
 	}
 }
 
@@ -339,6 +383,7 @@ function loadWebGL() {
 	initShaders();
 	initBuffers();
 	initModels();
+	initPortals();
 
 	gl.enable(gl.DEPTH_TEST);
 
