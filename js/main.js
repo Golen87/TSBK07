@@ -273,7 +273,7 @@ function drawFBO(time) {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	var projMatrix = mat4.create();
-	mat4.perspective( projMatrix, 45, FBO_WIDTH/FBO_HEIGHT, 0.1, 100 );
+	mat4.perspective( projMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100 );
 	var viewMatrix = mat4.create();
 	mat4.lookAt( viewMatrix, camera.position, camera.targetPos, camera.up );
 
