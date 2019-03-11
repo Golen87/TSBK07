@@ -224,40 +224,32 @@ function initModels() {
 	models.push( cubeTex );
 }
 
+function addPortal(position, yRotation) {
+	var portal = new Model( objects.surface, fbo_prog );
+	portal.setFBO( fbo );
+	portal.setGLSetting( gl.CULL_FACE, true );
+	mat4.translate( portal.modelMatrix, portal.modelMatrix, position);
+	mat4.scale( portal.modelMatrix, portal.modelMatrix, [0.8, 1.9, 0.8] );
+	mat4.rotateY( portal.modelMatrix, portal.modelMatrix, yRotation);
+	portals.push( portal );
+	return portal;
+}
+
 function initPortals() {
-	var leftFront = new Model( objects.surface, fbo_prog );
-	leftFront.setFBO( fbo );
-	leftFront.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate(	leftFront.modelMatrix, leftFront.modelMatrix, [-1.0, -1.0, -2.5] );
-	mat4.scale(	leftFront.modelMatrix, leftFront.modelMatrix, [0.8, 1.9, 0.8] );
-	portals.push( leftFront );
-
-	var leftBack = new Model( objects.surface, fbo_prog );
-	leftBack.setFBO( fbo );
-	leftBack.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate(	leftBack.modelMatrix, leftBack.modelMatrix, [-1.0, -1.0, -2.5] );
-	mat4.scale(	leftBack.modelMatrix, leftBack.modelMatrix, [0.8, 1.9, 0.8] );
-	mat4.rotate( leftBack.modelMatrix, leftBack.modelMatrix, Math.PI, [0, 1, 0] );
-	portals.push( leftBack );
-
-	var rightFront = new Model( objects.surface, fbo_prog );
-	rightFront.setFBO( fbo );
-	rightFront.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate(	rightFront.modelMatrix, rightFront.modelMatrix, [1.0, -1.0, -1.0] );
-	mat4.scale(	rightFront.modelMatrix, rightFront.modelMatrix, [0.8, 1.9, 0.8] );
-	portals.push( rightFront );
-
-	var rightBack = new Model( objects.surface, fbo_prog );
-	rightBack.setFBO( fbo );
-	rightBack.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate(	rightBack.modelMatrix, rightBack.modelMatrix, [1.0, -1.0, -1.0] );
-	mat4.scale(	rightBack.modelMatrix, rightBack.modelMatrix, [0.8, 1.9, 0.8] );
-	mat4.rotate( rightBack.modelMatrix, rightBack.modelMatrix, Math.PI, [0, 1, 0] );
-	portals.push( rightBack );
+	var leftFront  = addPortal( [-1.0, -1.0, -2.5], 0.0 );
+	var leftBack   = addPortal( [-1.0, -1.0, -2.5], Math.PI );
+	var rightFront = addPortal( [ 1.0, -1.0, -1.0], 0.0 );
+	var rightBack  = addPortal( [ 1.0, -1.0, -1.0], Math.PI );
+	var leftEndFront  = addPortal( [-1.0, -1.0, -3.5], 0.0 );
+	var leftEndBack   = addPortal( [-1.0, -1.0, -3.5], Math.PI );
+	var rightEndFront = addPortal( [ 1.0, -1.0, -5.0], 0.0 );
+	var rightEndBack  = addPortal( [ 1.0, -1.0, -5.0], Math.PI );
 
 	// Connect portals
 	connectPortals( leftFront, rightBack, Math.PI, [0, 1, 0] )
 	connectPortals( leftBack, rightFront, Math.PI, [0, 1, 0] )
+	connectPortals( leftEndFront, rightEndBack, Math.PI, [0, 1, 0] )
+	connectPortals( leftEndBack, rightEndFront, Math.PI, [0, 1, 0] )
 }
 
 function connectPortals(portal1, portal2, deltaRotation, rotationAxis) {
