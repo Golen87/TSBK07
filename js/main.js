@@ -4,6 +4,8 @@ var shader_prog;
 var normal_prog;
 var texture_prog;
 var fbo_prog;
+var magenta_prog;
+var screen_prog;
 
 var modelMatrix = mat4.create();
 
@@ -14,9 +16,15 @@ var triangleVertexColorBuffer;
 var models = [];
 var portals = [];
 
-var fbo;
+var fbos = [];
 const FBO_WIDTH = 256*8;
 const FBO_HEIGHT = 256*8;
+
+/* -1 -- No portals
+ *  0 -- 1 level of portals
+ *  1 -- 2 levels of portals
+ */
+const MAX_PORTAL_DEPTH = 1;
 
 
 function initShaders() {
@@ -47,6 +55,14 @@ function initShaders() {
 	fbo_prog.addUniform( "u_ProjMat" );
 	fbo_prog.addUniform( "u_ViewMat" );
 	fbo_prog.addUniform( "u_ModelMat" );
+
+
+	// Magenta
+	magenta_prog = new Shader( shaders.magentaVert, shaders.magentaFrag );
+	magenta_prog.addAttribute( "Position" );
+	magenta_prog.addUniform( "u_ProjMat" );
+	magenta_prog.addUniform( "u_ViewMat" );
+	magenta_prog.addUniform( "u_ModelMat" );
 
 
 	// Texture
@@ -95,66 +111,67 @@ function initBuffers() {
 	triangleVertexColorBuffer.numItems = 3;
 }
 
-function initFramebufferObject() {
-	var framebuffer, texture, depthBuffer;
+function initFramebufferObjects() {
+	for (var i = 0; i <= MAX_PORTAL_DEPTH; ++i) {
+		var framebuffer, texture, depthBuffer;
 
-	// Define the error handling function
-	var error = function() {
-		if (framebuffer) gl.deleteFramebuffer(framebuffer);
-		if (texture) gl.deleteTexture(texture);
-		if (depthBuffer) gl.deleteRenderbuffer(depthBuffer);
-		return null;
+		// Define the error handling function
+		var error = function() {
+			if (framebuffer) gl.deleteFramebuffer(framebuffer);
+			if (texture) gl.deleteTexture(texture);
+			if (depthBuffer) gl.deleteRenderbuffer(depthBuffer);
+			return null;
+		}
+
+		// Create a frame buffer object (FBO)
+		framebuffer = gl.createFramebuffer();
+		if (!framebuffer) {
+			console.log('Failed to create frame buffer object');
+			return error();
+		}
+
+		// Create a texture object and set its size and parameters
+		texture = gl.createTexture(); // Create a texture object
+		if (!texture) {
+			console.log('Failed to create texture object');
+			return error();
+		}
+		gl.bindTexture(gl.TEXTURE_2D, texture); // Bind the object to target
+		//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
+		gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
+		gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST );
+		gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
+		gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, FBO_WIDTH, FBO_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null );
+		framebuffer.texture = texture; // Store the texture object
+
+		// Create a renderbuffer object and set its size and parameters
+		depthBuffer = gl.createRenderbuffer(); // Create a renderbuffer object
+		if (!depthBuffer) {
+			console.log('Failed to create renderbuffer object');
+			return error();
+		}
+		gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer); // Bind the object to target
+		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, FBO_WIDTH, FBO_HEIGHT);
+
+		// Attach the texture and the renderbuffer object to the FBO
+		gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
+
+		// Check if FBO is configured correctly
+		var e = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+		if (gl.FRAMEBUFFER_COMPLETE !== e) {
+			console.log('Frame buffer object is incomplete: ' + e.toString());
+			return error();
+		}
+
+		// Unbind the buffer object
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+		gl.bindTexture(gl.TEXTURE_2D, null);
+
+		fbos.push(framebuffer);
 	}
-
-	// Create a frame buffer object (FBO)
-	framebuffer = gl.createFramebuffer();
-	if (!framebuffer) {
-		console.log('Failed to create frame buffer object');
-		return error();
-	}
-
-	// Create a texture object and set its size and parameters
-	texture = gl.createTexture(); // Create a texture object
-	if (!texture) {
-		console.log('Failed to create texture object');
-		return error();
-	}
-	gl.bindTexture(gl.TEXTURE_2D, texture); // Bind the object to target
-	//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-	gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
-	gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
-	gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST );
-	gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
-	gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, FBO_WIDTH, FBO_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null );
-	framebuffer.texture = texture; // Store the texture object
-
-	// Create a renderbuffer object and set its size and parameters
-	depthBuffer = gl.createRenderbuffer(); // Create a renderbuffer object
-	if (!depthBuffer) {
-		console.log('Failed to create renderbuffer object');
-		return error();
-	}
-	gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer); // Bind the object to target
-	gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, FBO_WIDTH, FBO_HEIGHT);
-
-	// Attach the texture and the renderbuffer object to the FBO
-	gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-	gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-	gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
-
-	// Check if FBO is configured correctly
-	var e = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-	if (gl.FRAMEBUFFER_COMPLETE !== e) {
-		console.log('Frame buffer object is incomplete: ' + e.toString());
-		return error();
-	}
-
-	// Unbind the buffer object
-	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-	gl.bindTexture(gl.TEXTURE_2D, null);
-	gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-
-	fbo = framebuffer;
 }
 
 function initModels() {
@@ -226,7 +243,7 @@ function initModels() {
 
 function addPortal(position, yRotation) {
 	var portal = new Model( objects.surface, fbo_prog );
-	portal.setFBO( fbo );
+	portal.setFBO( fbos[0] );
 	portal.setGLSetting( gl.CULL_FACE, true );
 	mat4.translate( portal.modelMatrix, portal.modelMatrix, position);
 	mat4.scale( portal.modelMatrix, portal.modelMatrix, [0.8, 1.9, 0.8] );
@@ -246,13 +263,13 @@ function initPortals() {
 	var rightEndBack  = addPortal( [ 1.0, -1.0, -5.0], Math.PI );
 
 	// Connect portals
-	connectPortals( leftFront, rightBack, Math.PI, [0, 1, 0] )
-	connectPortals( leftBack, rightFront, Math.PI, [0, 1, 0] )
-	connectPortals( leftEndFront, rightEndBack, Math.PI, [0, 1, 0] )
-	connectPortals( leftEndBack, rightEndFront, Math.PI, [0, 1, 0] )
+	connectPortals( leftFront, rightBack, Math.PI, [0, 1, 0], leftBack, rightFront )
+	connectPortals( leftBack, rightFront, Math.PI, [0, 1, 0], leftFront, rightBack )
+	connectPortals( leftEndFront, rightEndBack, Math.PI, [0, 1, 0], leftEndBack, rightEndFront )
+	connectPortals( leftEndBack, rightEndFront, Math.PI, [0, 1, 0], leftEndFront, rightEndBack )
 }
 
-function connectPortals(portal1, portal2, deltaRotation, rotationAxis) {
+function connectPortals(portal1, portal2, deltaRotation, rotationAxis, portal1back, portal2back) {
 	mat4.rotate( portal1.targetMatrix, portal2.modelMatrix, deltaRotation, rotationAxis );
 	mat4.rotate( portal2.targetMatrix, portal1.modelMatrix, -deltaRotation, rotationAxis );
 	mat3.normalFromMat4( portal1.normalMatrix, portal1.modelMatrix );
@@ -261,6 +278,8 @@ function connectPortals(portal1, portal2, deltaRotation, rotationAxis) {
 	vec3.transformMat3( portal2.targetNormal, vec3.fromValues(0.0, 0.0,-1.0), portal1.normalMatrix );
 	vec3.normalize( portal1.targetNormal, portal1.targetNormal );
 	vec3.normalize( portal2.targetNormal, portal2.targetNormal );
+	portal1.targetBack = portal2back;
+	portal2.targetBack = portal1back;
 }
 
 function drawTriangle(time, projMatrix, viewMatrix) {
@@ -297,19 +316,29 @@ function drawTriangle(time, projMatrix, viewMatrix) {
 	gl.enable(gl.CULL_FACE)
 }
 
-function drawFBO(time, portal) {
+function bindFBO(fbo) {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-	gl.bindTexture(gl.TEXTURE_2D, fbo.texture);
+	gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fbo.texture, 0)
+	gl.viewport(0, 0, FBO_WIDTH, FBO_WIDTH);
 	fbo.active = true;
+}
+
+function drawFBO(time, proj, view, portal, portalDepth) {
+	if (portalDepth > MAX_PORTAL_DEPTH) {
+		return;
+	}
+
+	var projMatrix = mat4.create();
+	mat4.copy(projMatrix, proj);
+	var viewMatrix = mat4.create();
+	mat4.copy(viewMatrix, view);
+
+	portal.setFBO(fbos[portalDepth]);
+	bindFBO(fbos[portalDepth]);
 
 	gl.viewport(0, 0, FBO_WIDTH, FBO_HEIGHT);
 	gl.clearColor(1.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-	var projMatrix = mat4.create();
-	mat4.perspective( projMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100 );
-	var viewMatrix = mat4.create();
-	mat4.lookAt( viewMatrix, camera.position, camera.targetPos, camera.up );
 
 	camera.getPortalView( projMatrix, viewMatrix, portal.modelMatrix, portal.targetMatrix, portal.targetNormal );
 
@@ -322,11 +351,32 @@ function drawFBO(time, portal) {
 
 	//Draw portals
 	for (var i = portals.length - 1; i >= 0; i--) {
-		portals[i].draw( projMatrix, viewMatrix );
+		if (portals[i] != portal &&
+			portals[i] != portal.targetBack &&
+			portals[i].isVisible(projMatrix, viewMatrix)) {
+
+			if (portalDepth < MAX_PORTAL_DEPTH) {
+
+				// Draw to inner portal's FBO
+				drawFBO( time, projMatrix, viewMatrix, portals[i], portalDepth + 1);
+				portals[i].setFBO(fbos[portalDepth + 1]);
+
+				// Draw to this portal's FBO
+				bindFBO(fbos[portalDepth]);
+				portals[i].shader = fbo_prog;
+				portals[i].draw( projMatrix, viewMatrix );
+			}
+			else {
+				// Dummy shading
+				gl.viewport(0, 0, FBO_WIDTH, FBO_WIDTH);
+				portals[i].shader = magenta_prog;
+				portals[i].draw( projMatrix, viewMatrix );
+			}
+		}
 	}
 
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-	fbo.active = false;
+	fbos[portalDepth].active = false;
 }
 
 function drawScene(time) {
@@ -344,8 +394,9 @@ function drawScene(time) {
 	//Draw portals
 	for (var i = portals.length - 1; i >= 0; i--) {
 		if (portals[i].isVisible( camera.projMatrix, camera.viewMatrix )) {
-			drawFBO( time, portals[i] );
+			drawFBO( time, camera.projMatrix, camera.viewMatrix, portals[i], 0 );
 			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+			portals[i].shader = fbo_prog;
 			portals[i].draw( camera.projMatrix, camera.viewMatrix );
 		}
 	}
@@ -378,7 +429,7 @@ function initGL() {
 
 function loadWebGL() {
 	initGL();
-	initFramebufferObject();
+	initFramebufferObjects();
 	initShaders();
 	initBuffers();
 	initModels();

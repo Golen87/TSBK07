@@ -11,6 +11,7 @@ function Model(meshStr, shader) {
 	// Portals
 	this.targetMatrix = mat4.create();
 	this.targetNormal = vec3.create();
+	this.targetBack = null;
 
 	this.texture = null;
 	this.hasTexture = false;
@@ -54,8 +55,6 @@ Model.prototype.setGLSetting = function(setting, state) {
 
 
 Model.prototype.draw = function(projMatrix, viewMatrix) {
-	if (this.isFBO && this.fbo.active)
-		return;
 
 	this.shader.use();
 	gl.uniformMatrix4fv(this.shader.u_ProjMat, false, projMatrix);
