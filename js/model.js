@@ -23,6 +23,19 @@ function Model(meshStr, shader) {
 	this.setGLSetting(gl.CULL_FACE, true);
 }
 
+// Portal
+Model.prototype.isVisible = function(projMatrix, viewMatrix) {
+	var normal = vec3.fromValues( 0.0, 0.0, 1.0 );
+	vec3.transformMat3( normal, normal, this.normalMatrix );
+	var viewNormal = vec4.fromValues( 0.0, 0.0, 1.0, 0.0 );
+	vec4.transformMat4( viewNormal, viewNormal, viewMatrix );
+	if (vec3.dot(vec3.fromValues(viewNormal[0], viewNormal[1], viewNormal[2]), normal) <= 0.0) {
+		return false;
+	}
+
+	return true;
+}
+
 Model.prototype.setTexture = function(texture) {
 	this.texture = texture;
 	this.hasTexture = true;

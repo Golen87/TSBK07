@@ -338,7 +338,6 @@ function drawFBO(time, portal) {
 }
 
 function drawScene(time) {
-
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -352,9 +351,11 @@ function drawScene(time) {
 
 	//Draw portals
 	for (var i = portals.length - 1; i >= 0; i--) {
-		drawFBO( time, portals[i] );
-		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-		portals[i].draw( camera.projMatrix, camera.viewMatrix );
+		if (portals[i].isVisible( camera.projMatrix, camera.viewMatrix )) {
+			drawFBO( time, portals[i] );
+			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+			portals[i].draw( camera.projMatrix, camera.viewMatrix );
+		}
 	}
 }
 
