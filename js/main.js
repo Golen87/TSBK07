@@ -11,8 +11,8 @@ var modelMatrix = mat4.create();
 
 var playerCamera;
 
-var triangleVertexPositionBuffer;
-var triangleVertexColorBuffer;
+//var triangleVertexPositionBuffer;
+//var triangleVertexColorBuffer;
 var models = [];
 var portals = [];
 
@@ -85,6 +85,7 @@ function getUniformLocation(program, name) {
 	return location;
 }
 
+/*
 function initBuffers() {
 	// Vertex position buffer
 	triangleVertexPositionBuffer = gl.createBuffer();
@@ -110,6 +111,7 @@ function initBuffers() {
 	triangleVertexColorBuffer.itemSize = 3;
 	triangleVertexColorBuffer.numItems = 3;
 }
+*/
 
 function initFramebufferObjects() {
 	for (var i = 0; i <= MAX_PORTAL_DEPTH; ++i) {
@@ -204,11 +206,11 @@ function initModels() {
 	mat3.normalFromMat4( sphere.normalMatrix, sphere.modelMatrix );
 	models.push( sphere );
 
-	var k = 3;
-	for (var x = -k; x < k; x++) for (var y = -k; y < k; y++) for (var z = -k; z < k; z++) {
+	var k = 2;
+	for (var x = -k; x < k; x++) for (var y = 0; y < 2*k; y++) for (var z = -k; z < k; z++) {
 		var sphere = new Model( objects.sphere, normal_prog );
 		sphere.setGLSetting( gl.CULL_FACE, true );
-		mat4.translate( sphere.modelMatrix, sphere.modelMatrix, [2*x, 2*y, 2*z] );
+		mat4.translate( sphere.modelMatrix, sphere.modelMatrix, [3*x, 3*y, 3*z] );
 		mat4.scale( sphere.modelMatrix, sphere.modelMatrix, [0.2, 0.2, 0.2] );
 		mat3.normalFromMat4( sphere.normalMatrix, sphere.modelMatrix );
 		models.push( sphere );
@@ -309,6 +311,7 @@ function connectPortals(portal1, portal2, deltaRotation, rotationAxis, portal1ba
 	portal2.targetBack = portal1back;
 }
 
+/*
 function drawTriangle(camera, time) {
 	shader_prog.use();
 	gl.uniformMatrix4fv(shader_prog.u_ProjMat, false, camera.projMatrix);
@@ -342,6 +345,7 @@ function drawTriangle(camera, time) {
 
 	gl.enable(gl.CULL_FACE)
 }
+*/
 
 function bindFBO(fbo) {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
@@ -366,7 +370,7 @@ function drawFBO(camera, time, portal, portalDepth) {
 
 
 	//Draw models
-	drawTriangle(portalCam, time);
+	//drawTriangle(portalCam, time);
 	for (var i = models.length - 1; i >= 0; i--) {
 		models[i].draw( portalCam );
 	}
@@ -405,7 +409,7 @@ function drawScene( camera, time ) {
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	drawTriangle(camera, time);
+	//drawTriangle(camera, time);
 
 	//Draw models
 	for (var i = models.length - 1; i >= 0; i--) {
@@ -452,7 +456,7 @@ function loadWebGL() {
 	initGL();
 	initFramebufferObjects();
 	initShaders();
-	initBuffers();
+	//initBuffers();
 	initModels();
 	initPortals();
 
