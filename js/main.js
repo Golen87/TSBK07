@@ -9,7 +9,7 @@ var screen_prog;
 
 var modelMatrix = mat4.create();
 
-var camera;
+var playerCamera;
 
 var triangleVertexPositionBuffer;
 var triangleVertexColorBuffer;
@@ -51,7 +51,7 @@ function initShaders() {
 	// FBO
 	fbo_prog = new Shader( shaders.fboVert, shaders.fboFrag );
 	fbo_prog.addAttribute( "Position" );
-	//fbo_prog.addAttribute( "TexCoord" );
+	fbo_prog.addAttribute( "TexCoord" );
 	fbo_prog.addUniform( "u_ProjMat" );
 	fbo_prog.addUniform( "u_ViewMat" );
 	fbo_prog.addUniform( "u_ModelMat" );
@@ -178,6 +178,7 @@ function initModels() {
 	var ground = new Model( objects.ground, texture_prog );
 	ground.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 	ground.setGLSetting( gl.CULL_FACE, true );
+	ground.frustumCulling = false;
 	mat4.translate(	ground.modelMatrix, ground.modelMatrix, [0.0, -1.0, 0.0] );
 	mat3.normalFromMat4( ground.normalMatrix, ground.modelMatrix );
 	models.push( ground );
@@ -202,6 +203,16 @@ function initModels() {
 	mat4.translate( sphere.modelMatrix, sphere.modelMatrix, [3.0, 0.0, -6.0] );
 	mat3.normalFromMat4( sphere.normalMatrix, sphere.modelMatrix );
 	models.push( sphere );
+
+	var k = 3;
+	for (var x = -k; x < k; x++) for (var y = -k; y < k; y++) for (var z = -k; z < k; z++) {
+		var sphere = new Model( objects.sphere, normal_prog );
+		sphere.setGLSetting( gl.CULL_FACE, true );
+		mat4.translate( sphere.modelMatrix, sphere.modelMatrix, [2*x, 2*y, 2*z] );
+		mat4.scale( sphere.modelMatrix, sphere.modelMatrix, [0.2, 0.2, 0.2] );
+		mat3.normalFromMat4( sphere.normalMatrix, sphere.modelMatrix );
+		models.push( sphere );
+	}
 
 	var sphereFlat = new Model( objects.sphere, normal_prog );
 	sphereFlat.setGLSetting( gl.CULL_FACE, true );
@@ -267,6 +278,23 @@ function initPortals() {
 	connectPortals( leftBack, rightFront, Math.PI, [0, 1, 0], leftFront, rightBack )
 	connectPortals( leftEndFront, rightEndBack, Math.PI, [0, 1, 0], leftEndBack, rightEndFront )
 	connectPortals( leftEndBack, rightEndFront, Math.PI, [0, 1, 0], leftEndFront, rightEndBack )
+
+	/*
+	var leftFront  = addPortal( [-1.0, -1.0, -2.5+5], 0.0 );
+	var leftBack   = addPortal( [-1.0, -1.0, -2.5+5], Math.PI );
+	var rightFront = addPortal( [ 1.0, -1.0, -1.0+5], 0.0 );
+	var rightBack  = addPortal( [ 1.0, -1.0, -1.0+5], Math.PI );
+	var leftEndFront  = addPortal( [-1.0, -1.0, -3.5+5], 0.0 );
+	var leftEndBack   = addPortal( [-1.0, -1.0, -3.5+5], Math.PI );
+	var rightEndFront = addPortal( [ 1.0, -1.0, -5.0+5], 0.0 );
+	var rightEndBack  = addPortal( [ 1.0, -1.0, -5.0+5], Math.PI );
+
+	// Connect portals
+	connectPortals( leftFront, rightBack, Math.PI, [0, 1, 0], leftBack, rightFront )
+	connectPortals( leftBack, rightFront, Math.PI, [0, 1, 0], leftFront, rightBack )
+	connectPortals( leftEndFront, rightEndBack, Math.PI, [0, 1, 0], leftEndBack, rightEndFront )
+	connectPortals( leftEndBack, rightEndFront, Math.PI, [0, 1, 0], leftEndFront, rightEndBack )
+	*/
 }
 
 function connectPortals(portal1, portal2, deltaRotation, rotationAxis, portal1back, portal2back) {
@@ -282,10 +310,10 @@ function connectPortals(portal1, portal2, deltaRotation, rotationAxis, portal1ba
 	portal2.targetBack = portal1back;
 }
 
-function drawTriangle(time, projMatrix, viewMatrix) {
+function drawTriangle(camera, time) {
 	shader_prog.use();
-	gl.uniformMatrix4fv(shader_prog.u_ProjMat, false, projMatrix);
-	gl.uniformMatrix4fv(shader_prog.u_ViewMat, false, viewMatrix);
+	gl.uniformMatrix4fv(shader_prog.u_ProjMat, false, camera.projMatrix);
+	gl.uniformMatrix4fv(shader_prog.u_ViewMat, false, camera.viewMatrix);
 	gl.disable(gl.CULL_FACE)
 
 	//Move our triangle
@@ -319,19 +347,14 @@ function drawTriangle(time, projMatrix, viewMatrix) {
 function bindFBO(fbo) {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 	gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fbo.texture, 0)
-	gl.viewport(0, 0, FBO_WIDTH, FBO_WIDTH);
+	gl.viewport(0, 0, FBO_WIDTH, FBO_HEIGHT);
 	fbo.active = true;
 }
 
-function drawFBO(time, proj, view, portal, portalDepth) {
+function drawFBO(camera, time, portal, portalDepth) {
 	if (portalDepth > MAX_PORTAL_DEPTH) {
 		return;
 	}
-
-	var projMatrix = mat4.create();
-	mat4.copy(projMatrix, proj);
-	var viewMatrix = mat4.create();
-	mat4.copy(viewMatrix, view);
 
 	portal.setFBO(fbos[portalDepth]);
 	bindFBO(fbos[portalDepth]);
@@ -340,37 +363,38 @@ function drawFBO(time, proj, view, portal, portalDepth) {
 	gl.clearColor(1.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	camera.getPortalView( projMatrix, viewMatrix, portal.modelMatrix, portal.targetMatrix, portal.targetNormal );
+	var portalCam = camera.clone();
+	portalCam.setPortalView( portal.modelMatrix, portal.targetMatrix, portal.targetNormal );
 
-	drawTriangle(time, projMatrix, viewMatrix);
 
 	//Draw models
+	drawTriangle(portalCam, time);
 	for (var i = models.length - 1; i >= 0; i--) {
-		models[i].draw( projMatrix, viewMatrix );
+		models[i].draw( portalCam );
 	}
 
 	//Draw portals
 	for (var i = portals.length - 1; i >= 0; i--) {
 		if (portals[i] != portal &&
 			portals[i] != portal.targetBack &&
-			portals[i].isVisible(projMatrix, viewMatrix)) {
+			portals[i].isVisible( portalCam )) {
 
 			if (portalDepth < MAX_PORTAL_DEPTH) {
 
 				// Draw to inner portal's FBO
-				drawFBO( time, projMatrix, viewMatrix, portals[i], portalDepth + 1);
+				drawFBO( portalCam, time, portals[i], portalDepth + 1);
 				portals[i].setFBO(fbos[portalDepth + 1]);
 
 				// Draw to this portal's FBO
 				bindFBO(fbos[portalDepth]);
 				portals[i].shader = fbo_prog;
-				portals[i].draw( projMatrix, viewMatrix );
+				portals[i].draw( portalCam );
 			}
 			else {
 				// Dummy shading
-				gl.viewport(0, 0, FBO_WIDTH, FBO_WIDTH);
+				gl.viewport(0, 0, FBO_WIDTH, FBO_HEIGHT);
 				portals[i].shader = magenta_prog;
-				portals[i].draw( projMatrix, viewMatrix );
+				portals[i].draw( portalCam );
 			}
 		}
 	}
@@ -379,25 +403,25 @@ function drawFBO(time, proj, view, portal, portalDepth) {
 	fbos[portalDepth].active = false;
 }
 
-function drawScene(time) {
+function drawScene( camera, time ) {
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	drawTriangle(time, camera.projMatrix, camera.viewMatrix);
+	drawTriangle(camera, time);
 
 	//Draw models
 	for (var i = models.length - 1; i >= 0; i--) {
-		models[i].draw( camera.projMatrix, camera.viewMatrix );
+		models[i].draw( camera );
 	}
 
 	//Draw portals
 	for (var i = portals.length - 1; i >= 0; i--) {
-		if (portals[i].isVisible( camera.projMatrix, camera.viewMatrix )) {
-			drawFBO( time, camera.projMatrix, camera.viewMatrix, portals[i], 0 );
+		if (portals[i].isVisible( camera )) {
+			drawFBO( camera, time, portals[i], 0 );
 			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 			portals[i].shader = fbo_prog;
-			portals[i].draw( camera.projMatrix, camera.viewMatrix );
+			portals[i].draw( camera );
 		}
 	}
 }
@@ -406,8 +430,8 @@ var previousTime = 0;
 function updateLoop( elapsedTime ) {
 	var deltaTime = (elapsedTime - previousTime) / 1000;
 
-	camera.update( deltaTime );
-	drawScene(elapsedTime / 1000);
+	playerCamera.update( deltaTime );
+	drawScene( playerCamera, elapsedTime / 1000 );
 
 	requestAnimationFrame(updateLoop);
 	previousTime = elapsedTime;
@@ -437,7 +461,7 @@ function loadWebGL() {
 
 	gl.enable(gl.DEPTH_TEST);
 
-	camera = new Camera();
+	playerCamera = new PlayerCamera();
 
 	requestAnimationFrame(updateLoop);
 }

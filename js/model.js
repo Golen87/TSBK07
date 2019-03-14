@@ -8,6 +8,8 @@ function Model(meshStr, shader) {
 	this.modelMatrix = mat4.create();
 	this.normalMatrix = mat3.create();
 
+	this.radius = 1.0;
+
 	// Portals
 	this.targetMatrix = mat4.create();
 	this.targetNormal = vec3.create();
@@ -22,20 +24,43 @@ function Model(meshStr, shader) {
 	// Render settings
 	this.settings = {};
 	this.setGLSetting(gl.CULL_FACE, true);
+
+	this.frustumCulling = true;
 }
 
 // Portal
-Model.prototype.isVisible = function(projMatrix, viewMatrix) {
+Model.prototype.isVisible = function( camera ) {
 	var normal = vec3.fromValues( 0.0, 0.0, 1.0 );
 	vec3.transformMat3( normal, normal, this.normalMatrix );
-	var viewNormal = vec4.fromValues( 0.0, 0.0, 1.0, 0.0 );
-	vec4.transformMat4( viewNormal, viewNormal, viewMatrix );
-	if (vec3.dot(vec3.fromValues(viewNormal[0], viewNormal[1], viewNormal[2]), normal) <= 0.0) {
+
+	var pos = vec3.create();
+	mat4.getTranslation( pos, this.modelMatrix );
+
+	var camPos = camera.getPosition();
+
+	var relPos = vec3.create();
+	vec3.sub( relPos, camPos, pos );
+
+	if ( vec3.dot( relPos, normal ) < 0 ) {
+		return false;
+	}
+
+	if ( !this.frustumCheck( camera ) ) {
 		return false;
 	}
 
 	return true;
 }
+
+Model.prototype.frustumCheck = function( camera ) {
+	var mat = mat4.create();
+	mat4.mul( mat, camera.viewMatrix, this.modelMatrix );
+	var pos = vec3.create();
+	mat4.getTranslation(pos, mat);
+
+	return camera.frustumCulling( pos, this.radius );
+}
+
 
 Model.prototype.setTexture = function(texture) {
 	this.texture = texture;
@@ -54,11 +79,14 @@ Model.prototype.setGLSetting = function(setting, state) {
 }
 
 
-Model.prototype.draw = function(projMatrix, viewMatrix) {
+Model.prototype.draw = function(camera) {
+
+	if ( this.frustumCulling && !this.frustumCheck( camera ) )
+		return;
 
 	this.shader.use();
-	gl.uniformMatrix4fv(this.shader.u_ProjMat, false, projMatrix);
-	gl.uniformMatrix4fv(this.shader.u_ViewMat, false, viewMatrix);
+	gl.uniformMatrix4fv(this.shader.u_ProjMat, false, camera.projMatrix);
+	gl.uniformMatrix4fv(this.shader.u_ViewMat, false, camera.viewMatrix);
 	gl.uniformMatrix4fv(this.shader.u_ModelMat, false, this.modelMatrix);
 
 	$.each( this.settings, function( key, value ) {

@@ -57,7 +57,7 @@ function onLockChange() {
 	}
 }
 function onMouseMove(e) {
-	camera.mouseMove(e.movementX, e.movementY);
+	playerCamera.mouseMove(e.movementX, e.movementY);
 }
 
 // Add event for locking pointer
