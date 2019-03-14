@@ -253,8 +253,7 @@ function initModels() {
 }
 
 function addPortal(position, yRotation) {
-	var portal = new Model( objects.surface, fbo_prog );
-	portal.setFBO( fbos[0] );
+	var portal = new Portal( objects.surface, fbo_prog );
 	portal.setGLSetting( gl.CULL_FACE, true );
 	mat4.translate( portal.modelMatrix, portal.modelMatrix, position);
 	mat4.scale( portal.modelMatrix, portal.modelMatrix, [0.8, 1.9, 0.8] );
@@ -348,7 +347,6 @@ function bindFBO(fbo) {
 	gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 	gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fbo.texture, 0)
 	gl.viewport(0, 0, FBO_WIDTH, FBO_HEIGHT);
-	fbo.active = true;
 }
 
 function drawFBO(camera, time, portal, portalDepth) {
@@ -400,7 +398,6 @@ function drawFBO(camera, time, portal, portalDepth) {
 	}
 
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-	fbos[portalDepth].active = false;
 }
 
 function drawScene( camera, time ) {

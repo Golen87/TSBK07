@@ -16,7 +16,6 @@ function PlayerCamera() {
 	this.rotateSpeed = 0.003;
 
 	this.updateView();
-	console.log(this.getPosition());
 }
 
 PlayerCamera.prototype.updateView = function() {
