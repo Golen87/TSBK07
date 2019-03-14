@@ -57,7 +57,7 @@ Camera.prototype.setPortalView = function( startMatrix, endMatrix, normal ) {
 	mat4.multiply( this.viewMatrix, this.viewMatrix, delta );
 };
 
-// Sets near plane to pos/normal plane to prevent drawing objects behind a portal
+// Clip the projection matrix to the portal surface, removing everything behind it
 Camera.prototype.clipOblique = function( pos, normal ) {
 	var pos4 = vec4.fromValues( pos[0], pos[1], pos[2], 1 );
 	var worldViewPos = vec4.create();
@@ -92,6 +92,8 @@ Camera.prototype.clipOblique = function( pos, normal ) {
 	this.projMatrix[6] = c[1] - this.projMatrix[7];
 	this.projMatrix[10] = c[2] - this.projMatrix[11];
 	this.projMatrix[14] = c[3] - this.projMatrix[15];
+
+	this.extractPlanesFromProjmat();
 }
 
 
