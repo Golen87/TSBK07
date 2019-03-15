@@ -20,11 +20,12 @@ var fbos = [];
 const FBO_WIDTH = 256*8;
 const FBO_HEIGHT = 256*8;
 
-/* -1 -- No portals
- *  0 -- 1 level of portals
- *  1 -- 2 levels of portals
+/* Number of rendered levels of portals
+ * 0 -- No portals
+ * 1 -- Single level of portals
+ * 2 -- Two levels of portals
  */
-const MAX_PORTAL_DEPTH = 1;
+const MAX_PORTAL_DEPTH = 2;
 
 
 function initShaders() {
@@ -114,7 +115,7 @@ function initBuffers() {
 */
 
 function initFramebufferObjects() {
-	for (var i = 0; i <= MAX_PORTAL_DEPTH; ++i) {
+	for (var i = 0; i < MAX_PORTAL_DEPTH; ++i) {
 		var framebuffer, texture, depthBuffer;
 
 		// Define the error handling function
@@ -361,7 +362,7 @@ function bindFBO(fbo) {
 }
 
 function drawFBO(camera, time, portal, portalDepth) {
-	if (portalDepth > MAX_PORTAL_DEPTH) {
+	if (portalDepth >= MAX_PORTAL_DEPTH) {
 		return;
 	}
 
@@ -388,7 +389,7 @@ function drawFBO(camera, time, portal, portalDepth) {
 			portals[i] != portal.targetBack &&
 			portals[i].isVisible( portalCam )) {
 
-			if (portalDepth < MAX_PORTAL_DEPTH) {
+			if (portalDepth < MAX_PORTAL_DEPTH - 1) {
 
 				// Draw to inner portal's FBO
 				drawFBO( portalCam, time, portals[i], portalDepth + 1);
