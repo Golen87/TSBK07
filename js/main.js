@@ -176,6 +176,14 @@ function initFramebufferObjects() {
 	}
 }
 
+function lengthVec2(x, y) {
+	return Math.sqrt(x*x + y*y);
+}
+
+function lengthVec3(x, y, z) {
+	return Math.sqrt(x*x + y*y + z*z);
+}
+
 function initModels() {
 	var ground = new Model( objects.ground, texture_prog );
 	ground.setTexture( loadTexture(gl, "tex/grass_lab.png") );
@@ -185,19 +193,27 @@ function initModels() {
 	mat3.normalFromMat4( ground.normalMatrix, ground.modelMatrix );
 	models.push( ground );
 
+	const CORRIDOR_HEIGHT = 2.0;
+	const CORRIDOR_WIDTH = 1.0;
+	const CORRIDOR_DEPTH_SHORT = 1.0;
 	var corridor = new Model( objects.corridor, texture_prog );
 	corridor.setTexture( loadTexture(gl, "tex/debug.png") );
 	corridor.setGLSetting( gl.CULL_FACE, true );
 	mat4.translate( corridor.modelMatrix, corridor.modelMatrix, [-1.0, 0.0, -3.0] );
 	mat3.normalFromMat4( corridor.normalMatrix, corridor.modelMatrix );
+	corridor.sphereOffset = vec3.fromValues(0.0, 1.0, 0.0);
+	corridor.sphereRadius = 0.5 * lengthVec3(CORRIDOR_WIDTH, CORRIDOR_HEIGHT, CORRIDOR_DEPTH_SHORT);
 	models.push( corridor );
 
+	const CORRIDOR_DEPTH_LONG = 4.0;
 	var corridorLong = new Model( objects.corridor, texture_prog );
 	corridorLong.setTexture( loadTexture(gl, "tex/debug.png") );
 	corridorLong.setGLSetting( gl.CULL_FACE, true );
 	mat4.translate( corridorLong.modelMatrix, corridorLong.modelMatrix, [1.0, 0.0, -3.0] );
-	mat4.scale( corridorLong.modelMatrix, corridorLong.modelMatrix, [1.0, 1.0, 4.0] );
+	mat4.scale( corridorLong.modelMatrix, corridorLong.modelMatrix, [1.0, 1.0, CORRIDOR_DEPTH_LONG] );
 	mat3.normalFromMat4( corridorLong.normalMatrix, corridorLong.modelMatrix );
+	corridorLong.sphereOffset = vec3.fromValues(0.0, 1.0, 0.0);
+	corridorLong.sphereRadius = 0.5 * lengthVec3(CORRIDOR_WIDTH, CORRIDOR_HEIGHT, CORRIDOR_DEPTH_LONG);
 	models.push( corridorLong );
 
 	var sphere = new Model( objects.sphere, normal_prog );
@@ -212,6 +228,7 @@ function initModels() {
 		sphere.setGLSetting( gl.CULL_FACE, true );
 		mat4.translate( sphere.modelMatrix, sphere.modelMatrix, [3*x, 3*y, 3*z] );
 		mat4.scale( sphere.modelMatrix, sphere.modelMatrix, [0.2, 0.2, 0.2] );
+		sphere.sphereRadius = 0.2;
 		mat3.normalFromMat4( sphere.normalMatrix, sphere.modelMatrix );
 		models.push( sphere );
 	}
@@ -244,6 +261,7 @@ function initModels() {
 	cube.setGLSetting( gl.CULL_FACE, true );
 	mat4.translate( cube.modelMatrix, cube.modelMatrix, [-3.0, 1.0, -6.0] );
 	mat3.normalFromMat4( cube.normalMatrix, cube.modelMatrix );
+	cube.sphereRadius = Math.sqrt(3.0);
 	models.push( cube );
 
 	var cubeTex = new Model( objects.cube, texture_prog );
@@ -251,15 +269,21 @@ function initModels() {
 	cubeTex.setGLSetting( gl.CULL_FACE, true );
 	mat4.translate( cubeTex.modelMatrix, cubeTex.modelMatrix, [-3.0, 1.0, -3.0] );
 	mat3.normalFromMat4( cubeTex.normalMatrix, cubeTex.modelMatrix );
+	cubeTex.sphereRadius = Math.sqrt(3.0);
 	models.push( cubeTex );
 }
 
+const PORTAL_WIDTH = 0.8;
+const PORTAL_HEIGHT = 1.9;
+const PORTAL_RADIUS = 0.5 * lengthVec2(PORTAL_HEIGHT, PORTAL_WIDTH);
 function addPortal(position, yRotation) {
 	var portal = new Portal( objects.surface, fbo_prog );
 	portal.setGLSetting( gl.CULL_FACE, true );
 	mat4.translate( portal.modelMatrix, portal.modelMatrix, position);
-	mat4.scale( portal.modelMatrix, portal.modelMatrix, [0.8, 1.9, 0.8] );
+	mat4.scale( portal.modelMatrix, portal.modelMatrix, [PORTAL_WIDTH, PORTAL_HEIGHT, PORTAL_WIDTH] );
 	mat4.rotateY( portal.modelMatrix, portal.modelMatrix, yRotation);
+	portal.sphereOffset = vec3.fromValues(0.0, 0.5, 0.0);
+	portal.sphereRadius = PORTAL_RADIUS;
 	portals.push( portal );
 	return portal;
 }

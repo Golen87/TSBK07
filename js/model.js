@@ -8,7 +8,8 @@ function Model(meshStr, shader) {
 	this.modelMatrix = mat4.create();
 	this.normalMatrix = mat3.create();
 
-	this.radius = 1.0;
+	this.sphereOffset = vec3.fromValues(0.0, 0.0, 0.0);
+	this.sphereRadius = 1.0;
 
 	this.texture = null;
 	this.hasTexture = false;
@@ -25,10 +26,10 @@ function Model(meshStr, shader) {
 Model.prototype.frustumCheck = function( camera ) {
 	var mat = mat4.create();
 	mat4.mul( mat, camera.viewMatrix, this.modelMatrix );
-	var pos = vec3.create();
-	mat4.getTranslation(pos, mat);
+	var spherePos = vec3.clone(this.sphereOffset);
+	vec3.transformMat4(spherePos, spherePos, mat);
 
-	return camera.frustumCulling( pos, this.radius );
+	return camera.frustumCulling( spherePos, this.sphereRadius );
 }
 
 
