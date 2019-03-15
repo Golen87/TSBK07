@@ -1,12 +1,11 @@
-function PlayerCamera() {
+function PlayerCamera(position) {
 	Camera.call( this );
 
-	this.position = vec3.create();
+	this.position = vec3.clone(position);
 	this.direction = vec3.create();
 	this.targetPos = vec3.clone( this.direction );
 	this.up = vec3.fromValues( 0, 1, 0 );
 
-	vec3.set( this.position, 0, 0, 3 );
 	vec3.set( this.direction, 0, 0, -1 );
 
 	this.pitch = 0.0;

@@ -91,9 +91,9 @@ function initBuffers() {
 	triangleVertexPositionBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
 	var vertices = [
-		 0.0,  1.0,  0.0,
-		-1.0, -1.0,  0.0,
-		 1.0, -1.0,  0.0
+		 0.0, 2.0,  0.0,
+		-1.0, 0.0,  0.0,
+		 1.0, 0.0,  0.0
 	];
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 	triangleVertexPositionBuffer.itemSize = 3;
@@ -181,33 +181,33 @@ function initModels() {
 	ground.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 	ground.setGLSetting( gl.CULL_FACE, true );
 	ground.frustumCulling = false;
-	mat4.translate(	ground.modelMatrix, ground.modelMatrix, [0.0, -1.0, 0.0] );
+	mat4.translate(	ground.modelMatrix, ground.modelMatrix, [0.0, 0.0, 0.0] );
 	mat3.normalFromMat4( ground.normalMatrix, ground.modelMatrix );
 	models.push( ground );
 
 	var corridor = new Model( objects.corridor, texture_prog );
 	corridor.setTexture( loadTexture(gl, "tex/debug.png") );
 	corridor.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( corridor.modelMatrix, corridor.modelMatrix, [-1.0, -1.0, -3.0] );
+	mat4.translate( corridor.modelMatrix, corridor.modelMatrix, [-1.0, 0.0, -3.0] );
 	mat3.normalFromMat4( corridor.normalMatrix, corridor.modelMatrix );
 	models.push( corridor );
 
 	var corridorLong = new Model( objects.corridor, texture_prog );
 	corridorLong.setTexture( loadTexture(gl, "tex/debug.png") );
 	corridorLong.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( corridorLong.modelMatrix, corridorLong.modelMatrix, [1.0, -1.0, -3.0] );
+	mat4.translate( corridorLong.modelMatrix, corridorLong.modelMatrix, [1.0, 0.0, -3.0] );
 	mat4.scale( corridorLong.modelMatrix, corridorLong.modelMatrix, [1.0, 1.0, 4.0] );
 	mat3.normalFromMat4( corridorLong.normalMatrix, corridorLong.modelMatrix );
 	models.push( corridorLong );
 
 	var sphere = new Model( objects.sphere, normal_prog );
 	sphere.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( sphere.modelMatrix, sphere.modelMatrix, [3.0, 0.0, -6.0] );
+	mat4.translate( sphere.modelMatrix, sphere.modelMatrix, [3.0, 1.0, -6.0] );
 	mat3.normalFromMat4( sphere.normalMatrix, sphere.modelMatrix );
 	models.push( sphere );
 
 	var k = 2;
-	for (var x = -k; x < k; x++) for (var y = 0; y < 2*k; y++) for (var z = -k; z < k; z++) {
+	for (var x = -k; x < k; x++) for (var y = 0.25; y < 2*k; y++) for (var z = -k; z < k; z++) {
 		var sphere = new Model( objects.sphere, normal_prog );
 		sphere.setGLSetting( gl.CULL_FACE, true );
 		mat4.translate( sphere.modelMatrix, sphere.modelMatrix, [3*x, 3*y, 3*z] );
@@ -218,7 +218,7 @@ function initModels() {
 
 	var sphereFlat = new Model( objects.sphere, normal_prog );
 	sphereFlat.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( sphereFlat.modelMatrix, sphereFlat.modelMatrix, [3.0, 2.0, -6.0] );
+	mat4.translate( sphereFlat.modelMatrix, sphereFlat.modelMatrix, [3.0, 3.0, -6.0] );
 	mat4.rotateZ( sphereFlat.modelMatrix, sphereFlat.modelMatrix, Math.PI * 0.25);
 	mat4.scale( sphereFlat.modelMatrix, sphereFlat.modelMatrix, [1.0, 0.5, 1.0] );
 	mat3.normalFromMat4( sphereFlat.normalMatrix, sphereFlat.modelMatrix );
@@ -227,14 +227,14 @@ function initModels() {
 	var sphereTex = new Model( objects.sphere, texture_prog );
 	sphereTex.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 	sphereTex.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( sphereTex.modelMatrix, sphereTex.modelMatrix, [3.0, 0.0, -3.0] );
+	mat4.translate( sphereTex.modelMatrix, sphereTex.modelMatrix, [3.0, 1.0, -3.0] );
 	mat3.normalFromMat4( sphereTex.normalMatrix, sphereTex.modelMatrix );
 	models.push( sphereTex );
 
 	var sphereTexFlat = new Model( objects.sphere, texture_prog );
 	sphereTexFlat.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 	sphereTexFlat.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( sphereTexFlat.modelMatrix, sphereTexFlat.modelMatrix, [3.0, 2.0, -3.0] );
+	mat4.translate( sphereTexFlat.modelMatrix, sphereTexFlat.modelMatrix, [3.0, 3.0, -3.0] );
 	mat4.rotateZ( sphereTexFlat.modelMatrix, sphereTexFlat.modelMatrix, Math.PI * 0.25);
 	mat4.scale( sphereTexFlat.modelMatrix, sphereTexFlat.modelMatrix, [1.0, 0.5, 1.0] );
 	mat3.normalFromMat4( sphereTexFlat.normalMatrix, sphereTexFlat.modelMatrix );
@@ -242,14 +242,14 @@ function initModels() {
 
 	var cube = new Model( objects.cube, normal_prog );
 	cube.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( cube.modelMatrix, cube.modelMatrix, [-3.0, 0.0, -6.0] );
+	mat4.translate( cube.modelMatrix, cube.modelMatrix, [-3.0, 1.0, -6.0] );
 	mat3.normalFromMat4( cube.normalMatrix, cube.modelMatrix );
 	models.push( cube );
 
 	var cubeTex = new Model( objects.cube, texture_prog );
 	cubeTex.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 	cubeTex.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( cubeTex.modelMatrix, cubeTex.modelMatrix, [-3.0, 0.0, -3.0] );
+	mat4.translate( cubeTex.modelMatrix, cubeTex.modelMatrix, [-3.0, 1.0, -3.0] );
 	mat3.normalFromMat4( cubeTex.normalMatrix, cubeTex.modelMatrix );
 	models.push( cubeTex );
 }
@@ -265,37 +265,20 @@ function addPortal(position, yRotation) {
 }
 
 function initPortals() {
-	var leftFront  = addPortal( [-1.0, -1.0, -2.5], 0.0 );
-	var leftBack   = addPortal( [-1.0, -1.0, -2.5], Math.PI );
-	var rightFront = addPortal( [ 1.0, -1.0, -1.0], 0.0 );
-	var rightBack  = addPortal( [ 1.0, -1.0, -1.0], Math.PI );
-	var leftEndFront  = addPortal( [-1.0, -1.0, -3.5], 0.0 );
-	var leftEndBack   = addPortal( [-1.0, -1.0, -3.5], Math.PI );
-	var rightEndFront = addPortal( [ 1.0, -1.0, -5.0], 0.0 );
-	var rightEndBack  = addPortal( [ 1.0, -1.0, -5.0], Math.PI );
+	var leftFront  = addPortal( [-1.0, 0.0, -2.5], 0.0 );
+	var leftBack   = addPortal( [-1.0, 0.0, -2.5], Math.PI );
+	var rightFront = addPortal( [ 1.0, 0.0, -1.0], 0.0 );
+	var rightBack  = addPortal( [ 1.0, 0.0, -1.0], Math.PI );
+	var leftEndFront  = addPortal( [-1.0, 0.0, -3.5], 0.0 );
+	var leftEndBack   = addPortal( [-1.0, 0.0, -3.5], Math.PI );
+	var rightEndFront = addPortal( [ 1.0, 0.0, -5.0], 0.0 );
+	var rightEndBack  = addPortal( [ 1.0, 0.0, -5.0], Math.PI );
 
 	// Connect portals
 	connectPortals( leftFront, rightBack, Math.PI, [0, 1, 0], leftBack, rightFront )
 	connectPortals( leftBack, rightFront, Math.PI, [0, 1, 0], leftFront, rightBack )
 	connectPortals( leftEndFront, rightEndBack, Math.PI, [0, 1, 0], leftEndBack, rightEndFront )
 	connectPortals( leftEndBack, rightEndFront, Math.PI, [0, 1, 0], leftEndFront, rightEndBack )
-
-	/*
-	var leftFront  = addPortal( [-1.0, -1.0, -2.5+5], 0.0 );
-	var leftBack   = addPortal( [-1.0, -1.0, -2.5+5], Math.PI );
-	var rightFront = addPortal( [ 1.0, -1.0, -1.0+5], 0.0 );
-	var rightBack  = addPortal( [ 1.0, -1.0, -1.0+5], Math.PI );
-	var leftEndFront  = addPortal( [-1.0, -1.0, -3.5+5], 0.0 );
-	var leftEndBack   = addPortal( [-1.0, -1.0, -3.5+5], Math.PI );
-	var rightEndFront = addPortal( [ 1.0, -1.0, -5.0+5], 0.0 );
-	var rightEndBack  = addPortal( [ 1.0, -1.0, -5.0+5], Math.PI );
-
-	// Connect portals
-	connectPortals( leftFront, rightBack, Math.PI, [0, 1, 0], leftBack, rightFront )
-	connectPortals( leftBack, rightFront, Math.PI, [0, 1, 0], leftFront, rightBack )
-	connectPortals( leftEndFront, rightEndBack, Math.PI, [0, 1, 0], leftEndBack, rightEndFront )
-	connectPortals( leftEndBack, rightEndFront, Math.PI, [0, 1, 0], leftEndFront, rightEndBack )
-	*/
 }
 
 function connectPortals(portal1, portal2, deltaRotation, rotationAxis, portal1back, portal2back) {
@@ -462,7 +445,7 @@ function loadWebGL() {
 
 	gl.enable(gl.DEPTH_TEST);
 
-	playerCamera = new PlayerCamera();
+	playerCamera = new PlayerCamera(vec3.fromValues(0.0, 1.0, 3.0));
 
 	requestAnimationFrame(updateLoop);
 }
