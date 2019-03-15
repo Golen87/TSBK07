@@ -426,10 +426,18 @@ function drawScene( camera, time ) {
 
 	//Draw portals
 	for (var i = portals.length - 1; i >= 0; i--) {
-		if (portals[i].isVisible( camera )) {
-			drawFBO( camera, time, portals[i], 0 );
-			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-			portals[i].shader = fbo_prog;
+		if (MAX_PORTAL_DEPTH > 0) {
+			// FBO shading
+			if (portals[i].isVisible( camera )) {
+				drawFBO( camera, time, portals[i], 0 );
+				gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+				portals[i].shader = fbo_prog;
+				portals[i].draw( camera );
+			}
+		}
+		else {
+			// Dummy shading
+			portals[i].shader = magenta_prog;
 			portals[i].draw( camera );
 		}
 	}
