@@ -4,7 +4,7 @@ var shader_prog;
 var normal_prog;
 var texture_prog;
 var fbo_prog;
-var magenta_prog;
+var unlit_color_prog;
 var screen_prog;
 
 var modelMatrix = mat4.create();
@@ -58,12 +58,13 @@ function initShaders() {
 	fbo_prog.addUniform( "u_ModelMat" );
 
 
-	// Magenta
-	magenta_prog = new Shader( shaders.magentaVert, shaders.magentaFrag );
-	magenta_prog.addAttribute( "Position" );
-	magenta_prog.addUniform( "u_ProjMat" );
-	magenta_prog.addUniform( "u_ViewMat" );
-	magenta_prog.addUniform( "u_ModelMat" );
+	// Unlit color
+	unlit_color_prog = new Shader( shaders.unlitColorVert, shaders.unlitColorFrag );
+	unlit_color_prog.addAttribute( "Position" );
+	unlit_color_prog.addUniform( "u_ProjMat" );
+	unlit_color_prog.addUniform( "u_ViewMat" );
+	unlit_color_prog.addUniform( "u_ModelMat" );
+	unlit_color_prog.addUniform( "u_Color" );
 
 
 	// Texture
@@ -403,8 +404,7 @@ function drawFBO(camera, time, portal, portalDepth) {
 			else {
 				// Dummy shading
 				gl.viewport(0, 0, FBO_WIDTH, FBO_HEIGHT);
-				portals[i].shader = magenta_prog;
-				portals[i].draw( portalCam );
+				portals[i].drawColor( portalCam, [1.0, 0.0, 1.0, 1.0] );
 			}
 		}
 	}
@@ -437,8 +437,7 @@ function drawScene( camera, time ) {
 		}
 		else {
 			// Dummy shading
-			portals[i].shader = magenta_prog;
-			portals[i].draw( camera );
+			portals[i].drawColor( portalCam, [1.0, 0.0, 1.0, 1.0] );
 		}
 	}
 }

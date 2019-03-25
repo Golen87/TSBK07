@@ -21,8 +21,8 @@ preload( shaders, "textureFrag", "shaders/texture.frag" );
 preload( shaders, "textureVert", "shaders/texture.vert" );
 preload( shaders, "fboFrag", "shaders/fbo.frag" );
 preload( shaders, "fboVert", "shaders/fbo.vert" );
-preload( shaders, "magentaFrag", "shaders/magenta.frag" );
-preload( shaders, "magentaVert", "shaders/magenta.vert" );
+preload( shaders, "unlitColorFrag", "shaders/unlit_color.frag" );
+preload( shaders, "unlitColorVert", "shaders/unlit_color.vert" );
 
 preload( objects, "cylinder", "obj/cylinder.obj" );
 preload( objects, "octagon", "obj/octagon.obj" );

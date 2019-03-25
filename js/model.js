@@ -108,6 +108,34 @@ Model.prototype.draw = function(camera) {
   		gl.uniform1i(this.shader.u_Sampler, 0); // Texture unit 0
 	}
 
+	if (this.shader.u_Color) {
+		gl.uniform4fv(this.shader.u_Color, this.color);
+	}
+
+
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.indexBuffer);
 	gl.drawElements(gl.TRIANGLES, this.mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+}
+
+Model.prototype.drawColor = function(camera, color) {
+
+    if ( this.frustumCulling && !this.frustumCheck( camera ) )
+        return;
+
+    var shader = unlit_color_prog;
+    shader.use();
+    gl.uniformMatrix4fv(shader.u_ProjMat, false, camera.projMatrix);
+    gl.uniformMatrix4fv(shader.u_ViewMat, false, camera.viewMatrix);
+    gl.uniformMatrix4fv(shader.u_ModelMat, false, this.modelMatrix);
+    gl.uniform4fv(shader.u_Color, color);
+
+    $.each( this.settings, function( key, value ) {
+        setGLSetting(key, value);
+    });
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.vertexBuffer);
+    gl.vertexAttribPointer(shader.Position, this.mesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.indexBuffer);
+    gl.drawElements(gl.TRIANGLES, this.mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
