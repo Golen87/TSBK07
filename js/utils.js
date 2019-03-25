@@ -29,3 +29,11 @@ function extend(base, sub) {
 		value: sub 
 	});
 }
+
+function lengthVec2(x, y) {
+	return Math.sqrt(x*x + y*y);
+}
+
+function lengthVec3(x, y, z) {
+	return Math.sqrt(x*x + y*y + z*z);
+}

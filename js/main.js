@@ -178,14 +178,6 @@ function initFramebufferObjects() {
 	}
 }
 
-function lengthVec2(x, y) {
-	return Math.sqrt(x*x + y*y);
-}
-
-function lengthVec3(x, y, z) {
-	return Math.sqrt(x*x + y*y + z*z);
-}
-
 function initModels() {
 	var ground = new Model( objects.ground, texture_prog );
 	ground.setTexture( loadTexture(gl, "tex/grass_lab.png") );
