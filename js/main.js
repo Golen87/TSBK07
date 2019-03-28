@@ -178,14 +178,6 @@ function initFramebufferObjects() {
 	}
 }
 
-function lengthVec2(x, y) {
-	return Math.sqrt(x*x + y*y);
-}
-
-function lengthVec3(x, y, z) {
-	return Math.sqrt(x*x + y*y + z*z);
-}
-
 function initCorridor(scaleX, scaleY, scaleZ, x, y, z) {
 	const BASE_HEIGHT = 2.0;
 	const BASE_WIDTH = 1.0;
@@ -477,10 +469,19 @@ function drawScene( camera, time ) {
 	}
 }
 
+var deltas = [0,0,0,0,0,0,0,0,0,0,0,0,0];
+function updateFPS( deltaTime ) {
+	deltas.push(deltaTime);
+	deltas.shift();
+	var sum = deltas.reduce((partial_sum, a) => partial_sum + a);
+	$("#fps").html(Math.round(1/(sum/deltas.length)));
+}
+
 var previousTime = 0;
 var timeStep = 1.0 / 60.0;
 function updateLoop( elapsedTime ) {
 	var deltaTime = (elapsedTime - previousTime) / 1000;
+	updateFPS(deltaTime);
 
 	playerCamera.update( deltaTime );
 	physicsWorld.step(timeStep);
