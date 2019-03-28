@@ -434,9 +434,18 @@ function drawScene( camera, time ) {
 	}
 }
 
+var deltas = [0,0,0,0,0,0,0,0,0,0,0,0,0];
+function updateFPS( deltaTime ) {
+	deltas.push(deltaTime);
+	deltas.shift();
+	var sum = deltas.reduce((partial_sum, a) => partial_sum + a);
+	$("#fps").html(Math.round(1/(sum/deltas.length)));
+}
+
 var previousTime = 0;
 function updateLoop( elapsedTime ) {
 	var deltaTime = (elapsedTime - previousTime) / 1000;
+	updateFPS(deltaTime);
 
 	playerCamera.update( deltaTime );
 	drawScene( playerCamera, elapsedTime / 1000 );
