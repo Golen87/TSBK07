@@ -186,6 +186,54 @@ function lengthVec3(x, y, z) {
 	return Math.sqrt(x*x + y*y + z*z);
 }
 
+function initCorridor(scaleX, scaleY, scaleZ, x, y, z) {
+	const BASE_HEIGHT = 2.0;
+	const BASE_WIDTH = 1.0;
+	const BASE_DEPTH = 1.0;
+	const BASE_THICKNESS = 0.1;
+
+	var width = scaleX * BASE_WIDTH;
+	var height = scaleY * BASE_HEIGHT;
+	var depth = scaleZ * BASE_DEPTH;
+	var wallThickness = scaleX * BASE_THICKNESS;
+	var roofThickness = scaleY * BASE_THICKNESS;
+
+	var corridor = new Model( objects.corridor, texture_prog );
+	corridor.setTexture( loadTexture(gl, "tex/debug.png") );
+	corridor.setGLSetting( gl.CULL_FACE, true );
+	mat4.translate( corridor.modelMatrix, corridor.modelMatrix, [x, y, z] );
+	mat4.scale( corridor.modelMatrix, corridor.modelMatrix, [scaleX, scaleY, scaleZ] );
+	mat3.normalFromMat4( corridor.normalMatrix, corridor.modelMatrix );
+	corridor.sphereOffset = vec3.fromValues(0.0, 1.0, 0.0);
+	corridor.sphereRadius = 0.5 * lengthVec3(height, height, depth);
+	models.push( corridor );
+
+	// Physics
+	wallShape = new CANNON.Box(new CANNON.Vec3(
+		0.5 * wallThickness,
+		0.5 * (height - roofThickness),
+		0.5 * depth));
+	roofShape = new CANNON.Box(new CANNON.Vec3(
+		0.5 * width,
+		0.5 * roofThickness,
+		0.5 * depth));
+	initStaticBoxBody(wallShape, [
+		x - 0.5 * (width - wallThickness),
+		y + 0.5 * (height - roofThickness),
+		z],
+		new CANNON.Quaternion());
+	initStaticBoxBody(wallShape, [
+		x + 0.5 * (width - wallThickness),
+		y + 0.5 * (height - roofThickness),
+		z],
+		new CANNON.Quaternion());
+	initStaticBoxBody(roofShape, [
+		x,
+		y + height + 0.5 * roofThickness,
+		z],
+		new CANNON.Quaternion());
+}
+
 function initModels() {
 	var ground = new Model( objects.ground, texture_prog );
 	ground.setTexture( loadTexture(gl, "tex/grass_lab.png") );
@@ -195,29 +243,16 @@ function initModels() {
 	mat3.normalFromMat4( ground.normalMatrix, ground.modelMatrix );
 	models.push( ground );
 
-	const CORRIDOR_HEIGHT = 2.0;
-	const CORRIDOR_WIDTH = 1.0;
-	const CORRIDOR_DEPTH_SHORT = 1.0;
-	var corridor = new Model( objects.corridor, texture_prog );
-	corridor.setTexture( loadTexture(gl, "tex/debug.png") );
-	corridor.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( corridor.modelMatrix, corridor.modelMatrix, [-1.0, 0.0, -2.5] );
-	mat3.normalFromMat4( corridor.normalMatrix, corridor.modelMatrix );
-	corridor.sphereOffset = vec3.fromValues(0.0, 1.0, 0.0);
-	corridor.sphereRadius = 0.5 * lengthVec3(CORRIDOR_WIDTH, CORRIDOR_HEIGHT, CORRIDOR_DEPTH_SHORT);
-	models.push( corridor );
+	var groundShape = new CANNON.Plane();
+	var groundRotation = new CANNON.Quaternion();
+	groundRotation.setFromAxisAngle (new CANNON.Vec3(1, 0, 0), -0.5 * Math.PI);
+	initStaticBoxBody(groundShape, [0, 0, 0], groundRotation);
 
-	const CORRIDOR_DEPTH_LONG = 4.0;
-	var corridorLong = new Model( objects.corridor, texture_prog );
-	corridorLong.setTexture( loadTexture(gl, "tex/debug.png") );
-	corridorLong.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( corridorLong.modelMatrix, corridorLong.modelMatrix, [1.0, 0.0, -3.0] );
-	mat4.scale( corridorLong.modelMatrix, corridorLong.modelMatrix, [1.0, 1.0, CORRIDOR_DEPTH_LONG] );
-	mat3.normalFromMat4( corridorLong.normalMatrix, corridorLong.modelMatrix );
-	corridorLong.sphereOffset = vec3.fromValues(0.0, 1.0, 0.0);
-	corridorLong.sphereRadius = 0.5 * lengthVec3(CORRIDOR_WIDTH, CORRIDOR_HEIGHT, CORRIDOR_DEPTH_LONG);
-	models.push( corridorLong );
+	// Corridors
+	initCorridor( /*Scale*/ 1.0, 1.0, 1.0, /*Position*/ -1.0,  0.0, -2.5 );
+	initCorridor( /*Scale*/ 1.0, 1.0, 4.0, /*Position*/  1.0,  0.0, -3.0 );
 
+	// Spheres
 	var k = 2;
 	for (var x = -k; x < k; x++) for (var y = 0.25; y < 2*k; y++) for (var z = -k; z < k; z++) {
 		var sphere = new Model( objects.sphere, normal_prog );
@@ -443,10 +478,13 @@ function drawScene( camera, time ) {
 }
 
 var previousTime = 0;
+var timeStep = 1.0 / 60.0;
 function updateLoop( elapsedTime ) {
 	var deltaTime = (elapsedTime - previousTime) / 1000;
 
 	playerCamera.update( deltaTime );
+	physicsWorld.step(timeStep);
+	playerCamera.updateVisualPosition();
 	drawScene( playerCamera, elapsedTime / 1000 );
 
 	requestAnimationFrame(updateLoop);
@@ -472,12 +510,13 @@ function loadWebGL() {
 	initFramebufferObjects();
 	initShaders();
 	//initBuffers();
+	initCannon();
 	initModels();
 	initPortals();
 
 	gl.enable(gl.DEPTH_TEST);
 
-	playerCamera = new PlayerCamera(vec3.fromValues(0.0, 1.0, 3.0));
+	playerCamera = new PlayerCamera(vec3.fromValues(0.0, 1.8, 3.0));
 
 	requestAnimationFrame(updateLoop);
 }
