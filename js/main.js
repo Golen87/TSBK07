@@ -517,7 +517,7 @@ function loadWebGL() {
 
 	gl.enable(gl.DEPTH_TEST);
 
-	playerCamera = new PlayerCamera(vec3.fromValues(0.0, 1.8, 3.0));
+	playerCamera = new PlayerCamera(vec3.fromValues(0.0, 1.46, 3.0));
 
 	requestAnimationFrame(updateLoop);
 }
