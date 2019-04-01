@@ -16,11 +16,14 @@ function PlayerCamera(position) {
 		mass: 5,
 		type: CANNON.Body.DYNAMIC,
 		shape: new CANNON.Box(new CANNON.Vec3(0.25, 0.85, 0.25)),
-		position: new CANNON.Vec3(position[0] + this.physicsBodyOffset[0], position[1] + this.physicsBodyOffset[1], position[2] + this.physicsBodyOffset[2]),
+		position: new CANNON.Vec3(
+			position[0] + this.physicsBodyOffset[0],
+			position[1] + this.physicsBodyOffset[1],
+			position[2] + this.physicsBodyOffset[2]),
 		linearDamping: 0.99999
 	});
 	physicsWorld.add(this.physicsBody);
-	this.updateVisualPosition();
+	this.postPhysicsUpdate();
 
 
 	this.physicsBody.fixedRotation = true;
@@ -63,8 +66,34 @@ PlayerCamera.prototype.keyboardMove = function( dt ) {
 	return true;
 };
 
-PlayerCamera.prototype.updateVisualPosition = function() {
+PlayerCamera.prototype.postPhysicsUpdate = function(hasTeleported) {
 	positionGlMatrix = vec3.fromValues(this.physicsBody.position.x, this.physicsBody.position.y, this.physicsBody.position.z);
+	// handle teleportation
+	for (var i = portals.length - 1; i >= 0; i--) {
+		vec3.add( vec3.temp, portals[i].position, portals[i].sphereOffset );
+		vec3.sub( vec3.temp, positionGlMatrix, vec3.temp ); // Delta position
+		normalAlignedOffset = vec3.dot( vec3.temp, portals[i].normal )
+		if ( !hasTeleported && normalAlignedOffset >= 0.0 && portals[i].lastNormalAlignedOffset < 0.0 ) {
+			// Crossed portal plane
+			if ( Math.abs(vec3.temp[1]) <= portals[i].sphereRadius
+				&& vec2.length(vec2.fromValues(vec3.temp[0], vec3.temp[2])) <= portals[i].radiusXZ ) {
+				// Inside portal
+
+				// Teleport
+				vec3.transformMat4(positionGlMatrix, positionGlMatrix, portals[i].warpInverse);
+				this.physicsBody.position.x = positionGlMatrix[0];
+				this.physicsBody.position.y = positionGlMatrix[1];
+				this.physicsBody.position.z = positionGlMatrix[2];
+				this.postPhysicsUpdate(true); // Update normalAlignedOffset with new position (without teleporting again)
+			}
+		}
+		if (normalAlignedOffset != 0.0) {
+			portals[i].lastNormalAlignedOffset = normalAlignedOffset;
+		}
+
+	}
+
+	// Update camera position
 	vec3.sub(this.position, positionGlMatrix, this.physicsBodyOffset);
 }
 

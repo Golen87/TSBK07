@@ -10,6 +10,7 @@ function initStaticBoxBody(shape, position, quaternion) {
 		linearDamping: 0.99999
 	});
 	physicsWorld.add(body);
+	return body;
 }
 
 function initCannon(){

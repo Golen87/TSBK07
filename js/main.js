@@ -306,13 +306,14 @@ const PORTAL_WIDTH = 0.8;
 const PORTAL_HEIGHT = 1.9;
 const PORTAL_RADIUS = 0.5 * lengthVec2(PORTAL_HEIGHT, PORTAL_WIDTH);
 function addPortal(position, yRotation) {
-	var portal = new Portal( objects.surface, fbo_prog );
+	var portal = new Portal( objects.surface, fbo_prog, position );
 	portal.setGLSetting( gl.CULL_FACE, true );
 	mat4.translate( portal.modelMatrix, portal.modelMatrix, position);
 	mat4.scale( portal.modelMatrix, portal.modelMatrix, [PORTAL_WIDTH, PORTAL_HEIGHT, PORTAL_WIDTH] );
 	mat4.rotateY( portal.modelMatrix, portal.modelMatrix, yRotation);
 	portal.sphereOffset = vec3.fromValues(0.0, 0.5, 0.0);
 	portal.sphereRadius = PORTAL_RADIUS;
+	portal.radiusXZ = PORTAL_WIDTH * 0.5;
 	portals.push( portal );
 	return portal;
 }
@@ -343,8 +344,12 @@ function connectPortals(portal1, portal2, deltaRotation, rotationAxis, portal1ba
 	vec3.transformMat3( portal2.targetNormal, vec3.fromValues(0.0, 0.0,-1.0), portal1.normalMatrix );
 	vec3.normalize( portal1.targetNormal, portal1.targetNormal );
 	vec3.normalize( portal2.targetNormal, portal2.targetNormal );
+	vec3.copy(portal1.normal, portal2.targetNormal);
+	vec3.copy(portal2.normal, portal1.targetNormal);
 	portal1.targetBack = portal2back;
 	portal2.targetBack = portal1back;
+	portal1.calculateWarp();
+	portal2.calculateWarp();
 }
 
 /*
@@ -402,7 +407,7 @@ function drawFBO(camera, time, portal, portalDepth) {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	var portalCam = camera.clone();
-	portalCam.setPortalView( portal.modelMatrix, portal.targetMatrix, portal.targetNormal );
+	portalCam.setPortalView( portal );
 
 
 	//Draw models
@@ -485,7 +490,7 @@ function updateLoop( elapsedTime ) {
 
 	playerCamera.update( deltaTime );
 	physicsWorld.step(timeStep);
-	playerCamera.updateVisualPosition();
+	playerCamera.postPhysicsUpdate();
 	drawScene( playerCamera, elapsedTime / 1000 );
 
 	requestAnimationFrame(updateLoop);
