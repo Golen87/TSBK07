@@ -1,15 +1,32 @@
 function PlayerCamera(position) {
 	Camera.call( this );
 
-	this.position = vec3.clone(position);
-	this.direction = vec3.create();
+	this.position = vec3.create();
+	this.direction = vec3.fromValues( 0, 0, -1 );
+	this.forward = vec3.fromValues( 0, 0, -1);
+	this.right = vec3.fromValues( 1, 0, 0);
 	this.targetPos = vec3.clone( this.direction );
 	this.up = vec3.fromValues( 0, 1, 0 );
 
-	vec3.set( this.direction, 0, 0, -1 );
-
 	this.pitch = 0.0;
 	this.yaw = 0.0;
+
+	this.physicsBodyOffset = vec3.fromValues(0.0, -0.6, 0.0);
+	this.physicsBody = new CANNON.Body({
+		mass: 5,
+		type: CANNON.Body.DYNAMIC,
+		shape: new CANNON.Box(new CANNON.Vec3(0.25, 0.85, 0.25)),
+		position: new CANNON.Vec3(
+			position[0] + this.physicsBodyOffset[0],
+			position[1] + this.physicsBodyOffset[1],
+			position[2] + this.physicsBodyOffset[2]),
+		linearDamping: 0.99999
+	});
+	physicsWorld.add(this.physicsBody);
+	this.postPhysicsUpdate();
+
+
+	this.physicsBody.fixedRotation = true;
 
 	this.moveSpeed = 4.0;
 	this.rotateSpeed = 0.003;
@@ -23,34 +40,63 @@ PlayerCamera.prototype.updateView = function() {
 }
 
 PlayerCamera.prototype.update = function( dt ) {
-	if ( this.keyboardMove( dt ) ) {
-		// Update view matrix
-		this.updateView();
-	}
+	this.keyboardMove( dt );
+	this.updateView();
 }
 
 PlayerCamera.prototype.keyboardMove = function( dt ) {
+	var movement = vec3.create();
 	if ( Key.isDown(Key.UP) || Key.isDown(Key.W) ) {
-		vec3.scale( vec3.temp, this.direction, this.moveSpeed * dt );
-		vec3.add( this.position, this.position, vec3.temp );
-	}
-	if ( Key.isDown(Key.LEFT) || Key.isDown(Key.A) ) {
-		vec3.scale( vec3.temp, this.direction, this.moveSpeed * dt );
-		vec3.cross( vec3.temp, vec3.temp, this.up );
-		vec3.sub( this.position, this.position, vec3.temp );
+		vec3.add( movement, movement, this.forward );
 	}
 	if ( Key.isDown(Key.DOWN) || Key.isDown(Key.S) ) {
-		vec3.scale( vec3.temp, this.direction, this.moveSpeed * dt );
-		vec3.sub( this.position, this.position, vec3.temp );
+		vec3.sub( movement, movement, this.forward );
 	}
+
 	if ( Key.isDown(Key.RIGHT) || Key.isDown(Key.D) ) {
-		vec3.scale( vec3.temp, this.direction, this.moveSpeed * dt );
-		vec3.cross( vec3.temp, vec3.temp, this.up );
-		vec3.add( this.position, this.position, vec3.temp );
+		vec3.add( movement, movement, this.right );
 	}
+	if ( Key.isDown(Key.LEFT) || Key.isDown(Key.A) ) {
+		vec3.sub( movement, movement, this.right);
+	}
+
+	vec3.scale( movement, movement, this.moveSpeed );
+	this.physicsBody.velocity.set(movement[0], movement[1], movement[2]);
 
 	return true;
 };
+
+PlayerCamera.prototype.postPhysicsUpdate = function(hasTeleported) {
+	positionGlMatrix = vec3.fromValues(this.physicsBody.position.x, this.physicsBody.position.y, this.physicsBody.position.z);
+	// handle teleportation
+	for (var i = portals.length - 1; i >= 0; i--) {
+		vec3.add( vec3.temp, portals[i].position, portals[i].sphereOffset );
+		vec3.sub( vec3.temp, positionGlMatrix, vec3.temp ); // Delta position
+		normalAlignedOffset = vec3.dot( vec3.temp, portals[i].normal )
+		if ( !hasTeleported && normalAlignedOffset >= 0.0 && portals[i].lastNormalAlignedOffset < 0.0 ) {
+			// Crossed portal plane
+			if ( Math.abs(vec3.temp[1]) <= portals[i].sphereRadius
+				&& vec2.length(vec2.fromValues(vec3.temp[0], vec3.temp[2])) <= portals[i].radiusXZ ) {
+				// Inside portal
+
+				// Teleport
+				vec3.transformMat4(positionGlMatrix, positionGlMatrix, portals[i].warpInverse);
+				this.physicsBody.position.x = positionGlMatrix[0];
+				this.physicsBody.position.y = positionGlMatrix[1];
+				this.physicsBody.position.z = positionGlMatrix[2];
+				this.postPhysicsUpdate(true); // Update normalAlignedOffset with new position (without teleporting again)
+			}
+		}
+		if (normalAlignedOffset != 0.0) {
+			portals[i].lastNormalAlignedOffset = normalAlignedOffset;
+		}
+
+	}
+
+	// Update camera position
+	vec3.sub(this.position, positionGlMatrix, this.physicsBodyOffset);
+}
+
 
 PlayerCamera.prototype.mouseMove = function( dx, dy ) {
 	const fullRotation = 2 * Math.PI;
@@ -63,6 +109,10 @@ PlayerCamera.prototype.mouseMove = function( dx, dy ) {
 	this.direction = vec3.fromValues(0, 0, -1);
 	vec3.rotateX(this.direction, this.direction, [0,0,0], this.pitch);
 	vec3.rotateY(this.direction, this.direction, [0,0,0], this.yaw);
+
+	this.forward = vec3.fromValues(this.direction[0], 0, this.direction[2]);
+	vec3.normalize(this.forward, this.forward);
+	vec3.cross( this.right, this.direction, this.up );
 };
 
 

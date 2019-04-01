@@ -98,7 +98,7 @@ function drawFBOScene(camera, time, portal, portalDepth, depthKey) {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	var portalCam = camera.clone();
-	portalCam.setPortalView( portal.modelMatrix, portal.targetMatrix, portal.targetNormal );
+	portalCam.setPortalView( portal );
 
 
 	//Draw models

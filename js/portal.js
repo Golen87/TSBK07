@@ -1,7 +1,14 @@
-function Portal(meshStr, shader) {
+function Portal(meshStr, shader, position) {
 	Model.call( this, meshStr, shader );
 
-	this.position = vec3.create();
+	this.position = position;
+	this.normal = vec3.create();
+	this.radiusXZ = 0.0;
+
+	this.warp = mat4.create();
+	this.warpInverse = mat4.create();
+
+	this.lastNormalAlignedOffset = vec3.create();
 
 	this.targetMatrix = mat4.create();
 	this.targetNormal = vec3.create();
@@ -58,10 +65,7 @@ Portal.prototype.checkOcclusionCulling = function( parent, camera ) {
 	// Query is initiated here by drawing the bounding box of the sphere
 	if (!this.queries[parent].inProgress) {
 		gl.beginQuery(gl.ANY_SAMPLES_PASSED_CONSERVATIVE, this.queries[parent]);
-
 		this.drawOcclusion( camera );
-
-		this.drawQuery( camera );
 		gl.endQuery(gl.ANY_SAMPLES_PASSED_CONSERVATIVE);
 		this.queries[parent].inProgress = true;
 	}
@@ -92,5 +96,14 @@ Portal.prototype.drawOcclusion = function( camera ) {
 	gl.drawElements(gl.TRIANGLES, this.mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
+Portal.prototype.calculateWarp = function() {
+	var pos = vec3.create();
+	mat4.getTranslation( pos, this.modelMatrix );
+
+	var endInverse = mat4.create();
+	mat4.invert( endInverse, this.targetMatrix );
+	mat4.multiply( this.warp, this.modelMatrix, endInverse );
+	mat4.invert( this.warpInverse, this.warp, )
+}
 
 extend( Model, Portal );

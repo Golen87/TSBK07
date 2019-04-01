@@ -40,21 +40,13 @@ Camera.prototype.onWindowResize = function() {
 
 /* Portal */
 
-Camera.prototype.setPortalView = function( startMatrix, endMatrix, normal ) {
+Camera.prototype.setPortalView = function( portal, normal ) {
 	var pos = vec3.create();
-	mat4.getTranslation( pos, startMatrix );
+	mat4.getTranslation( pos, portal.modelMatrix );
 
-	//Extra clipping to prevent artifacts
-	//var extra_clip = Math.min(/*GH_ENGINE->NearestPortalDist() * */0.5, 0.1);
+	this.clipOblique( /*pos - normal*extra_clip*/vec3.fromValues( pos[0]+0.1*portal.targetNormal[0], pos[1]+0.1*portal.targetNormal[1], pos[2]+0.1*portal.targetNormal[2] ), portal.targetNormal );
 
-	var endInverse = mat4.create();
-	mat4.invert( endInverse, endMatrix );
-	var delta = mat4.create();
-	mat4.multiply( delta, startMatrix, endInverse );
-
-	this.clipOblique( /*pos - normal*extra_clip*/vec3.fromValues( pos[0]+0.1*normal[0], pos[1]+0.1*normal[1], pos[2]+0.1*normal[2] ), normal );
-
-	mat4.multiply( this.viewMatrix, this.viewMatrix, delta );
+	mat4.multiply( this.viewMatrix, this.viewMatrix, portal.warp);
 };
 
 // Clip the projection matrix to the portal surface, removing everything behind it
