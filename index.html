@@ -13,7 +13,10 @@
 
 	<body>
 		<canvas id="canvas" width="800" height="600"></canvas>
-		<span id="fps" style="position: absolute; left: 0px; top: 0px; font-family: monospace; font-size: 3em; color: white;">fps</span>
+		<span id="fps" style="position: absolute; left: 0em; top: 0em; font-family: monospace; font-size: 3em; color: white;">fps</span>
+		<span id="debug-count" style="position: absolute; left: 0em; top: 2em; font-family: monospace; font-size: 3em; color: white;">count: 0</span>
+		<span id="debug-frustum" style="position: absolute; left: 0em; top: 3em; font-family: monospace; font-size: 3em; color: white;">frust: 0</span>
+		<span id="debug-occlusion" style="position: absolute; left: 0em; top: 4em; font-family: monospace; font-size: 3em; color: white;">occlu: 0</span>
 	</body>
 
 	<script src="js/utils.js"></script>
@@ -21,6 +24,7 @@
 	<script src="js/texture.js"></script>
 	<script src="js/shader.js"></script>
 	<script src="js/model.js"></script>
+	<script src="js/fbo.js"></script>
 	<script src="js/portal.js"></script>
 	<script src="js/input.js"></script>
 	<script src="js/camera.js"></script>

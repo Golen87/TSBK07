@@ -16,16 +16,15 @@ var playerCamera;
 var models = [];
 var portals = [];
 
-var fbos = [];
-const FBO_WIDTH = 256*8;
-const FBO_HEIGHT = 256*8;
-
 /* Number of rendered levels of portals
  * 0 -- No portals
  * 1 -- Single level of portals
  * 2 -- Two levels of portals
  */
-const MAX_PORTAL_DEPTH = 2;
+const MAX_PORTAL_DEPTH = 4;
+
+var debugFrustumCount = 0;
+var debugOcclusionCount = 0;
 
 
 function initShaders() {
@@ -114,69 +113,6 @@ function initBuffers() {
 	triangleVertexColorBuffer.numItems = 3;
 }
 */
-
-function initFramebufferObjects() {
-	for (var i = 0; i < MAX_PORTAL_DEPTH; ++i) {
-		var framebuffer, texture, depthBuffer;
-
-		// Define the error handling function
-		var error = function() {
-			if (framebuffer) gl.deleteFramebuffer(framebuffer);
-			if (texture) gl.deleteTexture(texture);
-			if (depthBuffer) gl.deleteRenderbuffer(depthBuffer);
-			return null;
-		}
-
-		// Create a frame buffer object (FBO)
-		framebuffer = gl.createFramebuffer();
-		if (!framebuffer) {
-			console.log('Failed to create frame buffer object');
-			return error();
-		}
-
-		// Create a texture object and set its size and parameters
-		texture = gl.createTexture(); // Create a texture object
-		if (!texture) {
-			console.log('Failed to create texture object');
-			return error();
-		}
-		gl.bindTexture(gl.TEXTURE_2D, texture); // Bind the object to target
-		//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-		gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
-		gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
-		gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST );
-		gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
-		gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, FBO_WIDTH, FBO_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null );
-		framebuffer.texture = texture; // Store the texture object
-
-		// Create a renderbuffer object and set its size and parameters
-		depthBuffer = gl.createRenderbuffer(); // Create a renderbuffer object
-		if (!depthBuffer) {
-			console.log('Failed to create renderbuffer object');
-			return error();
-		}
-		gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer); // Bind the object to target
-		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, FBO_WIDTH, FBO_HEIGHT);
-
-		// Attach the texture and the renderbuffer object to the FBO
-		gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
-
-		// Check if FBO is configured correctly
-		var e = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-		if (gl.FRAMEBUFFER_COMPLETE !== e) {
-			console.log('Frame buffer object is incomplete: ' + e.toString());
-			return error();
-		}
-
-		// Unbind the buffer object
-		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-		gl.bindTexture(gl.TEXTURE_2D, null);
-
-		fbos.push(framebuffer);
-	}
-}
 
 function initModels() {
 	var ground = new Model( objects.ground, texture_prog );
@@ -278,6 +214,7 @@ function addPortal(position, yRotation) {
 	mat4.rotateY( portal.modelMatrix, portal.modelMatrix, yRotation);
 	portal.sphereOffset = vec3.fromValues(0.0, 0.5, 0.0);
 	portal.sphereRadius = PORTAL_RADIUS;
+	portal.id = portals.length;
 	portals.push( portal );
 	return portal;
 }
@@ -348,62 +285,6 @@ function drawTriangle(camera, time) {
 }
 */
 
-function bindFBO(fbo) {
-	gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-	gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fbo.texture, 0)
-	gl.viewport(0, 0, FBO_WIDTH, FBO_HEIGHT);
-}
-
-function drawFBO(camera, time, portal, portalDepth) {
-	if (portalDepth >= MAX_PORTAL_DEPTH) {
-		return;
-	}
-
-	portal.setFBO(fbos[portalDepth]);
-	bindFBO(fbos[portalDepth]);
-
-	gl.viewport(0, 0, FBO_WIDTH, FBO_HEIGHT);
-	gl.clearColor(1.0, 0.0, 0.0, 1.0);
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-	var portalCam = camera.clone();
-	portalCam.setPortalView( portal.modelMatrix, portal.targetMatrix, portal.targetNormal );
-
-
-	//Draw models
-	//drawTriangle(portalCam, time);
-	for (var i = models.length - 1; i >= 0; i--) {
-		models[i].draw( portalCam );
-	}
-
-	//Draw portals
-	for (var i = portals.length - 1; i >= 0; i--) {
-		if (portals[i] != portal &&
-			portals[i] != portal.targetBack &&
-			portals[i].isVisible( portalCam )) {
-
-			if (portalDepth < MAX_PORTAL_DEPTH - 1) {
-
-				// Draw to inner portal's FBO
-				drawFBO( portalCam, time, portals[i], portalDepth + 1);
-				portals[i].setFBO(fbos[portalDepth + 1]);
-
-				// Draw to this portal's FBO
-				bindFBO(fbos[portalDepth]);
-				portals[i].shader = fbo_prog;
-				portals[i].draw( portalCam );
-			}
-			else {
-				// Dummy shading
-				gl.viewport(0, 0, FBO_WIDTH, FBO_HEIGHT);
-				portals[i].drawColor( portalCam, [1.0, 0.0, 1.0, 1.0] );
-			}
-		}
-	}
-
-	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-}
-
 function drawScene( camera, time ) {
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -422,20 +303,31 @@ function drawScene( camera, time ) {
 		var distB = b.distanceFromCamera( camera );
 		return distA < distB ? 1 : -1;
 	});
+
+	debugFrustumCount = 0;
+	debugOcclusionCount = 0;
+
 	//Draw portals
 	for (var i = portals.length - 1; i >= 0; i--) {
 		if (MAX_PORTAL_DEPTH > 0) {
 			// FBO shading
 			if (portals[i].isVisible( camera )) {
-				drawFBO( camera, time, portals[i], 0 );
-				gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-				portals[i].shader = fbo_prog;
-				portals[i].draw( camera );
+				debugFrustumCount++;
+
+				var depthKey = "";
+				if ( portals[i].checkOcclusionCulling( depthKey, camera ) ) {
+					debugOcclusionCount += 1;
+
+					drawFBOScene( camera, time, portals[i], 0, depthKey );
+					gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+					portals[i].shader = fbo_prog;
+					portals[i].draw( camera );
+				}
 			}
 		}
 		else {
 			// Dummy shading
-			portals[i].drawColor( portalCam, [1.0, 0.0, 1.0, 1.0] );
+			portals[i].drawColor( camera, [1.0, 0.0, 1.0, 1.0] );
 		}
 	}
 }
@@ -446,6 +338,10 @@ function updateFPS( deltaTime ) {
 	deltas.shift();
 	var sum = deltas.reduce((partial_sum, a) => partial_sum + a);
 	$("#fps").html(Math.round(1/(sum/deltas.length)));
+
+	$("#debug-count").html("count: " + portals.length);
+	$("#debug-frustum").html("frust: " + debugFrustumCount);
+	$("#debug-occlusion").html("occlu: " + debugOcclusionCount);
 }
 
 var previousTime = 0;
@@ -464,7 +360,7 @@ function updateLoop( elapsedTime ) {
 function initGL() {
 	try {
 		var canvas = document.getElementById("canvas");
-		gl = canvas.getContext("webgl");
+		gl = canvas.getContext("webgl2");
 		gl.viewportWidth = canvas.width = window.innerWidth;
 		gl.viewportHeight = canvas.height = window.innerHeight;
 	} catch (e) {
@@ -476,7 +372,7 @@ function initGL() {
 
 function loadWebGL() {
 	initGL();
-	initFramebufferObjects();
+	initFBO();
 	initShaders();
 	//initBuffers();
 	initModels();
