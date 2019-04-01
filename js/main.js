@@ -416,6 +416,12 @@ function drawScene( camera, time ) {
 		models[i].draw( camera );
 	}
 
+	// Sort portals
+	portals.sort(function(a, b) {
+		var distA = a.distanceFromCamera( camera );
+		var distB = b.distanceFromCamera( camera );
+		return distA < distB ? 1 : -1;
+	});
 	//Draw portals
 	for (var i = portals.length - 1; i >= 0; i--) {
 		if (MAX_PORTAL_DEPTH > 0) {
