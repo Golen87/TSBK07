@@ -1,6 +1,6 @@
 var fbos = [];
-const FBO_WIDTH = 256*8;
-const FBO_HEIGHT = 256*8;
+const FBO_WIDTH = 256*4;
+const FBO_HEIGHT = 256*4;
 
 var maskFBO;
 const MASK_WIDTH = 1;
