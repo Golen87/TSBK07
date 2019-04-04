@@ -34,7 +34,7 @@ window.addEventListener('keydown', function(event) { Key.onKeydown(event); }, fa
 
 // Add event for window resize
 window.addEventListener('resize', function() {
-	gl.viewportWidth = canvas.width  = window.innerWidth;
+	gl.viewportWidth = canvas.width = window.innerWidth;
 	gl.viewportHeight = canvas.height = window.innerHeight;
 	playerCamera.onWindowResize();
 }, false);
