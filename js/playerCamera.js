@@ -28,7 +28,7 @@ function PlayerCamera(position) {
 
 	this.physicsBody.fixedRotation = true;
 
-	this.moveSpeed = 4.0;
+	this.moveSpeed = 2.0;
 	this.rotateSpeed = 0.003;
 
 	this.updateView();
@@ -68,12 +68,14 @@ PlayerCamera.prototype.keyboardMove = function( dt ) {
 
 PlayerCamera.prototype.postPhysicsUpdate = function(hasTeleported) {
 	positionGlMatrix = vec3.fromValues(this.physicsBody.position.x, this.physicsBody.position.y, this.physicsBody.position.z);
+	var nearLimit = this.NEAR;
+
 	// handle teleportation
 	for (var i = portals.length - 1; i >= 0; i--) {
 		vec3.add( vec3.temp, portals[i].position, portals[i].sphereOffset );
 		vec3.sub( vec3.temp, positionGlMatrix, vec3.temp ); // Delta position
 		normalAlignedOffset = vec3.dot( vec3.temp, portals[i].normal )
-		if ( !hasTeleported && normalAlignedOffset >= 0.0 && portals[i].lastNormalAlignedOffset < 0.0 ) {
+		if ( !hasTeleported && normalAlignedOffset >= -nearLimit && portals[i].lastNormalAlignedOffset < -nearLimit ) {
 			// Crossed portal plane
 			if ( Math.abs(vec3.temp[1]) <= portals[i].sphereRadius
 				&& vec2.length(vec2.fromValues(vec3.temp[0], vec3.temp[2])) <= portals[i].radiusXZ ) {
@@ -81,16 +83,15 @@ PlayerCamera.prototype.postPhysicsUpdate = function(hasTeleported) {
 
 				// Teleport
 				vec3.transformMat4(positionGlMatrix, positionGlMatrix, portals[i].warpInverse);
+				vec3.scale(vec3.temp, portals[i].normal, 2.0 * nearLimit);
+				vec3.add(positionGlMatrix, positionGlMatrix, vec3.temp);
 				this.physicsBody.position.x = positionGlMatrix[0];
 				this.physicsBody.position.y = positionGlMatrix[1];
 				this.physicsBody.position.z = positionGlMatrix[2];
 				this.postPhysicsUpdate(true); // Update normalAlignedOffset with new position (without teleporting again)
 			}
 		}
-		if (normalAlignedOffset != 0.0) {
-			portals[i].lastNormalAlignedOffset = normalAlignedOffset;
-		}
-
+		portals[i].lastNormalAlignedOffset = normalAlignedOffset;
 	}
 
 	// Update camera position
