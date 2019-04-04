@@ -2,8 +2,17 @@ function Camera() {
 	this.viewMatrix = mat4.create();
 	this.projMatrix = mat4.create();
 
-	this.NEAR = 0.1;
+	this.NEAR = 0.001;
 	this.FAR = 100.0;
+
+	this.frustumPlanes = [
+		vec4.create(), // left
+		vec4.create(), // right
+		vec4.create(), // bottom
+		vec4.create(), // top
+		vec4.create(), // near
+		vec4.create(), // far
+	];
 
 	this.updatePerspective();
 }
@@ -92,22 +101,15 @@ Camera.prototype.clipOblique = function( pos, normal ) {
 /* Frustum culling */
 
 Camera.prototype.extractPlanesFromProjmat = function() {
-	this.left = vec4.create();
-	this.right = vec4.create();
-	this.bottom = vec4.create();
-	this.top = vec4.create();
-	this.near = vec4.create();
-	this.far = vec4.create();
-
 	var mat = this.projMatrix;
 
 	for (i = 0; i < 4; i++) {
-		this.left[i]   = mat[4*i + 3] + mat[4*i + 0];
-		this.right[i]  = mat[4*i + 3] - mat[4*i + 0]; 
-		this.bottom[i] = mat[4*i + 3] + mat[4*i + 1];
-		this.top[i]    = mat[4*i + 3] - mat[4*i + 1];
-		this.near[i]   = mat[4*i + 3] + mat[4*i + 2];
-		this.far[i]    = mat[4*i + 3] - mat[4*i + 2];
+		this.frustumPlanes[0][i] = mat[4*i + 3] + mat[4*i + 0]; // left
+		this.frustumPlanes[1][i] = mat[4*i + 3] - mat[4*i + 0]; // right
+		this.frustumPlanes[2][i] = mat[4*i + 3] + mat[4*i + 1]; // bottom
+		this.frustumPlanes[3][i] = mat[4*i + 3] - mat[4*i + 1]; // top
+		this.frustumPlanes[4][i] = mat[4*i + 3] + mat[4*i + 2]; // near
+		this.frustumPlanes[5][i] = mat[4*i + 3] - mat[4*i + 2]; // far
 	}
 }
 
@@ -124,9 +126,8 @@ Camera.prototype.pointToPlaneDistance = function( plane, point ) {
 }
 
 Camera.prototype.frustumCulling = function( point, radius=0 ) {
-	var planes = [this.left, this.right, this.bottom, this.top, this.near, this.far];
-	for (var i = 0; i < planes.length; i++) {
-		var D = this.pointToPlaneDistance( planes[i], point );
+	for (var i = 0; i < this.frustumPlanes.length; i++) {
+		var D = this.pointToPlaneDistance( this.frustumPlanes[i], point );
 		if ( D < -radius ) {
 			return false;
 		}
