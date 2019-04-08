@@ -182,7 +182,7 @@ function initModels() {
 
 	// Spheres
 	var k = 2;
-	for (var x = -k; x < k; x++) for (var y = 0.25; y < 2*k; y++) for (var z = -k; z < k; z++) {
+	for (var x = -k-0.25; x < k; x++) for (var y = 0.25; y < 2*k; y++) for (var z = -k; z < k; z++) {
 		var sphere = new Model( objects.sphere, normal_prog );
 		sphere.setGLSetting( gl.CULL_FACE, true );
 		mat4.translate( sphere.modelMatrix, sphere.modelMatrix, [3*x, 3*y, 3*z] );
@@ -358,7 +358,7 @@ function drawScene( camera, time ) {
 				debugFrustumCount++;
 
 				var depthKey = "";
-				if ( portals[i].checkOcclusionCulling( depthKey, camera ) ) {
+				if ( portals[i].checkOcclusionCulling( depthKey, camera ) || playerCamera.justTeleported ) {
 					debugOcclusionCount += 1;
 
 					drawFBOScene( camera, time, portals[i], 0, depthKey );

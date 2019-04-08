@@ -17,29 +17,18 @@ function Portal(meshStr, shader, position) {
 	this.distanceFromCamera = 0.0;
 
 	this.queries = {};
+	this.createQuery("");
 }
 
 Portal.prototype.updateDistanceFromCamera = function( camera ) {
 	mat4.getTranslation( this.position, this.modelMatrix );
-	this.distanceFromCamera = vec3.distance( camera.getPosition(), this.position );
+	var camPos = camera.getPosition();
 
-	/*
-	//Get world delta
-	const Matrix4 localToWorld = LocalToWorld();
-	const Vector3 v = pt - localToWorld.Translation();
+	vec3.subtract( vec3.temp, camPos, this.position ); // Camera-Portal vector
+	vec3.scale( vec3.temp, this.normal, vec3.dot( this.normal, vec3.temp ) ); // Scalar distance of point to plane
+	vec3.sub( vec3.temp, camPos, vec3.temp ); // Point on plane
 
-	//Get axes
-	const Vector3 x = localToWorld.XAxis();
-	const Vector3 y = localToWorld.YAxis();
-
-	//Find closest point
-	const float px = GH_CLAMP(v.Dot(x) / x.MagSq(), -1.0f, 1.0f);
-	const float py = GH_CLAMP(v.Dot(y) / y.MagSq(), -1.0f, 1.0f);
-	const Vector3 closest = x*px + y*py;
-
-	//Calculate distance to closest point
-	return (v - closest).Mag();
-	*/
+	this.distanceFromCamera = vec3.distance( camPos, vec3.temp );
 }
 
 
@@ -47,15 +36,15 @@ Portal.prototype.isVisible = function( camera ) {
 	var normal = vec3.fromValues( 0.0, 0.0, 1.0 );
 	vec3.transformMat3( normal, normal, this.normalMatrix );
 
-	var pos = vec3.create();
-	mat4.getTranslation( pos, this.modelMatrix );
-
 	var camPos = camera.getPosition();
 
-	var relPos = vec3.create();
-	vec3.sub( relPos, camPos, pos );
+	// Portal position
+	mat4.getTranslation( vec3.temp, this.modelMatrix );
+	// Portal to camera vector
+	vec3.sub( vec3.temp, camPos, vec3.temp );
 
-	if ( vec3.dot( relPos, normal ) < 0 ) {
+	// Check if portal is facing camera
+	if ( vec3.dot( vec3.temp, normal ) < 0 ) {
 		return false;
 	}
 
@@ -66,11 +55,15 @@ Portal.prototype.isVisible = function( camera ) {
 	return true;
 }
 
+Portal.prototype.createQuery = function( parent ) {
+	this.queries[parent] = gl.createQuery();
+	this.queries[parent].inProgress = false;
+	this.queries[parent].occluded = true;
+}
+
 Portal.prototype.checkOcclusionCulling = function( parent, camera ) {
 	if ( !this.queries[parent] ) {
-		this.queries[parent] = gl.createQuery();
-		this.queries[parent].inProgress = false;
-		this.queries[parent].occluded = true;
+		this.createQuery(parent);
 	}
 
 	gl.colorMask(false, false, false, false);
@@ -117,13 +110,10 @@ Portal.prototype.drawOcclusion = function( camera ) {
 }
 
 Portal.prototype.calculateWarp = function() {
-	var pos = vec3.create();
-	mat4.getTranslation( pos, this.modelMatrix );
-
 	var endInverse = mat4.create();
 	mat4.invert( endInverse, this.targetMatrix );
 	mat4.multiply( this.warp, this.modelMatrix, endInverse );
-	mat4.invert( this.warpInverse, this.warp, )
+	mat4.invert( this.warpInverse, this.warp );
 }
 
 extend( Model, Portal );
