@@ -9,3 +9,12 @@ body {
 canvas {
 	margin: auto;
 }
+
+.debug {
+	position: absolute;
+	left: 0em;
+	top: 0em;
+	font-family: monospace;
+	font-size: 3em;
+	color: white;
+}

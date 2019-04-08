@@ -380,11 +380,10 @@ function updateFPS( deltaTime ) {
 	deltas.push(deltaTime);
 	deltas.shift();
 	var sum = deltas.reduce((partial_sum, a) => partial_sum + a);
-	$("#fps").html(Math.round(1/(sum/deltas.length)));
-
-	$("#debug-count").html("count: " + portals.length);
-	$("#debug-frustum").html("frust: " + debugFrustumCount);
-	$("#debug-occlusion").html("occlu: " + debugOcclusionCount);
+	$("#debug-0").html(Math.round(1/(sum/deltas.length)));
+	$("#debug-2").html("count: " + portals.length);
+	$("#debug-3").html("frust: " + debugFrustumCount);
+	$("#debug-4").html("occlu: " + debugOcclusionCount);
 }
 
 var previousTime = 0;
