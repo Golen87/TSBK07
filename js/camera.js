@@ -53,7 +53,12 @@ Camera.prototype.setPortalView = function( portal, normal ) {
 	var pos = vec3.create();
 	mat4.getTranslation( pos, portal.modelMatrix );
 
-	this.clipOblique( /*pos - normal*extra_clip*/vec3.fromValues( pos[0]+0.1*portal.targetNormal[0], pos[1]+0.1*portal.targetNormal[1], pos[2]+0.1*portal.targetNormal[2] ), portal.targetNormal );
+	var nearest_portal_dist = portals[portals.length-1].distanceFromCamera;
+	var extra_clip = Math.min( nearest_portal_dist * 0.5, 0.001 );
+
+	this.clipOblique( vec3.fromValues( pos[0]+extra_clip * portal.targetNormal[0], pos[1]+extra_clip * portal.targetNormal[1], pos[2]+extra_clip * portal.targetNormal[2] ), portal.targetNormal );
+	//portalCam.ClipOblique(pos - normal*extra_clip, -normal);
+
 
 	mat4.multiply( this.viewMatrix, this.viewMatrix, portal.warp);
 };

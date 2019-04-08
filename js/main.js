@@ -338,9 +338,12 @@ function drawScene( camera, time ) {
 	}
 
 	// Sort portals
+	for (var i = portals.length - 1; i >= 0; i--) {
+		portals[i].updateDistanceFromCamera( camera );
+	}
 	portals.sort(function(a, b) {
-		var distA = a.distanceFromCamera( camera );
-		var distB = b.distanceFromCamera( camera );
+		var distA = a.distanceFromCamera;
+		var distB = b.distanceFromCamera;
 		return distA < distB ? 1 : -1;
 	});
 

@@ -14,12 +14,32 @@ function Portal(meshStr, shader, position) {
 	this.targetNormal = vec3.create();
 	this.targetBack = null;
 
+	this.distanceFromCamera = 0.0;
+
 	this.queries = {};
 }
 
-Portal.prototype.distanceFromCamera = function( camera ) {
+Portal.prototype.updateDistanceFromCamera = function( camera ) {
 	mat4.getTranslation( this.position, this.modelMatrix );
-	return vec3.distance( camera.getPosition(), this.position );
+	this.distanceFromCamera = vec3.distance( camera.getPosition(), this.position );
+
+	/*
+	//Get world delta
+	const Matrix4 localToWorld = LocalToWorld();
+	const Vector3 v = pt - localToWorld.Translation();
+
+	//Get axes
+	const Vector3 x = localToWorld.XAxis();
+	const Vector3 y = localToWorld.YAxis();
+
+	//Find closest point
+	const float px = GH_CLAMP(v.Dot(x) / x.MagSq(), -1.0f, 1.0f);
+	const float py = GH_CLAMP(v.Dot(y) / y.MagSq(), -1.0f, 1.0f);
+	const Vector3 closest = x*px + y*py;
+
+	//Calculate distance to closest point
+	return (v - closest).Mag();
+	*/
 }
 
 
