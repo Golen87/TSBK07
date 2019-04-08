@@ -13,6 +13,10 @@ function initStaticBoxBody(shape, position, quaternion) {
 	return body;
 }
 
+function clearPhysics() {
+	physicsWorld.bodies = [];
+}
+
 function initCannon(){
     // Setup our world
 	physicsWorld = new CANNON.World();

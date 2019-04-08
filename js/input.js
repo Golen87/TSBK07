@@ -14,6 +14,17 @@ var Key = {
 	RIGHT: 39,	D: 68,
 	DOWN: 40,	S: 83,
 
+	NUMROW1: 49,
+	NUMROW2: 50,
+	NUMROW3: 51,
+	NUMROW4: 52,
+	NUMROW5: 53,
+	NUMROW6: 54,
+	NUMROW7: 55,
+	NUMROW8: 56,
+	NUMROW9: 57,
+	NUMROW0: 48,
+
 	isDown: function(keyCode) {
 		return this._pressed[keyCode];
 	},
