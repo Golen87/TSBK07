@@ -1,4 +1,4 @@
-function PlayerCamera(position) {
+function PlayerCamera(position, rotationY) {
 	Camera.call( this );
 
 	this.position = vec3.create();
@@ -9,7 +9,7 @@ function PlayerCamera(position) {
 	this.up = vec3.fromValues( 0, 1, 0 );
 
 	this.pitch = 0.0;
-	this.yaw = 0.0;
+	this.yaw = rotationY;
 
 	this.physicsBodyOffset = vec3.fromValues(0.0, -0.6, 0.0);
 	this.physicsBody = new CANNON.Body({
@@ -32,6 +32,7 @@ function PlayerCamera(position) {
 	this.moveSpeed = 2.0;
 	this.rotateSpeed = 0.003;
 
+	this.mouseMove(0.0, 0.0);
 	this.updateView();
 }
 

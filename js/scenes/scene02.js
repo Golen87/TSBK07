@@ -53,6 +53,5 @@ var scene02 = new Scene(function() {
 
 
 	// Player
-	playerCamera = new PlayerCamera(vec3.fromValues(0.0, 1.46, -9.0));
-	playerCamera.yaw = Math.PI;
+	playerCamera = new PlayerCamera(vec3.fromValues(0.0, 1.46, -9.0), Math.PI);
 });

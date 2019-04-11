@@ -97,5 +97,5 @@ var scene01 = new Scene(function() {
 
 
 	// Player
-	playerCamera = new PlayerCamera(vec3.fromValues(0.0, 1.46, 3.0));
+	playerCamera = new PlayerCamera(vec3.fromValues(0.0, 1.46, 3.0), 0.0);
 });
