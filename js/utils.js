@@ -30,6 +30,14 @@ function extend(base, sub) {
 	});
 }
 
+function glVec3FromCannon(cannonVec3) {
+	return vec3.fromValues(cannonVec3.x, cannonVec3.y, cannonVec3.z);
+}
+
+function cannonQuatFromGl(glQuat) {
+	return new CANNON.Quaternion(glQuat[0], glQuat[1], glQuat[2], glQuat[3]);
+}
+
 function lengthVec2(x, y) {
 	return Math.sqrt(x*x + y*y);
 }

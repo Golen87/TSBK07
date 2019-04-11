@@ -68,13 +68,13 @@ PlayerCamera.prototype.keyboardMove = function( dt ) {
 };
 
 PlayerCamera.prototype.postPhysicsUpdate = function() {
-	positionGlMatrix = vec3.fromValues(this.physicsBody.position.x, this.physicsBody.position.y, this.physicsBody.position.z);
+	var positionGL = glVec3FromCannon(this.physicsBody.position);
 	var nearLimit = this.NEAR;
 
 	// Handle teleportation
 	for (var i = portals.length - 1; i >= 0; i--) {
 		vec3.add( vec3.temp, portals[i].position, portals[i].sphereOffset );
-		vec3.sub( vec3.temp, positionGlMatrix, vec3.temp ); // Delta position
+		vec3.sub( vec3.temp, positionGL, vec3.temp ); // Delta position
 		normalAlignedOffset = vec3.dot( vec3.temp, portals[i].normal )
 		if ( !this.justTeleported && normalAlignedOffset >= -nearLimit && portals[i].lastNormalAlignedOffset < -nearLimit ) {
 			// Crossed portal plane
@@ -82,13 +82,23 @@ PlayerCamera.prototype.postPhysicsUpdate = function() {
 				&& vec2.length(vec2.fromValues(vec3.temp[0], vec3.temp[2])) <= portals[i].radiusXZ ) {
 				// Inside portal
 
-				// Teleport
-				vec3.transformMat4(positionGlMatrix, positionGlMatrix, portals[i].warpInverse);
+				// Teleport -- position
+				vec3.transformMat4(positionGL, positionGL, portals[i].warpInverse);
 				vec3.scale(vec3.temp, portals[i].normal, 2.0 * nearLimit);
-				vec3.add(positionGlMatrix, positionGlMatrix, vec3.temp);
-				this.physicsBody.position.x = positionGlMatrix[0];
-				this.physicsBody.position.y = positionGlMatrix[1];
-				this.physicsBody.position.z = positionGlMatrix[2];
+				vec3.add(positionGL, positionGL, vec3.temp);
+				this.physicsBody.position.x = positionGL[0];
+				this.physicsBody.position.y = positionGL[1];
+				this.physicsBody.position.z = positionGL[2];
+
+				// Rotatation -- rotation
+				var warpRotationGL = quat.create();
+				mat4.getRotation(warpRotationGL, portals[i].warpInverse);
+				var rotation = cannonQuatFromGl(warpRotationGL);;
+				var rotYZX = new CANNON.Vec3();
+				rotation.toEuler(rotYZX, 'YZX');
+				this.yaw += rotYZX.y;
+				this.mouseMove(0.0, 0.0);
+
 				this.justTeleported = true;
 				return this.postPhysicsUpdate(true); // Update normalAlignedOffset with new position (without teleporting again)
 			}
@@ -97,7 +107,7 @@ PlayerCamera.prototype.postPhysicsUpdate = function() {
 	}
 
 	// Update camera position
-	vec3.sub(this.position, positionGlMatrix, this.physicsBodyOffset);
+	vec3.sub(this.position, positionGL, this.physicsBodyOffset);
 	this.updateView();
 }
 
