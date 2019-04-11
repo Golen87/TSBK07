@@ -49,7 +49,7 @@ Camera.prototype.onWindowResize = function() {
 
 /* Portal */
 
-Camera.prototype.setPortalView = function( portal, normal ) {
+Camera.prototype.setPortalView = function( portal ) {
 	var pos = vec3.create();
 	mat4.getTranslation( pos, portal.modelMatrix );
 
@@ -57,10 +57,12 @@ Camera.prototype.setPortalView = function( portal, normal ) {
 	//var extra_clip = Math.min( nearest_portal_dist * 0.5, 0.1 );
 	var extra_clip = 0.001;
 
-	this.clipOblique( vec3.fromValues( pos[0]+extra_clip * portal.targetNormal[0], pos[1]+extra_clip * portal.targetNormal[1], pos[2]+extra_clip * portal.targetNormal[2] ), portal.targetNormal );
-	//portalCam.ClipOblique(pos - normal*extra_clip, -normal);
+	vec3.scale( vec3.temp, portal.normal, extra_clip );
+	vec3.add( vec3.temp, pos, vec3.temp );
 
-	mat4.multiply( this.viewMatrix, this.viewMatrix, portal.warp);
+	this.clipOblique( vec3.temp, portal.normal );
+
+	mat4.multiply( this.viewMatrix, this.viewMatrix, portal.warp );
 };
 
 // Clip the projection matrix to the portal surface, removing everything behind it
@@ -70,7 +72,7 @@ Camera.prototype.clipOblique = function( pos, normal ) {
 	vec4.transformMat4( worldViewPos, pos4, this.viewMatrix )
 	var cpos = vec3.fromValues( worldViewPos[0], worldViewPos[1], worldViewPos[2] );
 
-	var nor4 = vec4.fromValues( normal[0], normal[1], normal[2], 0 );
+	var nor4 = vec4.fromValues( -normal[0], -normal[1], -normal[2], 0 );
 	var worldViewNor = vec4.create();
 	vec4.transformMat4( worldViewNor, nor4, this.viewMatrix );
 	var cnormal = vec3.fromValues( worldViewNor[0], worldViewNor[1], worldViewNor[2] );
