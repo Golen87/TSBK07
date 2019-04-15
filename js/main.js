@@ -22,6 +22,9 @@ window.addEventListener('keydown', function(event) {
 		case Key.NUMROW2:
 			newScene = scene02;
 			break;
+		case Key.NUMROW3:
+			newScene = scene03;
+			break;
 	}
 	if (newScene != null && newScene != currentScene) {
 		currentScene = newScene;
