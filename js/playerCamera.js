@@ -3,19 +3,20 @@ function PlayerCamera(position, rotationY) {
 
 	this.position = vec3.create();
 	this.direction = vec3.fromValues( 0, 0, -1 );
-	this.forward = vec3.fromValues( 0, 0, -1);
-	this.right = vec3.fromValues( 1, 0, 0);
+	this.forward = new CANNON.Vec3( 0, 0, -1 );
+	this.right = new CANNON.Vec3( 1, 0, 0 );
 	this.targetPos = vec3.clone( this.direction );
 	this.up = vec3.fromValues( 0, 1, 0 );
 
 	this.pitch = 0.0;
 	this.yaw = rotationY;
 
-	this.physicsBodyOffset = vec3.fromValues(0.0, -0.6, 0.0);
+	this.physicsBodyOffset = vec3.fromValues(0.0, -1.2, 0.0);
+	this.physicsBodyRadius = 0.25;
 	this.physicsBody = new CANNON.Body({
 		mass: 5,
 		type: CANNON.Body.DYNAMIC,
-		shape: new CANNON.Box(new CANNON.Vec3(0.25, 0.85, 0.25)),
+		shape: new CANNON.Sphere(this.physicsBodyRadius),
 		position: new CANNON.Vec3(
 			position[0] + this.physicsBodyOffset[0],
 			position[1] + this.physicsBodyOffset[1],
@@ -29,7 +30,7 @@ function PlayerCamera(position, rotationY) {
 	this.physicsBody.fixedRotation = true;
 	this.justTeleported = true;
 
-	this.moveSpeed = 2.0;
+	this.moveSpeed = 4.0;
 	this.rotateSpeed = 0.003;
 
 	this.mouseMove(0.0, 0.0);
@@ -47,23 +48,39 @@ PlayerCamera.prototype.update = function( dt ) {
 }
 
 PlayerCamera.prototype.keyboardMove = function( dt ) {
-	var movement = vec3.create();
+
+	var movement = new CANNON.Vec3();
 	if ( Key.isDown(Key.UP) || Key.isDown(Key.W) ) {
-		vec3.add( movement, movement, this.forward );
+		movement = movement.vadd(this.forward);
 	}
 	if ( Key.isDown(Key.DOWN) || Key.isDown(Key.S) ) {
-		vec3.sub( movement, movement, this.forward );
+		movement = movement.vsub(this.forward);
 	}
 
 	if ( Key.isDown(Key.RIGHT) || Key.isDown(Key.D) ) {
-		vec3.add( movement, movement, this.right );
+		movement = movement.vadd(this.right);
 	}
 	if ( Key.isDown(Key.LEFT) || Key.isDown(Key.A) ) {
-		vec3.sub( movement, movement, this.right);
+		movement = movement.vsub(this.right);
 	}
 
-	vec3.scale( movement, movement, this.moveSpeed );
-	this.physicsBody.velocity.set(movement[0], movement[1], movement[2]);
+	var raycastResult = new CANNON.RaycastResult();
+	if(physicsWorld.raycastClosest(
+		this.physicsBody.position,
+		new CANNON.Vec3(this.physicsBody.position[0], -Infinity, this.physicsBody.position[2]),
+		{}, raycastResult))
+	{
+		if (movement.lengthSquared() > 0.0) {
+			var surfaceNormal = raycastResult.hitNormalWorld.unit();
+			var movementNormalProjection = surfaceNormal.scale(surfaceNormal.dot(movement));
+			var surfaceMovement = movement.vsub(movementNormalProjection);
+			var finalMovement = surfaceMovement.unit().scale(this.moveSpeed);
+			this.physicsBody.velocity.set(surfaceMovement.x, surfaceMovement.y, surfaceMovement.z);
+		}
+		else {
+			this.physicsBody.velocity.set(0, 0, 0);
+		}
+	}
 
 	return true;
 };
@@ -128,6 +145,8 @@ PlayerCamera.prototype.mouseMove = function( dx, dy ) {
 	this.forward = vec3.fromValues(this.direction[0], 0, this.direction[2]);
 	vec3.normalize(this.forward, this.forward);
 	vec3.cross( this.right, this.direction, this.up );
+	this.forward = cannonVec3FromGL(this.forward);
+	this.right = cannonVec3FromGL(this.right);
 };
 
 

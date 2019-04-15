@@ -30,6 +30,10 @@ function extend(base, sub) {
 	});
 }
 
+function cannonVec3FromGL(glVec3) {
+	return new CANNON.Vec3(glVec3[0], glVec3[1], glVec3[2]);
+}
+
 function glVec3FromCannon(cannonVec3) {
 	return vec3.fromValues(cannonVec3.x, cannonVec3.y, cannonVec3.z);
 }

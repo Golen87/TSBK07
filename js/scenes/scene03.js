@@ -8,45 +8,51 @@ var scene03 = new Scene(function() {
 	ground.setGLSetting( gl.CULL_FACE, true );
 	ground.frustumCulling = false;
 	mat4.translate(	ground.modelMatrix, ground.modelMatrix, [0.0, 0.0, 0.0] );
+	mat4.rotateX( ground.modelMatrix, ground.modelMatrix, 0.1 * Math.PI);
 	mat3.normalFromMat4( ground.normalMatrix, ground.modelMatrix );
 	models.push( ground );
 
 	var groundShape = new CANNON.Plane();
 	var groundRotation = new CANNON.Quaternion();
-	groundRotation.setFromAxisAngle (new CANNON.Vec3(1, 0, 0), -0.5 * Math.PI);
+	groundRotation.setFromAxisAngle (new CANNON.Vec3(1, 0, 0), -0.4 * Math.PI);
 	initStaticBoxBody(groundShape, [0, 0, 0], groundRotation);
 
 	// Corridors
-	var pos1 = [1, 0, 0];
-	var pos2 = [-1, 0, 0];
-	var rot1 = -0.5 * Math.PI;
-	var rot2 = 0.5 * Math.PI;
+	var corrLeftPos = [-3.0, 0.0, -2.5];
+	var corrRightPos = [3.0,  0.0, -3.0];
+	var corrLeftRotY = 0.75 * Math.PI;
+	var corrRightRotY = 0.35 * Math.PI;
+	initCorridor( /*Scale*/ 1.0, 1.0, 1.0, /*Position*/ corrLeftPos, /*Rotation*/ 0.0, corrLeftRotY, 0.0 );
+	initCorridor( /*Scale*/ 1.0, 1.0, 4.0, /*Position*/ corrRightPos, /*Rotation*/ 0.0, corrRightRotY, 0.0 );
+
 
 	// Init portals
 	portals = [];
-	var portal1 = addPortal( pos1, rot1, 3, 3 );
-	var portal2 = addPortal( pos2, rot2, 3, 3 );
+	var leftPos    = [-3.0, 0.0, -2.0];
+	var leftEndPos = [-3.0, 0.0, -3.0];
+	vec3.rotateY(leftPos, leftPos, corrLeftPos, corrLeftRotY);
+	vec3.rotateY(leftEndPos, leftEndPos, corrLeftPos, corrLeftRotY);
+	var leftFront    = addPortal( leftPos, corrLeftRotY, W, H );
+	var leftBack     = addPortal( leftPos, corrLeftRotY + Math.PI, W, H );
+	var leftEndFront = addPortal( leftEndPos, corrLeftRotY, W, H );
+	var leftEndBack  = addPortal( leftEndPos, corrLeftRotY + Math.PI, W, H );
+
+	var rightPos    = [3.0, 0.0, -1.0];
+	var rightEndPos = [3.0, 0.0, -5.0];
+	vec3.rotateY(rightPos, rightPos, corrRightPos, corrRightRotY);
+	vec3.rotateY(rightEndPos, rightEndPos, corrRightPos, corrRightRotY);
+	var rightFront    = addPortal( rightPos, corrRightRotY, W, H );
+	var rightBack     = addPortal( rightPos, corrRightRotY + Math.PI, W, H );
+	var rightEndFront = addPortal( rightEndPos, corrRightRotY, W, H );
+	var rightEndBack  = addPortal( rightEndPos, corrRightRotY + Math.PI, W, H );
 
 	// Connect portals
-	portal1.modelMatrix;
-	portal2.modelMatrix;
-	connectPortals( portal1, portal2, 1*Math.PI, [0, 1, 0] )
-
-
-	var sphere = new Model( objects.sphere, normal_prog );
-	sphere.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( sphere.modelMatrix, sphere.modelMatrix, [2, 1, 2] );
-	mat3.normalFromMat4( sphere.normalMatrix, sphere.modelMatrix );
-	models.push( sphere );
-
-	var sphereTex = new Model( objects.sphere, texture_prog );
-	sphereTex.setTexture( loadTexture(gl, "tex/grass_lab.png") );
-	sphereTex.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( sphereTex.modelMatrix, sphereTex.modelMatrix, [2, 1, -2] );
-	mat3.normalFromMat4( sphereTex.normalMatrix, sphereTex.modelMatrix );
-	models.push( sphereTex );
+	connectPortals( leftFront, rightBack, Math.PI, [0, 1, 0], leftBack, rightFront )
+	connectPortals( leftBack, rightFront, Math.PI, [0, 1, 0], leftFront, rightBack )
+	connectPortals( leftEndFront, rightEndBack, Math.PI, [0, 1, 0], leftEndBack, rightEndFront )
+	connectPortals( leftEndBack, rightEndFront, Math.PI, [0, 1, 0], leftEndFront, rightEndBack )
 
 
 	// Player
-	playerCamera = new PlayerCamera(vec3.fromValues(0.0, 1.46, 2.0), 0);
+	playerCamera = new PlayerCamera(vec3.fromValues(0.0, 1.46, -9.0), Math.PI);
 });
