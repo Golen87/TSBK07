@@ -11,11 +11,11 @@ function PlayerCamera(position, rotationY) {
 	this.pitch = 0.0;
 	this.yaw = rotationY;
 
-	this.physicsBodyOffset = vec3.fromValues(0.0, -0.6, 0.0);
+	this.physicsBodyOffset = vec3.fromValues(0.0, -1.2, 0.0);
 	this.physicsBody = new CANNON.Body({
 		mass: 5,
 		type: CANNON.Body.DYNAMIC,
-		shape: new CANNON.Box(new CANNON.Vec3(0.25, 0.85, 0.25)),
+		shape: new CANNON.Sphere(0.25),
 		position: new CANNON.Vec3(
 			position[0] + this.physicsBodyOffset[0],
 			position[1] + this.physicsBodyOffset[1],
