@@ -13,29 +13,6 @@ var playerCamera;
 
 var currentScene = scene01;
 
-window.addEventListener('keydown', function(event) {
-	var newScene = null;
-	switch(event.keyCode) {
-		case Key.NUMROW1:
-			newScene = scene01;
-			break;
-		case Key.NUMROW2:
-			newScene = scene02;
-			break;
-	}
-	if (newScene != null && newScene != currentScene) {
-		currentScene = newScene;
-		currentScene.init();
-	}
-}, false);
-
-/* Number of rendered levels of portals
- * 0 -- No portals
- * 1 -- Single level of portals
- * 2 -- Two levels of portals
- */
-const MAX_PORTAL_DEPTH = 4;
-
 var debugFrustumCount = 0;
 var debugOcclusionCount = 0;
 
@@ -119,7 +96,19 @@ function updateLoop( elapsedTime ) {
 	playerCamera.update( deltaTime );
 	physicsWorld.step(timeStep);
 	playerCamera.postPhysicsUpdate();
-	drawScene( playerCamera, elapsedTime / 1000 );
+
+	// Sort portals
+	for (var i = portals.length - 1; i >= 0; i--) {
+		portals[i].updateDistanceFromCamera( playerCamera );
+	}
+	portals.sort(function(a, b) {
+		var distA = a.distanceFromCamera;
+		var distB = b.distanceFromCamera;
+		return distA < distB ? 1 : -1;
+	});
+
+	currentScene.update();
+	currentScene.draw( playerCamera, elapsedTime / 1000 );
 
 	requestAnimationFrame(updateLoop);
 	previousTime = elapsedTime;

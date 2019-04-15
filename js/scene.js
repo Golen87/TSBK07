@@ -5,6 +5,24 @@ function Scene(initFunc) {
 	this.init = initFunc;
 }
 
+Scene.prototype.update = function( dt ) {
+	var newScene = null;
+	if ( Key.isDown(Key.NUM_1) )
+		newScene = scene01;
+	else if ( Key.isDown(Key.NUM_2) )
+		newScene = scene02;
+	else if ( Key.isDown(Key.NUM_3) )
+		newScene = scene03;
+	else
+		return;
+
+	if (newScene && newScene != currentScene) {
+		currentScene = newScene;
+		currentScene.init();
+	}
+}
+
+
 function initCorridor(scaleX, scaleY, scaleZ, translation, rotX, rotY, rotZ) {
 	const BASE_HEIGHT = 2.0;
 	const BASE_WIDTH = 1.0;
@@ -68,19 +86,17 @@ function initCorridor(scaleX, scaleY, scaleZ, translation, rotX, rotY, rotZ) {
 	initStaticBoxBody(roofShape, [relPhysicsPos[0], relPhysicsPos[1], relPhysicsPos[2]], rotation);
 }
 
-const PORTAL_WIDTH = 0.8;
-const PORTAL_HEIGHT = 1.9;
-const PORTAL_RADIUS = 0.5 * lengthVec2(PORTAL_HEIGHT, PORTAL_WIDTH);
-function addPortal(position, yRotation) {
+function addPortal(position, yRotation, width, height) {
 	var portal = new Portal( objects.surface, fbo_prog, position );
 	portal.setGLSetting( gl.CULL_FACE, true );
 	mat4.translate( portal.modelMatrix, portal.modelMatrix, position);
-	mat4.scale( portal.modelMatrix, portal.modelMatrix, [PORTAL_WIDTH, PORTAL_HEIGHT, PORTAL_WIDTH] );
+	mat4.scale( portal.modelMatrix, portal.modelMatrix, [width, height, width] );
 	mat4.rotateY( portal.modelMatrix, portal.modelMatrix, yRotation);
+	//mat4.rotateZ( portal.modelMatrix, portal.modelMatrix, 0.05);
 	portal.sphereOffset = vec3.fromValues(0.0, 0.5, 0.0);
-	portal.sphereRadius = PORTAL_RADIUS;
+	portal.sphereRadius = 0.5 * lengthVec2(height, width); // Portal radius
 	portal.id = portals.length;
-	portal.radiusXZ = PORTAL_WIDTH * 0.5;
+	portal.radiusXZ = width * 0.5;
 	portals.push( portal );
 	return portal;
 }
@@ -102,7 +118,7 @@ function connectPortals(portal1, portal2, deltaRotation, rotationAxis, portal1ba
 	portal2.calculateWarp();
 }
 
-function drawScene( camera, time ) {
+Scene.prototype.draw = function( camera, time ) {
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -113,16 +129,6 @@ function drawScene( camera, time ) {
 	for (var i = models.length - 1; i >= 0; i--) {
 		models[i].draw( camera );
 	}
-
-	// Sort portals
-	for (var i = portals.length - 1; i >= 0; i--) {
-		portals[i].updateDistanceFromCamera( camera );
-	}
-	portals.sort(function(a, b) {
-		var distA = a.distanceFromCamera;
-		var distB = b.distanceFromCamera;
-		return distA < distB ? 1 : -1;
-	});
 
 	debugFrustumCount = 0;
 	debugOcclusionCount = 0;
@@ -140,6 +146,7 @@ function drawScene( camera, time ) {
 
 					drawFBOScene( camera, time, portals[i], 0, depthKey );
 					gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+					portals[i].setFBO(fbos[0]);
 					portals[i].shader = fbo_prog;
 					portals[i].draw( camera );
 				}

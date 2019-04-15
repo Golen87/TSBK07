@@ -1,3 +1,10 @@
+/* Number of rendered levels of portals
+ * 0 -- No portals
+ * 1 -- Single level of portals
+ * 2 -- Two levels of portals
+ */
+const MAX_PORTAL_DEPTH = 10;
+
 var fbos = [];
 const FBO_WIDTH = 256*8;
 const FBO_HEIGHT = 256*8;
@@ -109,8 +116,7 @@ function drawFBOScene(camera, time, portal, portalDepth, depthKey) {
 
 	//Draw portals
 	for (var i = portals.length - 1; i >= 0; i--) {
-		if (portals[i] != portal &&
-			portals[i] != portal.targetBack &&
+		if (portals[i] != portal.targetBack &&
 			portals[i].isVisible( portalCam )) {
 
 			if (portalDepth < MAX_PORTAL_DEPTH - 1) {

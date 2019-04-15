@@ -80,14 +80,16 @@ var scene01 = new Scene(function() {
 
 	// Init portals
 	portals = [];
-	var leftFront     = addPortal( [-1.0, 0.0, -2.0], 0.0 );
-	var leftBack      = addPortal( [-1.0, 0.0, -2.0], Math.PI );
-	var leftEndFront  = addPortal( [-1.0, 0.0, -3.0], 0.0 );
-	var leftEndBack   = addPortal( [-1.0, 0.0, -3.0], Math.PI );
-	var rightFront    = addPortal( [ 1.0, 0.0, -1.0], 0.0 );
-	var rightBack     = addPortal( [ 1.0, 0.0, -1.0], Math.PI );
-	var rightEndFront = addPortal( [ 1.0, 0.0, -5.0], 0.0 );
-	var rightEndBack  = addPortal( [ 1.0, 0.0, -5.0], Math.PI );
+	const W = 0.8;
+	const H = 1.9;
+	var leftFront     = addPortal( [-1.0, 0.0, -2.0], 0.0, W, H );
+	var leftBack      = addPortal( [-1.0, 0.0, -2.0], Math.PI, W, H );
+	var leftEndFront  = addPortal( [-1.0, 0.0, -3.0], 0.0, W, H );
+	var leftEndBack   = addPortal( [-1.0, 0.0, -3.0], Math.PI, W, H );
+	var rightFront    = addPortal( [ 1.0, 0.0, -1.0], 0.0, W, H );
+	var rightBack     = addPortal( [ 1.0, 0.0, -1.0], Math.PI, W, H );
+	var rightEndFront = addPortal( [ 1.0, 0.0, -5.0], 0.0, W, H );
+	var rightEndBack  = addPortal( [ 1.0, 0.0, -5.0], Math.PI, W, H );
 
 	// Connect portals
 	connectPortals( leftFront, rightBack, Math.PI, [0, 1, 0], leftBack, rightFront )

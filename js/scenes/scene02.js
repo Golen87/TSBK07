@@ -26,24 +26,27 @@ var scene02 = new Scene(function() {
 
 
 	// Init portals
+	const W = 0.8;
+	const H = 1.9;
+
 	portals = [];
 	var leftPos    = [-3.0, 0.0, -2.0];
 	var leftEndPos = [-3.0, 0.0, -3.0];
 	vec3.rotateY(leftPos, leftPos, corrLeftPos, corrLeftRotY);
 	vec3.rotateY(leftEndPos, leftEndPos, corrLeftPos, corrLeftRotY);
-	var leftFront    = addPortal( leftPos, corrLeftRotY );
-	var leftBack     = addPortal( leftPos, corrLeftRotY + Math.PI );
-	var leftEndFront = addPortal( leftEndPos, corrLeftRotY );
-	var leftEndBack  = addPortal( leftEndPos, corrLeftRotY + Math.PI );
+	var leftFront    = addPortal( leftPos, corrLeftRotY, W, H );
+	var leftBack     = addPortal( leftPos, corrLeftRotY + Math.PI, W, H );
+	var leftEndFront = addPortal( leftEndPos, corrLeftRotY, W, H );
+	var leftEndBack  = addPortal( leftEndPos, corrLeftRotY + Math.PI, W, H );
 
 	var rightPos    = [3.0, 0.0, -1.0];
 	var rightEndPos = [3.0, 0.0, -5.0];
 	vec3.rotateY(rightPos, rightPos, corrRightPos, corrRightRotY);
 	vec3.rotateY(rightEndPos, rightEndPos, corrRightPos, corrRightRotY);
-	var rightFront    = addPortal( rightPos, corrRightRotY );
-	var rightBack     = addPortal( rightPos, corrRightRotY + Math.PI );
-	var rightEndFront = addPortal( rightEndPos, corrRightRotY );
-	var rightEndBack  = addPortal( rightEndPos, corrRightRotY + Math.PI );
+	var rightFront    = addPortal( rightPos, corrRightRotY, W, H );
+	var rightBack     = addPortal( rightPos, corrRightRotY + Math.PI, W, H );
+	var rightEndFront = addPortal( rightEndPos, corrRightRotY, W, H );
+	var rightEndBack  = addPortal( rightEndPos, corrRightRotY + Math.PI, W, H );
 
 	// Connect portals
 	connectPortals( leftFront, rightBack, Math.PI, [0, 1, 0], leftBack, rightFront )
