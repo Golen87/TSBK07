@@ -27,6 +27,9 @@ var scene03 = new Scene(function() {
 
 
 	// Init portals
+	const W = 0.8;
+	const H = 1.9;
+
 	portals = [];
 	var leftPos    = [-3.0, 0.0, -2.0];
 	var leftEndPos = [-3.0, 0.0, -3.0];
