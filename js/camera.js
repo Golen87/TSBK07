@@ -37,7 +37,7 @@ Camera.prototype.getPosition = function() {
 
 
 Camera.prototype.updatePerspective = function() {
-	mat4.perspective( this.projMatrix, 45, gl.viewportWidth / gl.viewportHeight, this.NEAR, this.FAR );
+	mat4.perspective( this.projMatrix, 70/180*Math.PI, gl.viewportWidth / gl.viewportHeight, this.NEAR, this.FAR );
 	this.extractPlanesFromProjmat();
 }
 

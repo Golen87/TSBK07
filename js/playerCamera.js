@@ -30,7 +30,7 @@ function PlayerCamera(position, rotationY) {
 	this.physicsBody.fixedRotation = true;
 	this.justTeleported = true;
 
-	this.moveSpeed = 4.0;
+	this.moveSpeed = 2.6;
 	this.rotateSpeed = 0.003;
 
 	this.mouseMove(0.0, 0.0);
@@ -75,7 +75,7 @@ PlayerCamera.prototype.keyboardMove = function( dt ) {
 			var movementNormalProjection = surfaceNormal.scale(surfaceNormal.dot(movement));
 			var surfaceMovement = movement.vsub(movementNormalProjection);
 			var finalMovement = surfaceMovement.unit().scale(this.moveSpeed);
-			this.physicsBody.velocity.set(surfaceMovement.x, surfaceMovement.y, surfaceMovement.z);
+			this.physicsBody.velocity.set(finalMovement.x, finalMovement.y, finalMovement.z);
 		}
 		else {
 			this.physicsBody.velocity.set(0, 0, 0);
