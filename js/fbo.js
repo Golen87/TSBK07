@@ -3,7 +3,7 @@
  * 1 -- Single level of portals
  * 2 -- Two levels of portals
  */
-const MAX_PORTAL_DEPTH = 10;
+const MAX_PORTAL_DEPTH = 3;
 
 var fbos = [];
 const FBO_WIDTH = 256*8;
