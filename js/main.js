@@ -45,6 +45,7 @@ function initShaders() {
 	fbo_prog.addUniform( "u_ProjMat" );
 	fbo_prog.addUniform( "u_ViewMat" );
 	fbo_prog.addUniform( "u_ModelMat" );
+	fbo_prog.addUniform( "u_Sampler" );
 
 
 	// Unlit color
@@ -94,8 +95,8 @@ function updateLoop( elapsedTime ) {
 	updateFPS(deltaTime);
 
 	playerCamera.update( deltaTime );
-	physicsWorld.step(timeStep);
-	playerCamera.postPhysicsUpdate();
+	physicsWorld.step( timeStep );
+	playerCamera.postPhysicsUpdate( deltaTime );
 
 	// Sort portals
 	for (var i = portals.length - 1; i >= 0; i--) {

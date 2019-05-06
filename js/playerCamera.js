@@ -11,6 +11,9 @@ function PlayerCamera(position, rotationY) {
 	this.pitch = 0.0;
 	this.yaw = rotationY;
 
+	this.bobbing = vec3.create();
+	this.bobValue = 0.0;
+
 	this.physicsBodyOffset = vec3.fromValues(0.0, -1.2, 0.0);
 	this.physicsBodyRadius = 0.25;
 	this.physicsBody = new CANNON.Body({
@@ -24,20 +27,25 @@ function PlayerCamera(position, rotationY) {
 		linearDamping: 0.99999
 	});
 	physicsWorld.add(this.physicsBody);
-	this.postPhysicsUpdate();
+	this.postPhysicsUpdate(0.0);
 
 
 	this.physicsBody.fixedRotation = true;
 	this.justTeleported = true;
 
-	this.moveSpeed = 2.6;
+	this.moveSpeed = 2.8 * 60;
+	this.runFactor = null;
 	this.rotateSpeed = 0.003;
 
 	this.mouseMove(0.0, 0.0);
-	this.updateView();
+	this.updateView(0.0);
 }
 
-PlayerCamera.prototype.updateView = function() {
+PlayerCamera.prototype.updateView = function( dt ) {
+	var height = Math.abs(0.05 * Math.sin(0.04 * this.bobValue));
+	vec3.set( this.bobbing, 0, height, 0 );
+	vec3.add( this.position, this.position, this.bobbing );
+
 	vec3.add( this.targetPos, this.position, this.direction );
 	mat4.lookAt( this.viewMatrix, this.position, this.targetPos, this.up )
 }
@@ -48,6 +56,12 @@ PlayerCamera.prototype.update = function( dt ) {
 }
 
 PlayerCamera.prototype.keyboardMove = function( dt ) {
+	if ( Key.isDown(Key.SHIFT) ) {
+		this.runFactor = 2.1;
+	}
+	else {
+		this.runFactor = 1.0;
+	}
 
 	var movement = new CANNON.Vec3();
 	if ( Key.isDown(Key.UP) || Key.isDown(Key.W) ) {
@@ -74,8 +88,10 @@ PlayerCamera.prototype.keyboardMove = function( dt ) {
 			var surfaceNormal = raycastResult.hitNormalWorld.unit();
 			var movementNormalProjection = surfaceNormal.scale(surfaceNormal.dot(movement));
 			var surfaceMovement = movement.vsub(movementNormalProjection);
-			var finalMovement = surfaceMovement.unit().scale(this.moveSpeed);
+			var finalMovement = surfaceMovement.unit().scale(dt * this.moveSpeed * this.runFactor);
 			this.physicsBody.velocity.set(finalMovement.x, finalMovement.y, finalMovement.z);
+
+			this.bobValue += finalMovement.length();
 		}
 		else {
 			this.physicsBody.velocity.set(0, 0, 0);
@@ -85,7 +101,7 @@ PlayerCamera.prototype.keyboardMove = function( dt ) {
 	return true;
 };
 
-PlayerCamera.prototype.postPhysicsUpdate = function() {
+PlayerCamera.prototype.postPhysicsUpdate = function( dt ) {
 	var positionGL = glVec3FromCannon(this.physicsBody.position);
 	var nearLimit = this.NEAR;
 
@@ -118,7 +134,7 @@ PlayerCamera.prototype.postPhysicsUpdate = function() {
 				this.mouseMove(0.0, 0.0);
 
 				this.justTeleported = true;
-				return this.postPhysicsUpdate(true); // Update normalAlignedOffset with new position (without teleporting again)
+				return this.postPhysicsUpdate( dt ); // Update normalAlignedOffset with new position (without teleporting again)
 			}
 		}
 		portals[i].lastNormalAlignedOffset = normalAlignedOffset;
@@ -126,7 +142,7 @@ PlayerCamera.prototype.postPhysicsUpdate = function() {
 
 	// Update camera position
 	vec3.sub(this.position, positionGL, this.physicsBodyOffset);
-	this.updateView();
+	this.updateView( dt );
 }
 
 
