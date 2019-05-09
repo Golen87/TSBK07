@@ -81,9 +81,13 @@ PlayerCamera.prototype.keyboardMove = function( dt ) {
 	var raycastResult = new CANNON.RaycastResult();
 	if(physicsWorld.raycastClosest(
 		this.physicsBody.position,
-		new CANNON.Vec3(this.physicsBody.position[0], -Infinity, this.physicsBody.position[2]),
-		{}, raycastResult))
+		this.physicsBody.position.vsub(new CANNON.Vec3(0, 40, 0)),
+		{skipBackfaces: true}, raycastResult))
 	{
+		// Snap to surface
+		var gPos = raycastResult.hitPointWorld;
+		this.physicsBody.position.set(gPos.x, gPos.y + this.physicsBodyRadius, gPos.z);
+
 		if (movement.lengthSquared() > 0.0) {
 			var surfaceNormal = raycastResult.hitNormalWorld.unit();
 			var movementNormalProjection = surfaceNormal.scale(surfaceNormal.dot(movement));
@@ -96,6 +100,11 @@ PlayerCamera.prototype.keyboardMove = function( dt ) {
 		else {
 			this.physicsBody.velocity.set(0, 0, 0);
 		}
+	}
+	else {
+		// Floating
+		var finalMovement = movement.unit().scale(dt * this.moveSpeed * this.runFactor);
+		this.physicsBody.velocity.set(finalMovement.x, finalMovement.y, finalMovement.z);
 	}
 
 	return true;

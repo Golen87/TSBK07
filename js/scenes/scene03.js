@@ -3,47 +3,79 @@ var scene03 = new Scene(function() {
 
 	// Init models
 	models = [];
-	addGround([0, 0, 0], 0.1 * Math.PI);
+
+
+	// Ground
+
+	const angle = 0.08 * Math.PI;
+	const slopeDepth = 4.0;
+	groundHeight = 0.1;
+
+	const grassColor = [0.3, 0.7, 0.3, 1];
+
+	var slopeEdgeDepth = Math.cos(angle) * slopeDepth;
+	slopeEdgeHeight = Math.sin(angle) * slopeDepth;
+	var slopeEdgeDepthOffset = Math.sin(angle) * groundHeight;
+	addModel(cube_mesh, [0, 0, 0], [slopeDepth, groundHeight, slopeDepth], [angle, 0, 0], texture_prog)
+		.setTexture( loadTexture(gl, "tex/grass.png") ).setColor(grassColor);
+	addModel(cube_mesh, [0, slopeEdgeHeight, -(slopeEdgeDepth - slopeEdgeDepthOffset + slopeDepth)],
+		[slopeDepth, groundHeight, slopeDepth], [0, 0, 0], texture_prog)
+		.setTexture( loadTexture(gl, "tex/grass.png") ).setColor(grassColor);
+	addModel(cube_mesh, [0, -slopeEdgeHeight, (slopeEdgeDepth - slopeEdgeDepthOffset + slopeDepth)],
+		[slopeDepth, groundHeight, slopeDepth], [0, 0, 0], texture_prog)
+		.setTexture( loadTexture(gl, "tex/grass.png") ).setColor(grassColor);
+
 
 	// Corridors
-	var corrLeftPos = [-3.0, 0.0, -2.5];
-	var corrRightPos = [3.0,  0.0, -3.0];
-	var corrLeftRotY = 0.75 * Math.PI;
-	var corrRightRotY = 0.35 * Math.PI;
-	addCorridor( /*Position*/ corrLeftPos, /*Scale*/ [1.0, 1.0, 1.0], /*Rotation*/ [0.0, corrLeftRotY, 0.0] );
-	addCorridor( /*Position*/ corrRightPos, /*Scale*/ [1.0, 1.0, 4.0], /*Rotation*/ [0.0, corrRightRotY, 0.0] );
+	var shearTransform = mat4.fromValues(
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, -Math.tan(angle /*+ 0.015*/), 1, 0,
+		0, 0, 0, 1
+	);
+	var corridor = addCorridor( /*Position*/ [0, groundHeight, 0], /*Scale*/ [2, 1.5, 2 * slopeEdgeDepth], /*Rotation*/ [0.0, 0.0, 0.0]);
+	mat4.multiply(corridor.modelMatrix, shearTransform, corridor.modelMatrix);
+
+	// Physical walls
+	var width = 2;
+	var wallThickness = 0.2;
+	var depth = 2 * slopeEdgeDepth;
+	wallShape = new CANNON.Box(new CANNON.Vec3(
+		0.5 * wallThickness,
+		80,
+		0.5 * depth));
+
+	var wallPos = vec3.fromValues(
+		- 0.5 * (width - wallThickness),
+		0,
+		0.0);
+	initStaticBoxBody(wallShape, wallPos, new CANNON.Quaternion());
+
+	wallPos = vec3.fromValues(
+		+ 0.5 * (width - wallThickness),
+		0,
+		0.0);
+	initStaticBoxBody(wallShape, wallPos, new CANNON.Quaternion());
 
 
 	// Init portals
-	const W = 0.8;
-	const H = 1.9;
-
+	const W = 0.8 * 2;
+	const H = 1.9 * 1.5;
 	portals = [];
-	var leftPos    = [-3.0, 0.0, -2.0];
-	var leftEndPos = [-3.0, 0.0, -3.0];
-	vec3.rotateY(leftPos, leftPos, corrLeftPos, corrLeftRotY);
-	vec3.rotateY(leftEndPos, leftEndPos, corrLeftPos, corrLeftRotY);
-	var leftFront    = addPortal( leftPos, corrLeftRotY, W, H );
-	var leftBack     = addPortal( leftPos, corrLeftRotY + Math.PI, W, H );
-	var leftEndFront = addPortal( leftEndPos, corrLeftRotY, W, H );
-	var leftEndBack  = addPortal( leftEndPos, corrLeftRotY + Math.PI, W, H );
-
-	var rightPos    = [3.0, 0.0, -1.0];
-	var rightEndPos = [3.0, 0.0, -5.0];
-	vec3.rotateY(rightPos, rightPos, corrRightPos, corrRightRotY);
-	vec3.rotateY(rightEndPos, rightEndPos, corrRightPos, corrRightRotY);
-	var rightFront    = addPortal( rightPos, corrRightRotY, W, H );
-	var rightBack     = addPortal( rightPos, corrRightRotY + Math.PI, W, H );
-	var rightEndFront = addPortal( rightEndPos, corrRightRotY, W, H );
-	var rightEndBack  = addPortal( rightEndPos, corrRightRotY + Math.PI, W, H );
+	var topFront = addPortal( [0, slopeEdgeHeight + groundHeight, -slopeEdgeDepth],
+		0.0, W, H );
+	var topBack = addPortal( [0, slopeEdgeHeight + groundHeight, -slopeEdgeDepth],
+		Math.PI, W, H );
+	var bottomFront = addPortal( [0, -slopeEdgeHeight + groundHeight, slopeEdgeDepth],
+		Math.PI, W, H );
+	var bottomBack = addPortal( [0, -slopeEdgeHeight + groundHeight, slopeEdgeDepth],
+		0.0, W, H );
 
 	// Connect portals
-	connectPortals( leftFront, rightBack, Math.PI, [0, 1, 0], leftBack, rightFront )
-	connectPortals( leftBack, rightFront, Math.PI, [0, 1, 0], leftFront, rightBack )
-	connectPortals( leftEndFront, rightEndBack, Math.PI, [0, 1, 0], leftEndBack, rightEndFront )
-	connectPortals( leftEndBack, rightEndFront, Math.PI, [0, 1, 0], leftEndFront, rightEndBack )
-
+	connectPortals( topFront, bottomFront, 0, [0, 1, 0], topBack, bottomBack );
+	connectPortals( topBack, bottomBack, 0, [0, 1, 0], portals, bottomFront );
 
 	// Player
-	playerCamera = new PlayerCamera(vec3.fromValues(0.0, 1.46, -9.0), Math.PI);
+	playerCamera = new PlayerCamera(
+		vec3.fromValues(0.0, 1.46 + slopeEdgeHeight + 0.5 * groundHeight, -7.0), Math.PI);
 });
