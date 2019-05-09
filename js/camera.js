@@ -55,7 +55,7 @@ Camera.prototype.setPortalView = function( portal ) {
 
 	//var nearest_portal_dist = portals[portals.length-1].distanceFromCamera;
 	//var extra_clip = Math.min( nearest_portal_dist * 0.5, 0.1 );
-	var extra_clip = 0.0;
+	var extra_clip = 0.001;
 
 	vec3.scale( vec3.temp, portal.normal, extra_clip );
 	vec3.add( vec3.temp, pos, vec3.temp );
