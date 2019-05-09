@@ -17,6 +17,8 @@ Scene.prototype.update = function( dt ) {
 		newScene = scene04;
 	else if ( Key.isDown(Key.NUM_5) )
 		newScene = scene05;
+	else if ( Key.isDown(Key.NUM_6) )
+		newScene = scene06;
 	else
 		return;
 
