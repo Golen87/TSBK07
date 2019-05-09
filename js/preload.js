@@ -2,6 +2,7 @@ var loaders = [];
 
 var shaders = {};
 var objects = {};
+var textures = {};
 
 function preload( obj, name, url ) {
 	var loader = $.ajax({
@@ -36,12 +37,31 @@ preload( objects, "corridor", "obj/corridor.obj" );
 preload( objects, "surface", "obj/surface.obj" );
 preload( objects, "cube", "obj/cube.obj" );
 
-// "tex/grass.png"
-// "tex/dirt.png"
-// "tex/stone.png"
-// "tex/snow.png"
-// "tex/sand.png"
-// "tex/water.png"
+textures.grass_lab	= "tex/grass_lab.png";
+textures.grass		= "tex/grass.png";
+textures.dirt		= "tex/dirt.png";
+textures.stone		= "tex/stone.png";
+textures.snow		= "tex/snow.png";
+textures.sand		= "tex/sand.png";
+textures.water		= "tex/water.png";
+textures.wall		= "tex/wall.png";
+
+// Meshes
+
+cube_mesh = {
+	mesh: "cube",
+	dims: [2.0, 2.0, 2.0]
+};
+
+sphere_mesh = {
+	mesh: "sphere",
+	dims: [2.0, 2.0, 2.0]
+};
+
+cylinder_mesh = {
+	mesh: "cylinder",
+	dims: [2.0, 2.0, 2.0]
+};
 
 
 function onPreload( func ) {

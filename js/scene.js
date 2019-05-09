@@ -28,23 +28,6 @@ Scene.prototype.update = function( dt ) {
 	}
 }
 
-// Meshes
-
-cube_mesh = {
-	mesh: objects.cube,
-	dims: [2.0, 2.0, 2.0]
-};
-
-sphere_mesh = {
-	mesh: objects.sphere,
-	dims: [2.0, 2.0, 2.0]
-};
-
-cylinder_mesh = {
-	mesh: objects.cylinder,
-	dims: [2.0, 2.0, 2.0]
-};
-
 /**
  * Initiates a model and cube-shaped physical body and adds both to the world.
  * Base width, height and depth is 2.0.
@@ -57,7 +40,7 @@ function addModel(mesh, pos, scale, rot, shaderProg) {
 	const depth = scale[2] *mesh.dims[0];
 
 	// Model
-	var model = new Model( mesh.mesh, shaderProg );
+	var model = new Model( objects[mesh.mesh], shaderProg );
 	model.setGLSetting( gl.CULL_FACE, true );
 	mat4.translate( model.modelMatrix, model.modelMatrix, pos );
 	mat4.rotateX( model.modelMatrix, model.modelMatrix, rot[0] );
