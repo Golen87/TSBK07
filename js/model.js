@@ -13,6 +13,7 @@ function Model(meshStr, shader) {
 
 	this.texture = null;
 	this.hasTexture = false;
+	this.color = [1, 1, 1, 1];
 
 	this.isFBO = false;
 
@@ -36,6 +37,11 @@ Model.prototype.frustumCheck = function( camera ) {
 Model.prototype.setTexture = function(texture) {
 	this.texture = texture;
 	this.hasTexture = true;
+	return this;
+}
+
+Model.prototype.setColor = function(color) {
+	this.color = color;
 	return this;
 }
 

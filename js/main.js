@@ -68,6 +68,7 @@ function initShaders() {
 	texture_prog.addUniform( "u_ModelMat" );
 	texture_prog.addUniform( "u_NormalMat" );
 	texture_prog.addUniform( "u_Sampler" );
+	texture_prog.addUniform( "u_Color" );
 }
 
 function getUniformLocation(program, name) {
