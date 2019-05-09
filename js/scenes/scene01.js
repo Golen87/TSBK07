@@ -23,7 +23,7 @@ var scene01 = new Scene(function() {
 		.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 
 	addModel(cube_mesh, [-3.5, 1.0, -6.0], [1, 1, 1], [0, 0, 0], normal_prog);
-	addModel(cube_mesh, [-3.5, 1.0, -3.0], [1, 1, 1], [0, 0, 0], normal_prog)
+	addModel(cube_mesh, [-3.5, 1.0, -3.0], [1, 1, 1], [0, 0, 0], texture_prog)
 		.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 
 

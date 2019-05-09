@@ -15,6 +15,7 @@ var scene04 = new Scene(function() {
 	portals = [];
 	var portal1 = addPortal( pos1, rot1, 3, 3 );
 	var portal2 = addPortal( pos2, rot2, 3, 3 );
+	mat4.rotateZ( portal2.modelMatrix, portal2.modelMatrix, 0.2);
 
 	// Connect portals
 	portal1.modelMatrix;
