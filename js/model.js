@@ -112,6 +112,10 @@ Model.prototype.draw = function(camera) {
 		gl.uniform4fv(this.shader.u_Color, this.color);
 	}
 
+	if (this.shader.u_Debug) {
+		gl.uniform1i(this.shader.u_Debug, window.shaderDebug);
+	}
+
 
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.indexBuffer);
 	gl.drawElements(gl.TRIANGLES, this.mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);

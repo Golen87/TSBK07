@@ -139,7 +139,7 @@ Scene.prototype.draw = function( camera, time ) {
 
 	//Draw portals
 	for (var i = portals.length - 1; i >= 0; i--) {
-		if (MAX_PORTAL_DEPTH > 0) {
+		if (window.CURRENT_PORTAL_DEPTH > 0) {
 			// FBO shading
 			if (portals[i].isVisible( camera )) {
 				debugFrustumCount++;

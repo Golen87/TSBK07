@@ -3,7 +3,8 @@
  * 1 -- Single level of portals
  * 2 -- Two levels of portals
  */
-const MAX_PORTAL_DEPTH = 3;
+const MAX_PORTAL_DEPTH = 30;
+window.CURRENT_PORTAL_DEPTH = 3;
 
 var fbos = [];
 const FBO_WIDTH = 256*8;
@@ -91,7 +92,7 @@ function bindFBO(fbo) {
 
 
 function drawFBOScene(camera, time, portal, portalDepth, depthKey) {
-	if (portalDepth >= MAX_PORTAL_DEPTH) {
+	if (portalDepth >= window.CURRENT_PORTAL_DEPTH) {
 		return;
 	}
 
@@ -119,7 +120,7 @@ function drawFBOScene(camera, time, portal, portalDepth, depthKey) {
 		if (portals[i] != portal.targetBack &&
 			portals[i].isVisible( portalCam )) {
 
-			if (portalDepth < MAX_PORTAL_DEPTH - 1) {
+			if (portalDepth < window.CURRENT_PORTAL_DEPTH - 1) {
 				debugFrustumCount++;
 
 				if ( portals[i].checkOcclusionCulling( depthKey, portalCam ) ) {

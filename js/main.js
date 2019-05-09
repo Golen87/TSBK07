@@ -46,6 +46,7 @@ function initShaders() {
 	fbo_prog.addUniform( "u_ViewMat" );
 	fbo_prog.addUniform( "u_ModelMat" );
 	fbo_prog.addUniform( "u_Sampler" );
+	fbo_prog.addUniform( "u_Debug" );
 
 
 	// Unlit color
@@ -83,9 +84,11 @@ function updateFPS( deltaTime ) {
 	deltas.shift();
 	var sum = deltas.reduce((partial_sum, a) => partial_sum + a);
 	$("#debug-0").html(Math.round(1/(sum/deltas.length)));
-	$("#debug-2").html("count: " + portals.length);
-	$("#debug-3").html("frust: " + debugFrustumCount);
-	$("#debug-4").html("occlu: " + debugOcclusionCount);
+	if (window.shaderDebug) {
+		$("#debug-2").html("count: " + portals.length);
+		$("#debug-3").html("frust: " + debugFrustumCount);
+		$("#debug-4").html("occlu: " + debugOcclusionCount);
+	}
 }
 
 var previousTime = 0;
@@ -116,6 +119,23 @@ function updateLoop( elapsedTime ) {
 }
 
 
+function initKeybinds() {
+	window.shaderDebug = false;
+	Key.bindKeydown(Key.Q, function() {
+		window.shaderDebug = !window.shaderDebug;
+		for (var i = 0; i < 16; i++) {
+			$("#debug-"+i).html("");
+		}
+	});
+
+	Key.bindKeydown(Key.PLUS, function() {
+		window.CURRENT_PORTAL_DEPTH = (window.CURRENT_PORTAL_DEPTH + 1).clamp(0, MAX_PORTAL_DEPTH);
+	});
+	Key.bindKeydown(Key.MINUS, function() {
+		window.CURRENT_PORTAL_DEPTH = (window.CURRENT_PORTAL_DEPTH - 1).clamp(0, MAX_PORTAL_DEPTH);
+	});
+}
+
 function initGL() {
 	try {
 		var canvas = document.getElementById("canvas");
@@ -135,6 +155,7 @@ function loadWebGL() {
 	initShaders();
 	//initBuffers();
 	initCannon();
+	initKeybinds();
 	currentScene.init();
 
 	gl.enable(gl.DEPTH_TEST);

@@ -1,6 +1,7 @@
 // Keyboard helper
 var Key = {
 	_pressed: {},
+	_keydownBinds: {},
 
 	ENTER: 13,
 	SHIFT: 16,
@@ -13,6 +14,10 @@ var Key = {
 	UP: 38,		W: 87,
 	RIGHT: 39,	D: 68,
 	DOWN: 40,	S: 83,
+
+	Q: 81,
+	PLUS: 187,
+	MINUS: 189,
 
 	NUM_1: 49,
 	NUM_2: 50,
@@ -28,14 +33,21 @@ var Key = {
 	isDown: function(keyCode) {
 		return this._pressed[keyCode];
 	},
-	
+
 	onKeydown: function(event) {
+		if (this._keydownBinds[event.keyCode]) {
+			this._keydownBinds[event.keyCode]();
+		}
 		this._pressed[event.keyCode] = true;
 	},
 	
 	onKeyup: function(event) {
 		delete this._pressed[event.keyCode];
-	}
+	},
+
+	bindKeydown: function(keyCode, callback) {
+		this._keydownBinds[keyCode] = callback;
+	},
 };
 
 // Add event for keyboard input

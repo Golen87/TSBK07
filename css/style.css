@@ -2,7 +2,6 @@
 body {
 	background: #333333;
 	margin: auto;
-	text-align: center;
 	overflow: hidden;
 }
 
@@ -12,9 +11,9 @@ canvas {
 
 .debug {
 	position: absolute;
-	left: 0em;
 	top: 0em;
 	font-family: monospace;
 	font-size: 3em;
 	color: white;
+	white-space: pre;
 }
