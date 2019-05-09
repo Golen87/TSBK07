@@ -17,8 +17,8 @@ var scene01 = new Scene(function() {
 	initStaticBoxBody(groundShape, [0, 0, 0], groundRotation);
 
 	// Corridors
-	initCorridor( /*Scale*/ 1.0, 1.0, 1.0, /*Position*/ [-1.0,  0.0, -2.5], /*Rotation*/ 0.0, 0.0, 0.0 );
-	initCorridor( /*Scale*/ 1.0, 1.0, 4.0, /*Position*/ [ 1.0,  0.0, -3.0], /*Rotation*/ 0.0, 0.0, 0.0 );
+	addCorridor( /*Position*/ [-1.0,  0.0, -2.5], /*Scale*/ [1.0, 1.0, 1.0], /*Rotation*/ [0.0, 0.0, 0.0] );
+	addCorridor( /*Position*/ [ 1.0,  0.0, -3.0], /*Scale*/ [1.0, 1.0, 4.0], /*Rotation*/ [0.0, 0.0, 0.0] );
 
 	// Spheres
 	var k = 2;

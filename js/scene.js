@@ -63,27 +63,27 @@ function addCube(pos, scale, rot, shaderProg) {
 	return cube;
 }
 
-function initCorridor(scaleX, scaleY, scaleZ, translation, rotX, rotY, rotZ) {
+function addCorridor(pos, scale, rot) {
 	const BASE_HEIGHT = 2.0;
 	const BASE_WIDTH = 1.0;
 	const BASE_DEPTH = 1.0;
 	const BASE_THICKNESS = 0.1;
 
-	var width = scaleX * BASE_WIDTH;
-	var height = scaleY * BASE_HEIGHT;
-	var depth = scaleZ * BASE_DEPTH;
-	var wallThickness = scaleX * BASE_THICKNESS;
-	var roofThickness = scaleY * BASE_THICKNESS;
+	var width = scale[0] * BASE_WIDTH;
+	var height = scale[1] * BASE_HEIGHT;
+	var depth = scale[2] * BASE_DEPTH;
+	var wallThickness = scale[0] * BASE_THICKNESS;
+	var roofThickness = scale[1] * BASE_THICKNESS;
 
 	var corridor = new Model( objects.corridor, texture_prog );
 	corridor.setTexture( loadTexture(gl, "tex/debug.png") );
 	corridor.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( corridor.modelMatrix, corridor.modelMatrix, translation );
-	mat4.rotateX( corridor.modelMatrix, corridor.modelMatrix, rotX );
-	mat4.rotateY( corridor.modelMatrix, corridor.modelMatrix, rotY );
-	mat4.rotateZ( corridor.modelMatrix, corridor.modelMatrix, rotZ );
+	mat4.translate( corridor.modelMatrix, corridor.modelMatrix, pos );
+	mat4.rotateX( corridor.modelMatrix, corridor.modelMatrix, rot[0] );
+	mat4.rotateY( corridor.modelMatrix, corridor.modelMatrix, rot[1] );
+	mat4.rotateZ( corridor.modelMatrix, corridor.modelMatrix, rot[2] );
 	var transRotMatrix = mat4.clone( corridor.modelMatrix );
-	mat4.scale( corridor.modelMatrix, corridor.modelMatrix, [scaleX, scaleY, scaleZ] );
+	mat4.scale( corridor.modelMatrix, corridor.modelMatrix, scale );
 	mat3.normalFromMat4( corridor.normalMatrix, corridor.modelMatrix );
 	corridor.sphereOffset = vec3.fromValues(0.0, 1.0, 0.0);
 	corridor.sphereRadius = 0.5 * lengthVec3(height, height, depth);
@@ -99,7 +99,7 @@ function initCorridor(scaleX, scaleY, scaleZ, translation, rotX, rotY, rotZ) {
 		0.5 * roofThickness,
 		0.5 * depth));
 	var rotation = new CANNON.Quaternion();
-	rotation.setFromEuler(rotX, rotY, rotZ, "XYZ");
+	rotation.setFromEuler(rot[0], rot[1], rot[2], "XYZ");
 
 	// Wall left
 	var relPhysicsPos =  vec3.fromValues(

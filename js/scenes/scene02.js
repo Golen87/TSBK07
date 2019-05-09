@@ -21,8 +21,8 @@ var scene02 = new Scene(function() {
 	var corrRightPos = [3.0,  0.0, -3.0];
 	var corrLeftRotY = 0.75 * Math.PI;
 	var corrRightRotY = 0.35 * Math.PI;
-	initCorridor( /*Scale*/ 1.0, 1.0, 1.0, /*Position*/ corrLeftPos, /*Rotation*/ 0.0, corrLeftRotY, 0.0 );
-	initCorridor( /*Scale*/ 1.0, 1.0, 4.0, /*Position*/ corrRightPos, /*Rotation*/ 0.0, corrRightRotY, 0.0 );
+	addCorridor( /*Position*/ corrLeftPos, /*Scale*/ [1.0, 1.0, 1.0], /*Rotation*/ [0.0, corrLeftRotY, 0.0] );
+	addCorridor( /*Position*/ corrRightPos, /*Scale*/ [1.0, 1.0, 4.0], /*Rotation*/ [0.0, corrRightRotY, 0.0] );
 
 
 	// Init portals
