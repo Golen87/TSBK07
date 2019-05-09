@@ -73,7 +73,7 @@ var scene03 = new Scene(function() {
 
 	// Connect portals
 	connectPortals( topFront, bottomFront, 0, [0, 1, 0], topBack, bottomBack );
-	connectPortals( topBack, bottomBack, 0, [0, 1, 0], portals, bottomFront );
+	connectPortals( topBack, bottomBack, 0, [0, 1, 0], topFront, bottomFront );
 
 	// Player
 	playerCamera = new PlayerCamera(
