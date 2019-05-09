@@ -62,20 +62,9 @@ var scene01 = new Scene(function() {
 	mat3.normalFromMat4( sphereTexFlat.normalMatrix, sphereTexFlat.modelMatrix );
 	models.push( sphereTexFlat );
 
-	var cube = new Model( objects.cube, normal_prog );
-	cube.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( cube.modelMatrix, cube.modelMatrix, [-3.5, 1.0, -6.0] );
-	mat3.normalFromMat4( cube.normalMatrix, cube.modelMatrix );
-	cube.sphereRadius = Math.sqrt(3.0);
-	models.push( cube );
-
-	var cubeTex = new Model( objects.cube, texture_prog );
-	cubeTex.setTexture( loadTexture(gl, "tex/grass_lab.png") );
-	cubeTex.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( cubeTex.modelMatrix, cubeTex.modelMatrix, [-3.5, 1.0, -3.0] );
-	mat3.normalFromMat4( cubeTex.normalMatrix, cubeTex.modelMatrix );
-	cubeTex.sphereRadius = Math.sqrt(3.0);
-	models.push( cubeTex );
+	addCube([-3.5, 1.0, -6.0], [1, 1, 1], [0, 0, 0], normal_prog);
+	addCube([-3.5, 1.0, -3.0], [1, 1, 1], [0, 0, 0], normal_prog)
+		.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 
 
 	// Init portals

@@ -41,21 +41,7 @@ var scene05 = new Scene(function() {
 			scale[1] / 2,
 			scale[2] * 2 * p[1],
 		];
-
-		var cube = new Model( objects.cube, normal_prog );
-		cube.setGLSetting( gl.CULL_FACE, true );
-		mat4.translate( cube.modelMatrix, cube.modelMatrix, pos );
-		mat4.scale( cube.modelMatrix, cube.modelMatrix, scale );
-		mat3.normalFromMat4( cube.normalMatrix, cube.modelMatrix );
-		cube.sphereRadius = Math.sqrt(3.0);
-		models.push( cube );
-
-		var box = new CANNON.Box(new CANNON.Vec3(
-			scale[0],
-			scale[1],
-			scale[2]
-		));
-		initStaticBoxBody(box, pos, new CANNON.Quaternion());
+		addCube(pos, scale, [0, 0, 0], normal_prog);
 	}
 
 	for (var i = 0; i < doors.length; i++) {

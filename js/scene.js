@@ -26,6 +26,42 @@ Scene.prototype.update = function( dt ) {
 	}
 }
 
+/**
+ * Initiates a Box with a model and physical body and add both to the world.
+ * Base width, height and depth is 2.0.
+ *
+ * Returns the model.
+ */
+function addCube(pos, scale, rot, shaderProg) {
+	const BASE_LENGTH = 2.0;
+	const width = scale[0] * BASE_LENGTH;
+	const height = scale[1] * BASE_LENGTH;
+	const depth = scale[2] * BASE_LENGTH;
+
+	// Model
+	var cube = new Model( objects.cube, shaderProg );
+	cube.setGLSetting( gl.CULL_FACE, true );
+	mat4.translate( cube.modelMatrix, cube.modelMatrix, pos );
+	mat4.rotateX( cube.modelMatrix, cube.modelMatrix, rot[0] );
+	mat4.rotateY( cube.modelMatrix, cube.modelMatrix, rot[1] );
+	mat4.rotateZ( cube.modelMatrix, cube.modelMatrix, rot[2] );
+	mat4.scale( cube.modelMatrix, cube.modelMatrix, scale );
+	mat3.normalFromMat4( cube.normalMatrix, cube.modelMatrix );
+	cube.sphereOffset = vec3.fromValues(0.0, 0.0, 0.0);
+	cube.sphereRadius = 0.5 * lengthVec3(width, height, depth);
+	models.push( cube );
+
+	// Physics
+	cubeShape = new CANNON.Box(new CANNON.Vec3(
+		0.5 * width,
+		0.5 * height,
+		0.5 * depth));
+	var rotation = new CANNON.Quaternion();
+	rotation.setFromEuler(rot[0], rot[1], rot[2], "XYZ");
+	initStaticBoxBody(cubeShape, pos, rotation);
+
+	return cube;
+}
 
 function initCorridor(scaleX, scaleY, scaleZ, translation, rotX, rotY, rotZ) {
 	const BASE_HEIGHT = 2.0;
