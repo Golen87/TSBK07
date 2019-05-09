@@ -14,12 +14,14 @@ function Model(meshStr, shader) {
 	this.texture = null;
 	this.hasTexture = false;
 	this.color = [1, 1, 1, 1];
+	this.isSkybox = false;
 
 	this.isFBO = false;
 
 	// Render settings
 	this.settings = {};
-	this.setGLSetting(gl.CULL_FACE, true);
+	this.setGLSetting( gl.CULL_FACE, true );
+	this.setGLSetting( gl.DEPTH_TEST, true );
 
 	this.frustumCulling = true;
 }
@@ -52,6 +54,11 @@ Model.prototype.setFBO = function(fbo) {
 	return this;
 }
 
+Model.prototype.setSkybox = function() {
+	this.isSkybox = true;
+	return this;
+}
+
 Model.prototype.setGLSetting = function(setting, state) {
 	this.settings[setting] = state;
 	return this;
@@ -68,6 +75,14 @@ Model.prototype.draw = function(camera) {
 	gl.uniformMatrix4fv(this.shader.u_ViewMat, false, camera.viewMatrix);
 	gl.uniformMatrix4fv(this.shader.u_ModelMat, false, this.modelMatrix);
 
+	if (this.isSkybox) {
+		var skyView = mat4.clone(camera.viewMatrix);
+		skyView[12] = 0.0;
+		skyView[13] = 0.0;
+		skyView[14] = 0.0;
+		gl.uniformMatrix4fv(this.shader.u_ViewMat, false, skyView);
+	}
+
 	$.each( this.settings, function( key, value ) {
 		setGLSetting(key, value);
 	});
@@ -81,8 +96,9 @@ Model.prototype.draw = function(camera) {
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 		}
 		else {
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+			// Only for pixel perfect
+			//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+			//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 		}
 	}
 

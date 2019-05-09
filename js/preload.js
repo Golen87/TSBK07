@@ -22,6 +22,8 @@ preload( shaders, "fboFrag", "shaders/fbo.frag" );
 preload( shaders, "fboVert", "shaders/fbo.vert" );
 preload( shaders, "unlitColorFrag", "shaders/unlit_color.frag" );
 preload( shaders, "unlitColorVert", "shaders/unlit_color.vert" );
+preload( shaders, "skyboxFrag", "shaders/skybox.frag" );
+preload( shaders, "skyboxVert", "shaders/skybox.vert" );
 
 preload( objects, "cylinder", "obj/cylinder.obj" );
 preload( objects, "octagon", "obj/octagon.obj" );
@@ -43,6 +45,7 @@ textures.snow		= "tex/snow.png";
 textures.sand		= "tex/sand.png";
 textures.water		= "tex/water.png";
 textures.wall		= "tex/wall.png";
+textures.skybox		= "tex/skybox.png";
 
 // Meshes
 
@@ -58,6 +61,11 @@ sphere_mesh = {
 
 cylinder_mesh = {
 	mesh: "cylinder",
+	dims: [2.0, 2.0, 2.0]
+};
+
+skybox_mesh = {
+	mesh: "skybox",
 	dims: [2.0, 2.0, 2.0]
 };
 

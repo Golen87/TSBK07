@@ -1,11 +1,10 @@
 var gl;
 
-var shader_prog;
 var normal_prog;
 var texture_prog;
 var fbo_prog;
 var unlit_color_prog;
-var screen_prog;
+var skybox_prog;
 
 var modelMatrix = mat4.create();
 
@@ -61,6 +60,15 @@ function initShaders() {
 	texture_prog.addUniform( "u_NormalMat" );
 	texture_prog.addUniform( "u_Sampler" );
 	texture_prog.addUniform( "u_Color" );
+
+
+	// Skybox
+	skybox_prog = new Shader( shaders.skyboxVert, shaders.skyboxFrag );
+	skybox_prog.addAttribute( "Position" );
+	skybox_prog.addAttribute( "TexCoord" );
+	skybox_prog.addUniform( "u_ProjMat" );
+	skybox_prog.addUniform( "u_ViewMat" );
+	skybox_prog.addUniform( "u_Sampler" );
 }
 
 function getUniformLocation(program, name) {
@@ -150,6 +158,7 @@ function loadWebGL() {
 	initCannon();
 	initKeybinds();
 	currentScene.init();
+	createSkybox();
 
 	gl.enable(gl.DEPTH_TEST);
 

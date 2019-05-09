@@ -1,5 +1,6 @@
 var models = [];
 var portals = [];
+window.skybox = null;
 
 function Scene(initFunc) {
 	this.init = initFunc;
@@ -80,6 +81,15 @@ function addGround(pos = [0, 0, 0], rotX = 0.0) {
 	var groundRotation = new CANNON.Quaternion();
 	groundRotation.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), rotX - 0.5 * Math.PI);
 	initStaticBoxBody(groundShape, pos, groundRotation);
+}
+
+function createSkybox() {
+	window.skybox = new Model( objects[skybox_mesh.mesh], skybox_prog );
+	window.skybox.frustumCulling = false;
+	window.skybox.setGLSetting( gl.CULL_FACE, false );
+	window.skybox.setGLSetting( gl.DEPTH_TEST, false );
+	window.skybox.setTexture( loadTexture(gl, textures.skybox) );
+	window.skybox.setSkybox();
 }
 
 function addCorridor(pos, scale, rot) {
@@ -185,6 +195,10 @@ Scene.prototype.draw = function( camera, time ) {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	//drawTriangle(camera, time);
+
+	if (window.skybox) {
+		window.skybox.draw( camera );
+	}
 
 	//Draw models
 	for (var i = models.length - 1; i >= 0; i--) {
