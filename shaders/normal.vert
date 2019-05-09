@@ -1,17 +1,20 @@
-attribute vec3 Position;
-attribute vec3 Color;
-attribute vec3 Normal;
+#version 300 es
+
+in vec3 Position;
+in vec3 Normal;
 
 uniform mat4 u_ProjMat;
 uniform mat4 u_ViewMat;
 uniform mat4 u_ModelMat;
 uniform mat3 u_NormalMat;
 
-varying vec3 v_Normal;
+out vec3 v_Normal;
+out vec3 v_CamPos;
 
 
 void main(void)
 {
 	gl_Position = u_ProjMat * u_ViewMat * u_ModelMat * vec4(Position, 1.0);
 	v_Normal = u_NormalMat * Normal;
+	v_CamPos = vec3( inverse(u_ViewMat * u_ModelMat) * vec4(0,0,0,1) ) - Position;
 }

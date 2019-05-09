@@ -19,15 +19,6 @@ var debugOcclusionCount = 0;
 
 function initShaders() {
 
-	// Shader
-	shader_prog = new Shader( shaders.shaderVert, shaders.shaderFrag );
-	shader_prog.addAttribute( "Position" );
-	shader_prog.addAttribute( "Color" );
-	shader_prog.addUniform( "u_ProjMat" );
-	shader_prog.addUniform( "u_ViewMat" );
-	shader_prog.addUniform( "u_ModelMat" );
-
-
 	// Normal
 	normal_prog = new Shader( shaders.normalVert, shaders.normalFrag );
 	normal_prog.addAttribute( "Position" );
@@ -36,6 +27,7 @@ function initShaders() {
 	normal_prog.addUniform( "u_ViewMat" );
 	normal_prog.addUniform( "u_ModelMat" );
 	normal_prog.addUniform( "u_NormalMat" );
+	normal_prog.addUniform( "u_Color" );
 
 
 	// FBO

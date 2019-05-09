@@ -179,7 +179,7 @@ function connectPortals(portal1, portal2, deltaRotation, rotationAxis, portal1ba
 
 Scene.prototype.draw = function( camera, time ) {
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-	gl.clearColor(0.0, 0.0, 0.0, 1.0);
+	gl.clearColor(0.573, 0.886, 0.992, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	//drawTriangle(camera, time);

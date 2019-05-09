@@ -14,8 +14,6 @@ function preload( obj, name, url ) {
 	loaders.push(loader);
 }
 
-preload( shaders, "shaderFrag", "shaders/shader.frag" );
-preload( shaders, "shaderVert", "shaders/shader.vert" );
 preload( shaders, "normalFrag", "shaders/normal.frag" );
 preload( shaders, "normalVert", "shaders/normal.vert" );
 preload( shaders, "textureFrag", "shaders/texture.frag" );
