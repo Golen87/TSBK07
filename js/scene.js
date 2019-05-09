@@ -160,6 +160,8 @@ function addCorridor(pos, scale, rot) {
 		0.0);
 	vec3.transformMat4(relPhysicsPos, relPhysicsPos, transRotMatrix);
 	initStaticBoxBody(roofShape, [relPhysicsPos[0], relPhysicsPos[1], relPhysicsPos[2]], rotation);
+
+	return corridor;
 }
 
 function addPortal(position, yRotation, width, height) {
