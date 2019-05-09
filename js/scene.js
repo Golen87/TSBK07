@@ -28,30 +28,46 @@ Scene.prototype.update = function( dt ) {
 	}
 }
 
+// Meshes
+
+cube_mesh = {
+	mesh: objects.cube,
+	dims: [2.0, 2.0, 2.0]
+};
+
+sphere_mesh = {
+	mesh: objects.sphere,
+	dims: [2.0, 2.0, 2.0]
+};
+
+cylinder_mesh = {
+	mesh: objects.cylinder,
+	dims: [2.0, 2.0, 2.0]
+};
+
 /**
- * Initiates a Box with a model and physical body and add both to the world.
+ * Initiates a model and cube-shaped physical body and adds both to the world.
  * Base width, height and depth is 2.0.
  *
  * Returns the model.
  */
-function addCube(pos, scale, rot, shaderProg) {
-	const BASE_LENGTH = 2.0;
-	const width = scale[0] * BASE_LENGTH;
-	const height = scale[1] * BASE_LENGTH;
-	const depth = scale[2] * BASE_LENGTH;
+function addModel(mesh, pos, scale, rot, shaderProg) {
+	const width = scale[0] * mesh.dims[0];
+	const height = scale[1] * mesh.dims[1];
+	const depth = scale[2] *mesh.dims[0];
 
 	// Model
-	var cube = new Model( objects.cube, shaderProg );
-	cube.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( cube.modelMatrix, cube.modelMatrix, pos );
-	mat4.rotateX( cube.modelMatrix, cube.modelMatrix, rot[0] );
-	mat4.rotateY( cube.modelMatrix, cube.modelMatrix, rot[1] );
-	mat4.rotateZ( cube.modelMatrix, cube.modelMatrix, rot[2] );
-	mat4.scale( cube.modelMatrix, cube.modelMatrix, scale );
-	mat3.normalFromMat4( cube.normalMatrix, cube.modelMatrix );
-	cube.sphereOffset = vec3.fromValues(0.0, 0.0, 0.0);
-	cube.sphereRadius = 0.5 * lengthVec3(width, height, depth);
-	models.push( cube );
+	var model = new Model( mesh.mesh, shaderProg );
+	model.setGLSetting( gl.CULL_FACE, true );
+	mat4.translate( model.modelMatrix, model.modelMatrix, pos );
+	mat4.rotateX( model.modelMatrix, model.modelMatrix, rot[0] );
+	mat4.rotateY( model.modelMatrix, model.modelMatrix, rot[1] );
+	mat4.rotateZ( model.modelMatrix, model.modelMatrix, rot[2] );
+	mat4.scale( model.modelMatrix, model.modelMatrix, scale );
+	mat3.normalFromMat4( model.normalMatrix, model.modelMatrix );
+	model.sphereOffset = vec3.fromValues(0.0, 0.0, 0.0);
+	model.sphereRadius = 0.5 * lengthVec3(width, height, depth);
+	models.push( model );
 
 	// Physics
 	cubeShape = new CANNON.Box(new CANNON.Vec3(
@@ -62,7 +78,25 @@ function addCube(pos, scale, rot, shaderProg) {
 	rotation.setFromEuler(rot[0], rot[1], rot[2], "XYZ");
 	initStaticBoxBody(cubeShape, pos, rotation);
 
-	return cube;
+	return model;
+}
+
+function addGround(pos = [0, 0, 0], rotX = 0.0) {
+	var ground = new Model( objects.ground, texture_prog );
+	ground.setTexture( loadTexture(gl, "tex/grass_lab.png") );
+	ground.setGLSetting( gl.CULL_FACE, true );
+	ground.frustumCulling = false;
+	mat4.translate(	ground.modelMatrix, ground.modelMatrix, pos );
+	if (rotX != 0) {
+		mat4.rotateX(ground.modelMatrix, ground.modelMatrix, rotX); 
+	}
+	mat3.normalFromMat4( ground.normalMatrix, ground.modelMatrix );
+	models.push( ground );
+
+	var groundShape = new CANNON.Plane();
+	var groundRotation = new CANNON.Quaternion();
+	groundRotation.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), rotX - 0.5 * Math.PI);
+	initStaticBoxBody(groundShape, pos, groundRotation);
 }
 
 function addCorridor(pos, scale, rot) {

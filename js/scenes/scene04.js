@@ -3,18 +3,7 @@ var scene04 = new Scene(function() {
 
 	// Init models
 	models = [];
-	var ground = new Model( objects.ground, texture_prog );
-	ground.setTexture( loadTexture(gl, "tex/grass_lab.png") );
-	ground.setGLSetting( gl.CULL_FACE, true );
-	ground.frustumCulling = false;
-	mat4.translate(	ground.modelMatrix, ground.modelMatrix, [0.0, 0.0, 0.0] );
-	mat3.normalFromMat4( ground.normalMatrix, ground.modelMatrix );
-	models.push( ground );
-
-	var groundShape = new CANNON.Plane();
-	var groundRotation = new CANNON.Quaternion();
-	groundRotation.setFromAxisAngle (new CANNON.Vec3(1, 0, 0), -0.5 * Math.PI);
-	initStaticBoxBody(groundShape, [0, 0, 0], groundRotation);
+	addGround();
 
 	// Corridors
 	var pos1 = [1, 0, 0];
@@ -33,18 +22,9 @@ var scene04 = new Scene(function() {
 	connectPortals( portal1, portal2, 1*Math.PI, [0, 1, 0] )
 
 
-	var sphere = new Model( objects.sphere, normal_prog );
-	sphere.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( sphere.modelMatrix, sphere.modelMatrix, [2, 1, 2] );
-	mat3.normalFromMat4( sphere.normalMatrix, sphere.modelMatrix );
-	models.push( sphere );
-
-	var sphereTex = new Model( objects.sphere, texture_prog );
-	sphereTex.setTexture( loadTexture(gl, "tex/grass_lab.png") );
-	sphereTex.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( sphereTex.modelMatrix, sphereTex.modelMatrix, [2, 1, -2] );
-	mat3.normalFromMat4( sphereTex.normalMatrix, sphereTex.modelMatrix );
-	models.push( sphereTex );
+	addModel(sphere_mesh, [2, 1, 2], [1, 1, 1], [0, 0, 0], normal_prog);
+	addModel(sphere_mesh, [2, 1, -2], [1, 1, 1], [0, 0, 0], texture_prog)
+		.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 
 
 	// Player

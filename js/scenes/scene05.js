@@ -8,18 +8,7 @@ var scene05 = new Scene(function() {
 
 	// Init models
 	for (var i = 0; i < 2; i++) {
-		var ground = new Model( objects.ground, texture_prog );
-		ground.setTexture( loadTexture(gl, "tex/grass_lab.png") );
-		ground.setGLSetting( gl.CULL_FACE, false );
-		ground.frustumCulling = false;
-		mat4.translate(	ground.modelMatrix, ground.modelMatrix, [2*scale[0]*offset*i, 0.0, 0.0] );
-		mat3.normalFromMat4( ground.normalMatrix, ground.modelMatrix );
-		models.push( ground );
-
-		var groundShape = new CANNON.Plane();
-		var groundRotation = new CANNON.Quaternion();
-		groundRotation.setFromAxisAngle (new CANNON.Vec3(1, 0, 0), -0.5 * Math.PI);
-		initStaticBoxBody(groundShape, [0, 0, 0], groundRotation);
+		addGround([2*scale[0]*offset*i, 0.0, 0.0]);
 	}
 
 	var walls = [
@@ -41,7 +30,7 @@ var scene05 = new Scene(function() {
 			scale[1] / 2,
 			scale[2] * 2 * p[1],
 		];
-		addCube(pos, scale, [0, 0, 0], normal_prog);
+		addModel(cube_mesh, pos, scale, [0, 0, 0], normal_prog);
 	}
 
 	for (var i = 0; i < doors.length; i++) {
@@ -73,13 +62,8 @@ var scene05 = new Scene(function() {
 		connectPortals( portal1, portal2, 1*Math.PI, [0, 1, 0] )
 	}
 
-	var cubeTex = new Model( objects.cube, texture_prog );
-	cubeTex.setTexture( loadTexture(gl, "tex/grass_lab.png") );
-	cubeTex.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( cubeTex.modelMatrix, cubeTex.modelMatrix, [-3.5, 1.0, -3.0] );
-	mat3.normalFromMat4( cubeTex.normalMatrix, cubeTex.modelMatrix );
-	cubeTex.sphereRadius = Math.sqrt(3.0);
-	models.push( cubeTex );
+	addModel(cube_mesh, [-3.5, 1, -3], [1, 1, 1], [0, 0, 0], texture_prog)
+		.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 
 	// Player
 	playerCamera = new PlayerCamera(vec3.fromValues(6, 1.46, -2), 0);

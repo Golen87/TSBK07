@@ -3,18 +3,7 @@ var scene01 = new Scene(function() {
 
 	// Init models
 	models = [];
-	var ground = new Model( objects.ground, texture_prog );
-	ground.setTexture( loadTexture(gl, "tex/grass_lab.png") );
-	ground.setGLSetting( gl.CULL_FACE, true );
-	ground.frustumCulling = false;
-	mat4.translate(	ground.modelMatrix, ground.modelMatrix, [0.0, 0.0, 0.0] );
-	mat3.normalFromMat4( ground.normalMatrix, ground.modelMatrix );
-	models.push( ground );
-
-	var groundShape = new CANNON.Plane();
-	var groundRotation = new CANNON.Quaternion();
-	groundRotation.setFromAxisAngle (new CANNON.Vec3(1, 0, 0), -0.5 * Math.PI);
-	initStaticBoxBody(groundShape, [0, 0, 0], groundRotation);
+	addGround();
 
 	// Corridors
 	addCorridor( /*Position*/ [-1.0,  0.0, -2.5], /*Scale*/ [1.0, 1.0, 1.0], /*Rotation*/ [0.0, 0.0, 0.0] );
@@ -23,47 +12,18 @@ var scene01 = new Scene(function() {
 	// Spheres
 	var k = 2;
 	for (var x = -k; x < k; x++) for (var y = 0.25; y < 2*k; y++) for (var z = -k; z < k; z++) {
-		var sphere = new Model( objects.sphere, normal_prog );
-		sphere.setGLSetting( gl.CULL_FACE, true );
-		mat4.translate( sphere.modelMatrix, sphere.modelMatrix, [3*x, 3*y, 3*z] );
-		mat4.scale( sphere.modelMatrix, sphere.modelMatrix, [0.2, 0.2, 0.2] );
-		sphere.sphereRadius = 0.2;
-		mat3.normalFromMat4( sphere.normalMatrix, sphere.modelMatrix );
-		models.push( sphere );
+		addModel(sphere_mesh, [3*x, 3*y, 3*z], [0.2, 0.2, 0.2], [0, 0, 0], normal_prog);
 	}
 
-	var sphere = new Model( objects.sphere, normal_prog );
-	sphere.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( sphere.modelMatrix, sphere.modelMatrix, [3.5, 1.0, -6.0] );
-	mat3.normalFromMat4( sphere.normalMatrix, sphere.modelMatrix );
-	models.push( sphere );
+	addModel(sphere_mesh, [3.5, 1, -6], [1, 1, 1], [0, 0, 0], normal_prog);
+	addModel(sphere_mesh, [3.5, 3, -6], [1, 0.5, 1], [0, 0, 0.25 * Math.PI], normal_prog);
+	addModel(sphere_mesh, [3.5, 1, -3], [1, 1, 1], [0, 0, 0], texture_prog)
+		.setTexture( loadTexture(gl, "tex/grass_lab.png") );
+	addModel(sphere_mesh, [3.5, 3, -3.0], [1, 0.5, 1], [0, 0, 0.25 * Math.PI], texture_prog)
+		.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 
-	var sphereFlat = new Model( objects.sphere, normal_prog );
-	sphereFlat.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( sphereFlat.modelMatrix, sphereFlat.modelMatrix, [3.5, 3.0, -6.0] );
-	mat4.rotateZ( sphereFlat.modelMatrix, sphereFlat.modelMatrix, Math.PI * 0.25);
-	mat4.scale( sphereFlat.modelMatrix, sphereFlat.modelMatrix, [1.0, 0.5, 1.0] );
-	mat3.normalFromMat4( sphereFlat.normalMatrix, sphereFlat.modelMatrix );
-	models.push( sphereFlat );
-
-	var sphereTex = new Model( objects.sphere, texture_prog );
-	sphereTex.setTexture( loadTexture(gl, "tex/grass_lab.png") );
-	sphereTex.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( sphereTex.modelMatrix, sphereTex.modelMatrix, [3.5, 1.0, -3.0] );
-	mat3.normalFromMat4( sphereTex.normalMatrix, sphereTex.modelMatrix );
-	models.push( sphereTex );
-
-	var sphereTexFlat = new Model( objects.sphere, texture_prog );
-	sphereTexFlat.setTexture( loadTexture(gl, "tex/grass_lab.png") );
-	sphereTexFlat.setGLSetting( gl.CULL_FACE, true );
-	mat4.translate( sphereTexFlat.modelMatrix, sphereTexFlat.modelMatrix, [3.5, 3.0, -3.0] );
-	mat4.rotateZ( sphereTexFlat.modelMatrix, sphereTexFlat.modelMatrix, Math.PI * 0.25);
-	mat4.scale( sphereTexFlat.modelMatrix, sphereTexFlat.modelMatrix, [1.0, 0.5, 1.0] );
-	mat3.normalFromMat4( sphereTexFlat.normalMatrix, sphereTexFlat.modelMatrix );
-	models.push( sphereTexFlat );
-
-	addCube([-3.5, 1.0, -6.0], [1, 1, 1], [0, 0, 0], normal_prog);
-	addCube([-3.5, 1.0, -3.0], [1, 1, 1], [0, 0, 0], normal_prog)
+	addModel(cube_mesh, [-3.5, 1.0, -6.0], [1, 1, 1], [0, 0, 0], normal_prog);
+	addModel(cube_mesh, [-3.5, 1.0, -3.0], [1, 1, 1], [0, 0, 0], normal_prog)
 		.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 
 
@@ -88,5 +48,5 @@ var scene01 = new Scene(function() {
 
 
 	// Player
-	playerCamera = new PlayerCamera(vec3.fromValues(0.0, 1.46, 3.0), 0.0);
+	playerCamera = new PlayerCamera(vec3.fromValues(0.5, 1.46, 3.0), 0.0);
 });

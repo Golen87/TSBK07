@@ -3,18 +3,7 @@ var scene02 = new Scene(function() {
 
 	// Init models
 	models = [];
-	var ground = new Model( objects.ground, texture_prog );
-	ground.setTexture( loadTexture(gl, "tex/grass_lab.png") );
-	ground.setGLSetting( gl.CULL_FACE, true );
-	ground.frustumCulling = false;
-	mat4.translate(	ground.modelMatrix, ground.modelMatrix, [0.0, 0.0, 0.0] );
-	mat3.normalFromMat4( ground.normalMatrix, ground.modelMatrix );
-	models.push( ground );
-
-	var groundShape = new CANNON.Plane();
-	var groundRotation = new CANNON.Quaternion();
-	groundRotation.setFromAxisAngle (new CANNON.Vec3(1, 0, 0), -0.5 * Math.PI);
-	initStaticBoxBody(groundShape, [0, 0, 0], groundRotation);
+	addGround();
 
 	// Corridors
 	var corrLeftPos = [-3.0, 0.0, -2.5];
