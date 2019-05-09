@@ -80,9 +80,10 @@ function onLockChange() {
 	}
 }
 function onMouseMove(e) {
-	if (Math.abs(e.movementX) > window.innerWidth/10) {
+	if (Math.abs(e.movementX) > window.innerWidth/10)
 		return;
-	}
+	if (Math.abs(e.movementY) > window.innerHeight/10)
+		return;
 	playerCamera.mouseMove(e.movementX, e.movementY);
 }
 
