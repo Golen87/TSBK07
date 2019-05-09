@@ -36,16 +36,19 @@ Model.prototype.frustumCheck = function( camera ) {
 Model.prototype.setTexture = function(texture) {
 	this.texture = texture;
 	this.hasTexture = true;
+	return this;
 }
 
 Model.prototype.setFBO = function(fbo) {
 	this.isFBO = true;
 	this.texture = fbo.texture;
 	this.hasTexture = true;
+	return this;
 }
 
 Model.prototype.setGLSetting = function(setting, state) {
 	this.settings[setting] = state;
+	return this;
 }
 
 
