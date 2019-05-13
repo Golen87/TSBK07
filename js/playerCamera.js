@@ -103,8 +103,13 @@ PlayerCamera.prototype.keyboardMove = function( dt ) {
 	}
 	else {
 		// Floating
-		var finalMovement = movement.unit().scale(dt * this.moveSpeed * this.runFactor);
-		this.physicsBody.velocity.set(finalMovement.x, finalMovement.y, finalMovement.z);
+		if (movement.lengthSquared() > 0.0) {
+			var finalMovement = movement.unit().scale(dt * this.moveSpeed * this.runFactor);
+			this.physicsBody.velocity.set(finalMovement.x, finalMovement.y, finalMovement.z);
+		}
+		else {
+			this.physicsBody.velocity.set(0, 0, 0);
+		}
 	}
 
 	return true;
@@ -127,7 +132,7 @@ PlayerCamera.prototype.postPhysicsUpdate = function( dt ) {
 
 				// Teleport -- position
 				vec3.transformMat4(positionGL, positionGL, portals[i].warpInverse);
-				vec3.scale(vec3.temp, portals[i].normal, 2.0 * nearLimit);
+				vec3.scale(vec3.temp, portals[i].targetNormal, -2.0 * nearLimit);
 				vec3.add(positionGL, positionGL, vec3.temp);
 				this.physicsBody.position.x = positionGL[0];
 				this.physicsBody.position.y = positionGL[1];
