@@ -17,13 +17,13 @@ var scene03 = new Scene(function() {
 	slopeEdgeHeight = Math.sin(angle) * slopeDepth;
 	var slopeEdgeDepthOffset = Math.sin(angle) * groundHeight;
 	addModel(cube_mesh, [0, 0, 0], [slopeDepth, groundHeight, slopeDepth], [angle, 0, 0], texture_prog)
-		.setTexture( loadTexture(gl, "tex/grass.png") ).setColor(grassColor);
+		.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 	addModel(cube_mesh, [0, slopeEdgeHeight, -(slopeEdgeDepth - slopeEdgeDepthOffset + slopeDepth)],
 		[slopeDepth, groundHeight, slopeDepth], [0, 0, 0], texture_prog)
-		.setTexture( loadTexture(gl, "tex/grass.png") ).setColor(grassColor);
+		.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 	addModel(cube_mesh, [0, -slopeEdgeHeight, (slopeEdgeDepth - slopeEdgeDepthOffset + slopeDepth)],
 		[slopeDepth, groundHeight, slopeDepth], [0, 0, 0], texture_prog)
-		.setTexture( loadTexture(gl, "tex/grass.png") ).setColor(grassColor);
+		.setTexture( loadTexture(gl, "tex/grass_lab.png") );
 
 
 	// Corridors
