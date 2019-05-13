@@ -62,18 +62,14 @@ var scene03 = new Scene(function() {
 	const W = 0.8 * 2;
 	const H = 1.9 * 1.5;
 	portals = [];
-	var topFront = addPortal( [0, slopeEdgeHeight + groundHeight, -slopeEdgeDepth],
-		0.0, W, H );
-	var topBack = addPortal( [0, slopeEdgeHeight + groundHeight, -slopeEdgeDepth],
-		Math.PI, W, H );
-	var bottomFront = addPortal( [0, -slopeEdgeHeight + groundHeight, slopeEdgeDepth],
-		Math.PI, W, H );
-	var bottomBack = addPortal( [0, -slopeEdgeHeight + groundHeight, slopeEdgeDepth],
-		0.0, W, H );
+	var topFront = addPortal( [0, slopeEdgeHeight + groundHeight, -slopeEdgeDepth], 0.0, W, H );
+	var topBack = addPortal( [0, slopeEdgeHeight + groundHeight, -slopeEdgeDepth], Math.PI, W, H );
+	var bottomFront = addPortal( [0, -slopeEdgeHeight + groundHeight, slopeEdgeDepth], 0.0, W, H );
+	var bottomBack = addPortal( [0, -slopeEdgeHeight + groundHeight, slopeEdgeDepth], Math.PI, W, H );
 
 	// Connect portals
-	connectPortals( topFront, bottomFront, 0, [0, 1, 0], topBack, bottomBack );
-	connectPortals( topBack, bottomBack, 0, [0, 1, 0], topFront, bottomFront );
+	connectPortals( topFront, bottomFront, Math.PI, [0, 1, 0], topBack, bottomBack );
+	connectPortals( topBack, bottomBack, Math.PI, [0, 1, 0], topFront, bottomFront );
 
 	// Player
 	playerCamera = new PlayerCamera(
