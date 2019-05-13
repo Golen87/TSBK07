@@ -77,9 +77,13 @@ Model.prototype.draw = function(camera) {
 
 	if (this.isSkybox) {
 		var skyView = mat4.clone(camera.viewMatrix);
+		skyView[3] = 0.0;
+		skyView[7] = 0.0;
+		skyView[11] = 0.0;
 		skyView[12] = 0.0;
 		skyView[13] = 0.0;
 		skyView[14] = 0.0;
+		skyView[15] = 1.0;
 		gl.uniformMatrix4fv(this.shader.u_ViewMat, false, skyView);
 	}
 

@@ -7,6 +7,7 @@ var scene05 = new Scene(function() {
 	var scale = [0.5, 1.2, 0.5];
 
 	// Init models
+	addSkybox();
 	for (var i = 0; i < 2; i++) {
 		addGround([0.0, 0.0, 2*scale[0]*offset*i]);
 	}

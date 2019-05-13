@@ -1,6 +1,5 @@
 var models = [];
 var portals = [];
-window.skybox = null;
 
 function Scene(initFunc) {
 	this.init = initFunc;
@@ -83,13 +82,14 @@ function addGround(pos = [0, 0, 0], rotX = 0.0) {
 	initStaticBoxBody(groundShape, pos, groundRotation);
 }
 
-function createSkybox() {
-	window.skybox = new Model( objects[skybox_mesh.mesh], skybox_prog );
-	window.skybox.frustumCulling = false;
-	window.skybox.setGLSetting( gl.CULL_FACE, false );
-	window.skybox.setGLSetting( gl.DEPTH_TEST, false );
-	window.skybox.setTexture( loadTexture(gl, textures.skybox) );
-	window.skybox.setSkybox();
+function addSkybox() {
+	var skybox = new Model( objects[skybox_mesh.mesh], skybox_prog );
+	skybox.frustumCulling = false;
+	skybox.setGLSetting( gl.CULL_FACE, false );
+	//skybox.setGLSetting( gl.DEPTH_TEST, false );
+	skybox.setTexture( loadTexture(gl, textures.skybox) );
+	skybox.setSkybox();
+	models.push(skybox);
 }
 
 function addCorridor(pos, scale, rot) {
@@ -193,12 +193,6 @@ Scene.prototype.draw = function( camera, time ) {
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 	gl.clearColor(0.573, 0.886, 0.992, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-	//drawTriangle(camera, time);
-
-	if (window.skybox) {
-		window.skybox.draw( camera );
-	}
 
 	//Draw models
 	for (var i = models.length - 1; i >= 0; i--) {

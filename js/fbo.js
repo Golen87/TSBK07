@@ -107,12 +107,7 @@ function drawFBOScene(camera, time, portal, portalDepth, depthKey) {
 	var portalCam = camera.clone();
 	portalCam.setPortalView( portal );
 
-	if (window.skybox) {
-		window.skybox.draw( playerCamera );
-	}
-
 	//Draw models
-	//drawTriangle(portalCam, time);
 	for (var i = models.length - 1; i >= 0; i--) {
 		models[i].draw( portalCam );
 	}
