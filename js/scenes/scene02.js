@@ -3,6 +3,7 @@ var scene02 = new Scene(function() {
 
 	// Init models
 	models = [];
+	addSkybox();
 	addGround();
 
 	// Corridors

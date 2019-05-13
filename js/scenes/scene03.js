@@ -4,6 +4,7 @@ var scene03 = new Scene(function() {
 	// Init models
 	models = [];
 
+	addSkybox();
 
 	// Ground
 

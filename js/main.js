@@ -158,7 +158,6 @@ function loadWebGL() {
 	initCannon();
 	initKeybinds();
 	currentScene.init();
-	createSkybox();
 
 	gl.enable(gl.DEPTH_TEST);
 

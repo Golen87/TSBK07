@@ -3,6 +3,7 @@ var scene06 = new Scene(function() {
 
 	// Init models
 	models = [];
+	addSkybox();
 	addGround();
 
 	// Inner walls -- Center
