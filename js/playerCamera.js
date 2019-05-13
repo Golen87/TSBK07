@@ -127,7 +127,7 @@ PlayerCamera.prototype.postPhysicsUpdate = function( dt ) {
 
 				// Teleport -- position
 				vec3.transformMat4(positionGL, positionGL, portals[i].warpInverse);
-				vec3.scale(vec3.temp, portals[i].normal, 2.0 * nearLimit);
+				vec3.scale(vec3.temp, portals[i].targetNormal, -2.0 * nearLimit);
 				vec3.add(positionGL, positionGL, vec3.temp);
 				this.physicsBody.position.x = positionGL[0];
 				this.physicsBody.position.y = positionGL[1];
