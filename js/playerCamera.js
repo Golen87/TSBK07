@@ -103,8 +103,13 @@ PlayerCamera.prototype.keyboardMove = function( dt ) {
 	}
 	else {
 		// Floating
-		var finalMovement = movement.unit().scale(dt * this.moveSpeed * this.runFactor);
-		this.physicsBody.velocity.set(finalMovement.x, finalMovement.y, finalMovement.z);
+		if (movement.lengthSquared() > 0.0) {
+			var finalMovement = movement.unit().scale(dt * this.moveSpeed * this.runFactor);
+			this.physicsBody.velocity.set(finalMovement.x, finalMovement.y, finalMovement.z);
+		}
+		else {
+			this.physicsBody.velocity.set(0, 0, 0);
+		}
 	}
 
 	return true;
