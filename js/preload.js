@@ -36,6 +36,7 @@ preload( objects, "ground", "obj/ground.obj" );
 preload( objects, "corridor", "obj/corridor.obj" );
 preload( objects, "surface", "obj/surface.obj" );
 preload( objects, "cube", "obj/cube.obj" );
+preload( objects, "monkey", "obj/monkey.obj" );
 
 textures.debug		= "tex/debug.png";
 textures.grass_lab	= "tex/grass_lab.png";
@@ -86,6 +87,10 @@ skybox_mesh = {
 	dims: [2.0, 2.0, 2.0]
 };
 
+monkey_mesh = {
+	mesh: "monkey",
+	dims: [2.0, 2.0, 2.0]
+};
 
 function onPreload( func ) {
 	$.when.apply($, loaders).then(function() {
