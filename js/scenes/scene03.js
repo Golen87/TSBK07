@@ -12,19 +12,23 @@ var scene03 = new Scene(function() {
 	const slopeDepth = 4.0;
 	groundHeight = 0.1;
 
-	const grassColor = [0.3, 0.7, 0.3, 1];
-
 	var slopeEdgeDepth = Math.cos(angle) * slopeDepth;
 	slopeEdgeHeight = Math.sin(angle) * slopeDepth;
 	var slopeEdgeDepthOffset = Math.sin(angle) * groundHeight;
-	addModel(cube_mesh, [0, 0, 0], [slopeDepth, groundHeight, slopeDepth], [angle, 0, 0], texture_prog)
-		.setTexture( loadTexture(gl, "tex/grass_lab.png") );
-	addModel(cube_mesh, [0, slopeEdgeHeight, -(slopeEdgeDepth - slopeEdgeDepthOffset + slopeDepth)],
-		[slopeDepth, groundHeight, slopeDepth], [0, 0, 0], texture_prog)
-		.setTexture( loadTexture(gl, "tex/grass_lab.png") );
+	addModel(cube_mesh,
+		[0, 0, 0],
+		[slopeDepth, groundHeight, slopeDepth],
+		[angle, 0, 0])
+		.setTexture(textures.concrete);
+	addModel(cube_mesh,
+		[0, slopeEdgeHeight, -(slopeEdgeDepth - slopeEdgeDepthOffset + slopeDepth)],
+		[slopeDepth, groundHeight, slopeDepth],
+		[0, 0, 0])
+		.setTexture(textures.concrete);
 	addModel(cube_mesh, [0, -slopeEdgeHeight, (slopeEdgeDepth - slopeEdgeDepthOffset + slopeDepth)],
-		[slopeDepth, groundHeight, slopeDepth], [0, 0, 0], texture_prog)
-		.setTexture( loadTexture(gl, "tex/grass_lab.png") );
+		[slopeDepth, groundHeight, slopeDepth],
+		[0, 0, 0])
+		.setTexture(textures.concrete);
 
 
 	// Corridors

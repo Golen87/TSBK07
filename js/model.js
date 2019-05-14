@@ -1,10 +1,10 @@
-function Model(meshStr, shader) {
+function Model(meshStr) {
 	if (!meshStr)
 		console.error("Mesh is missing");
 
 	this.mesh = new OBJ.Mesh(meshStr);
 	OBJ.initMeshBuffers(gl, this.mesh);
-	this.shader = shader;
+	this.shader = normal_prog;
 	this.modelMatrix = mat4.create();
 	this.normalMatrix = mat3.create();
 
@@ -37,7 +37,8 @@ Model.prototype.frustumCheck = function( camera ) {
 
 
 Model.prototype.setTexture = function(texture) {
-	this.texture = texture;
+	this.shader = texture_prog;
+	this.texture = loadTexture(gl, texture);
 	this.hasTexture = true;
 	return this;
 }
@@ -55,6 +56,7 @@ Model.prototype.setFBO = function(fbo) {
 }
 
 Model.prototype.setSkybox = function() {
+	this.shader = skybox_prog;
 	this.isSkybox = true;
 	return this;
 }

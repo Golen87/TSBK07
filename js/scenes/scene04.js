@@ -3,7 +3,8 @@ var scene04 = new Scene(function() {
 
 	// Init models
 	models = [];
-	addGround();
+	addGround()
+		.setTexture(textures.grass_lab);
 
 	// Corridors
 	var pos1 = [1, 0, 0];
@@ -23,9 +24,10 @@ var scene04 = new Scene(function() {
 	connectPortals( portal1, portal2, 1*Math.PI, [0, 1, 0] )
 
 
-	addModel(sphere_mesh, [2, 1, 2], [1, 1, 1], [0, 0, 0], normal_prog);
-	addModel(sphere_mesh, [2, 1, -2], [1, 1, 1], [0, 0, 0], texture_prog)
-		.setTexture( loadTexture(gl, "tex/grass_lab.png") );
+	addModel(sphere_mesh, [2, 1, 2])
+		.setTexture(textures.snow);
+	addModel(sphere_mesh, [2, 1, -2])
+		.setTexture(textures.soil);
 
 
 	// Player

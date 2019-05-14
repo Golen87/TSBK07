@@ -9,7 +9,8 @@ var scene05 = new Scene(function() {
 	// Init models
 	addSkybox();
 	for (var i = 0; i < 2; i++) {
-		addGround([0.0, 0.0, 2*scale[0]*offset*i]);
+		addGround([0.0, 0.0, 2*scale[0]*offset*i])
+			.setTexture(textures.gravel);
 	}
 
 	var blocks = [
@@ -41,8 +42,8 @@ var scene05 = new Scene(function() {
 			scale[1] * (-1 + 2*p[1]),
 			scale[2] * 2 * p[2],
 		];
-		addModel(cube_mesh, pos, scale, [0, 0, 0], texture_prog)
-			.setTexture( loadTexture(gl, textures.wall) );
+		addModel(cube_mesh, pos, scale)
+			.setTexture(textures.wall);
 	}
 
 	for (var i = 0; i < walls.length; i++) {
@@ -52,8 +53,8 @@ var scene05 = new Scene(function() {
 			scale[1],
 			scale[2] * 2 * (p[1]+offset),
 		];
-		addModel(cube_mesh, pos, scale, [0, 0, 0], texture_prog)
-			.setTexture( loadTexture(gl, textures.wall) );
+		addModel(cube_mesh, pos, scale)
+			.setTexture(textures.wall);
 	}
 
 	for (var i = 0; i < doors.length; i++) {

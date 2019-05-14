@@ -34,13 +34,13 @@ Scene.prototype.update = function( dt ) {
  *
  * Returns the model.
  */
-function addModel(mesh, pos, scale, rot, shaderProg) {
+function addModel(mesh, pos=[0,0,0], scale=[1,1,1], rot=[0,0,0]) {
 	const width = scale[0] * mesh.dims[0];
 	const height = scale[1] * mesh.dims[1];
 	const depth = scale[2] *mesh.dims[0];
 
 	// Model
-	var model = new Model( objects[mesh.mesh], shaderProg );
+	var model = new Model( objects[mesh.mesh] );
 	model.setGLSetting( gl.CULL_FACE, true );
 	mat4.translate( model.modelMatrix, model.modelMatrix, pos );
 	mat4.rotateX( model.modelMatrix, model.modelMatrix, rot[0] );
@@ -65,8 +65,7 @@ function addModel(mesh, pos, scale, rot, shaderProg) {
 }
 
 function addGround(pos = [0, 0, 0], rotX = 0.0) {
-	var ground = new Model( objects.ground, texture_prog );
-	ground.setTexture( loadTexture(gl, "tex/grass_lab.png") );
+	var ground = new Model( objects.ground );
 	ground.setGLSetting( gl.CULL_FACE, true );
 	ground.frustumCulling = false;
 	mat4.translate(	ground.modelMatrix, ground.modelMatrix, pos );
@@ -80,16 +79,20 @@ function addGround(pos = [0, 0, 0], rotX = 0.0) {
 	var groundRotation = new CANNON.Quaternion();
 	groundRotation.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), rotX - 0.5 * Math.PI);
 	initStaticBoxBody(groundShape, pos, groundRotation);
+
+	return ground;
 }
 
 function addSkybox() {
-	var skybox = new Model( objects[skybox_mesh.mesh], skybox_prog );
+	var skybox = new Model( objects[skybox_mesh.mesh] );
 	skybox.frustumCulling = false;
 	skybox.setGLSetting( gl.CULL_FACE, false );
 	//skybox.setGLSetting( gl.DEPTH_TEST, false );
-	skybox.setTexture( loadTexture(gl, textures.skybox) );
+	skybox.setTexture( textures.skybox );
 	skybox.setSkybox();
 	models.push(skybox);
+
+	return skybox;
 }
 
 function addCorridor(pos, scale, rot) {
@@ -104,8 +107,8 @@ function addCorridor(pos, scale, rot) {
 	var wallThickness = scale[0] * BASE_THICKNESS;
 	var roofThickness = scale[1] * BASE_THICKNESS;
 
-	var corridor = new Model( objects.corridor, texture_prog );
-	corridor.setTexture( loadTexture(gl, "tex/debug.png") );
+	var corridor = new Model( objects.corridor );
+	corridor.setTexture( textures.metal );
 	corridor.setGLSetting( gl.CULL_FACE, true );
 	mat4.translate( corridor.modelMatrix, corridor.modelMatrix, pos );
 	mat4.rotateX( corridor.modelMatrix, corridor.modelMatrix, rot[0] );

@@ -4,7 +4,8 @@ var scene02 = new Scene(function() {
 	// Init models
 	models = [];
 	addSkybox();
-	addGround();
+	addGround()
+		.setTexture(textures.snow);
 
 	// Corridors
 	var corrLeftPos = [-3.0, 0.0, -2.5];
