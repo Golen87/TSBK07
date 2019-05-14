@@ -4,13 +4,15 @@ precision mediump float;
 in vec3 v_Normal;
 in vec2 v_TexCoord;
 in vec3 v_CamPos;
+in vec4 v_Position;
+in vec3 v_Distance;
 
 uniform sampler2D u_Sampler;
 uniform vec4 u_Color;
 
 out vec4 o_FragColor;
 
-const float k_d = 0.6;		// Surface reflectivity
+const float k_d = 0.9;		// Surface reflectivity
 const float k_spec = 0.4;	// Surface specularity
 
 struct LightSource
@@ -30,7 +32,7 @@ const LightSource light_2 = LightSource(
 vec3 add_ambient_light()
 {
 	const vec3 ambient_color = vec3( 1, 1, 1 );
-	const float i_a = 0.3;		// Ambient light level
+	const float i_a = 0.4;		// Ambient light level
 
 	float i_amb = k_d * i_a;
 	float i = i_amb;
@@ -62,6 +64,22 @@ vec3 add_directional_light( LightSource light )
 	return light.color * i;
 }
 
+vec4 add_fog(vec4 color) {
+	//const vec4 fogColor = vec4(0.573, 0.886, 0.992, 1.0);
+	const vec4 fogColor = vec4(0.85, 0.85, 0.85, 1.0);
+	const float fogDensity = 0.03;
+	const float dmin = 25.0;
+	const float dmax = 50.0;
+
+	float dist = length(v_Distance);
+
+	float fogFactor = 1.0 / exp( (dist * fogDensity)* (dist * fogDensity));
+	fogFactor *= (dmax - dist)/(dmax - dmin);
+	fogFactor = clamp( fogFactor, 0.0, 1.0 );
+
+	return mix(fogColor, color, fogFactor);
+}
+
 void main(void)
 {
 	vec3 lightColor =
@@ -70,7 +88,18 @@ void main(void)
 
 	vec4 color = texture(u_Sampler, v_TexCoord) * u_Color * vec4( lightColor, 1.0 );
 
+	vec2 uv = (v_Position.xy / v_Position.w);
+	uv = uv*0.5 + 0.5;
+		float sum = color[0] + color[1] + color[2];
+		float x = 0.6*1410.0*uv[0];
+		float y = 0.6*984.0*uv[1];
+		if ( sin(x+y) > sum*sum ) {
+			color *= 1.0;
+		}
+
+	color = add_fog(color);
+
 	// Gamma correction
-	vec4 gamma = vec4( 1.0 / 1.5 );
+	vec4 gamma = vec4( 1.0 / 1.4 );
 	o_FragColor = pow( max( color, vec4(0,0,0,0) ), gamma );
 }
