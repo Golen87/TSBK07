@@ -4,7 +4,8 @@ var scene07 = new Scene(function() {
 	// Init models
 	models = [];
 	addSkybox();
-	addGround();
+	addGround()
+        .setTexture(textures.wood);
 
     const red = [1, 0.25, 0.25, 1];
     const green = [0.25, 1, 0.25, 1];
@@ -23,15 +24,21 @@ var scene07 = new Scene(function() {
         const x = i * 5.0;
 
         // Walls
-        addModel(cube_mesh, [x + 2, 1.5, 1], [wallThickness, 1.5, 3], [0, 0, 0], texture_prog).setTexture( loadTexture(gl, "tex/debug.png") );
-        addModel(cube_mesh, [x - 2, 1.5, 1], [wallThickness, 1.5, 3], [0, 0, 0], texture_prog).setTexture( loadTexture(gl, "tex/debug.png") );
-        addModel(cube_mesh, [x, 1.5, 4], [2, 1.5, wallThickness], [0, 0, 0], texture_prog).setTexture( loadTexture(gl, "tex/debug.png") );
-        addModel(cube_mesh, [x, 1.5, -2], [2, 1.5, wallThickness], [0, 0, 0], texture_prog).setTexture( loadTexture(gl, "tex/debug.png") );
+        addModel(cube_mesh, [x + 2, 1.5, 1], [wallThickness, 1.5, 3])
+            .setTexture(textures.wood_wall);
+        addModel(cube_mesh, [x - 2, 1.5, 1], [wallThickness, 1.5, 3])
+            .setTexture(textures.wood_wall);
+        addModel(cube_mesh, [x, 1.5, 4], [2, 1.5, wallThickness])
+            .setTexture(textures.wood_wall);
+        addModel(cube_mesh, [x, 1.5, -2], [2, 1.5, wallThickness])
+            .setTexture(textures.wood_wall);
 
         // Pillar
-        addModel(cube_mesh, [x, 1.5, 0], [wallThickness, 1.5, wallThickness], [0, 0, 0], texture_prog).setTexture( loadTexture(gl, "tex/debug.png") );
+        addModel(cube_mesh, [x, 1.5, 0], [wallThickness, 1.5, wallThickness])
+            .setTexture(textures.concrete);
 
-        addModel(roomObjectMeshes[i], [x, 1, 3], [1, 1, 1], [0, 0, 0], texture_prog).setTexture( loadTexture(gl, "tex/debug.png") )
+        addModel(roomObjectMeshes[i], [x, 1, 3])
+            .setTexture(textures.debug)
             .setColor(roomObjectColors[i]);
 
         addPortal([x, 0.0, -1], 0.5 * Math.PI, 2 - 2 * wallThickness, 3 );
