@@ -188,6 +188,8 @@ function connectPortals(portal1, portal2, deltaRotation, rotationAxis, portal1ba
 	vec3.normalize( portal2.targetNormal, portal2.targetNormal );
 	vec3.copy(portal1.normal, portal2.targetNormal);
 	vec3.copy(portal2.normal, portal1.targetNormal);
+	portal1.target = portal2;
+	portal2.target = portal1;
 	portal1.targetBack = portal2back;
 	portal2.targetBack = portal1back;
 	portal1.calculateWarp();
@@ -202,6 +204,10 @@ Scene.prototype.draw = function( camera, time ) {
 	//Draw models
 	for (var i = models.length - 1; i >= 0; i--) {
 		models[i].draw( camera );
+	}
+
+	for (var i = portals.length - 1; i >= 0; i--) {
+		portals[i].isDrawn = false;
 	}
 
 	debugFrustumCount = 0;
@@ -224,11 +230,20 @@ Scene.prototype.draw = function( camera, time ) {
 					portals[i].shader = fbo_prog;
 					portals[i].draw( camera );
 				}
+				else if (window.shaderDebug) {
+					portals[i].drawColor( camera, [1.0, 0.0, 0.0, 1.0] );
+				}
 			}
 		}
 		else {
 			// Dummy shading
-			portals[i].drawColor( camera, [1.0, 0.0, 1.0, 1.0] );
+			if (window.shaderDebug) {
+				portals[i].drawColor( camera, [1.0, 0.0, 1.0, 1.0] );
+			}
 		}
+	}
+
+	for (var i = portals.length - 1; i >= 0; i--) {
+		portals[i].wasDrawn = portals[i].isDrawn;
 	}
 }

@@ -147,6 +147,9 @@ PlayerCamera.prototype.postPhysicsUpdate = function( dt ) {
 				this.yaw += rotYZX.y;
 				this.mouseMove(0.0, 0.0);
 
+				portals[i].target.wasDrawn = true;
+				console.log('teleport', portals[i].id, '->', portals[i].target.id);
+
 				this.justTeleported = true;
 				return this.postPhysicsUpdate( dt ); // Update normalAlignedOffset with new position (without teleporting again)
 			}

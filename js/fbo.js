@@ -96,7 +96,7 @@ function drawFBOScene(camera, time, portal, portalDepth, depthKey) {
 		return;
 	}
 
-	depthKey += portal.id;
+	depthKey += portal.id + '-';
 
 	portal.setFBO(fbos[portalDepth]);
 	bindFBO(fbos[portalDepth]);
@@ -131,11 +131,16 @@ function drawFBOScene(camera, time, portal, portalDepth, depthKey) {
 					portals[i].shader = fbo_prog;
 					portals[i].draw( portalCam );
 				}
+				else if (window.shaderDebug) {
+					portals[i].drawColor( portalCam, [1.0, 0.5, 0.0, 1.0] );
+				}
 			}
 			else {
 				// Dummy shading
-				gl.viewport(0, 0, FBO_WIDTH, FBO_HEIGHT);
-				portals[i].drawColor( portalCam, [1.0, 0.0, 1.0, 1.0] );
+				if (window.shaderDebug) {
+					gl.viewport(0, 0, FBO_WIDTH, FBO_HEIGHT);
+					portals[i].drawColor( portalCam, [1.0, 0.0, 1.0, 1.0] );
+				}
 			}
 		}
 	}

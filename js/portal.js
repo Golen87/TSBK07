@@ -12,9 +12,12 @@ function Portal(meshStr, shader, position) {
 
 	this.targetMatrix = mat4.create();
 	this.targetNormal = vec3.create();
+	this.target = null;
 	this.targetBack = null;
 
 	this.distanceFromCamera = 0.0;
+	this.isDrawn = false;
+	this.wasDrawn = false;
 
 	this.queries = {};
 	this.createQuery("");
@@ -86,7 +89,21 @@ Portal.prototype.checkOcclusionCulling = function( parent, camera ) {
 	gl.colorMask(true, true, true, true);
 	gl.depthMask(true);
 
-	return !this.queries[parent].occluded;
+	var visible = !this.queries[parent].occluded;
+
+	if (visible) {
+		this.isDrawn = true;
+	}
+
+	if (playerCamera.justTeleported && this.wasDrawn) {
+		this.queries[parent].inProgress = false;
+		this.queries[parent].occluded = false;
+		this.isDrawn = true;
+
+		return true;
+	}
+
+	return visible;
 }
 
 Portal.prototype.drawOcclusion = function( camera ) {
