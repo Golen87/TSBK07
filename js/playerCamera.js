@@ -92,7 +92,8 @@ PlayerCamera.prototype.keyboardMove = function( dt ) {
 			var surfaceNormal = raycastResult.hitNormalWorld.unit();
 			var movementNormalProjection = surfaceNormal.scale(surfaceNormal.dot(movement));
 			var surfaceMovement = movement.vsub(movementNormalProjection);
-			var finalMovement = surfaceMovement.unit().scale(dt * this.moveSpeed * this.runFactor);
+			var dist = dt.clamp(0, 4/60) * this.moveSpeed * this.runFactor;
+			var finalMovement = surfaceMovement.unit().scale( dist );
 			this.physicsBody.velocity.set(finalMovement.x, finalMovement.y, finalMovement.z);
 
 			this.bobValue += finalMovement.length();
