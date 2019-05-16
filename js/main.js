@@ -157,6 +157,7 @@ function loadWebGL() {
 	//initBuffers();
 	initCannon();
 	initKeybinds();
+	preloadTextures();
 
 	initScene(scene01);
 

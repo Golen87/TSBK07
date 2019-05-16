@@ -38,8 +38,13 @@ Model.prototype.frustumCheck = function( camera ) {
 
 Model.prototype.setTexture = function(texture) {
 	this.shader = texture_prog;
-	this.texture = loadTexture(gl, texture);
 	this.hasTexture = true;
+
+	if (!window.textureCache[texture]) {
+		window.textureCache[texture] = loadTexture(gl, texture);
+	}
+	this.texture = window.textureCache[texture];
+
 	return this;
 }
 

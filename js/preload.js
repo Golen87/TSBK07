@@ -4,6 +4,8 @@ var shaders = {};
 var objects = {};
 var textures = {};
 
+window.textureCache = {};
+
 function preload( obj, name, url ) {
 	var loader = $.ajax({
 		url: url,
@@ -91,6 +93,14 @@ monkey_mesh = {
 	mesh: "monkey",
 	dims: [2.0, 2.0, 2.0]
 };
+
+
+function preloadTextures() {
+	for (var i = 0; i < Object.keys(textures).length; i++) {
+		var tex = textures[Object.keys(textures)[i]];
+		window.textureCache[tex] = loadTexture(gl, tex);
+	}
+}
 
 function onPreload( func ) {
 	$.when.apply($, loaders).then(function() {
