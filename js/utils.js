@@ -49,3 +49,7 @@ function lengthVec2(x, y) {
 function lengthVec3(x, y, z) {
 	return Math.sqrt(x*x + y*y + z*z);
 }
+
+function vadd(v1, v2) {
+	return [v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2]];
+}
