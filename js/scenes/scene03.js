@@ -1,4 +1,5 @@
 var scene03 = new Scene(function() {
+	window.CURRENT_PORTAL_DEPTH = 2;
 	clearPhysics();
 
 	// Init models
@@ -25,7 +26,8 @@ var scene03 = new Scene(function() {
 		[slopeDepth, groundHeight, slopeDepth],
 		[0, 0, 0])
 		.setTexture(textures.concrete);
-	addModel(cube_mesh, [0, -slopeEdgeHeight, (slopeEdgeDepth - slopeEdgeDepthOffset + slopeDepth)],
+	addModel(cube_mesh,
+		[0, -slopeEdgeHeight, (slopeEdgeDepth - slopeEdgeDepthOffset + slopeDepth)],
 		[slopeDepth, groundHeight, slopeDepth],
 		[0, 0, 0])
 		.setTexture(textures.concrete);

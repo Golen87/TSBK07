@@ -1,4 +1,5 @@
 var scene05 = new Scene(function() {
+	window.CURRENT_PORTAL_DEPTH = 3;
 	clearPhysics();
 	models = [];
 	portals = [];
