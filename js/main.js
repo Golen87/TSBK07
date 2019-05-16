@@ -10,8 +10,6 @@ var modelMatrix = mat4.create();
 
 var playerCamera;
 
-var currentScene = scene01;
-
 var debugFrustumCount = 0;
 var debugOcclusionCount = 0;
 
@@ -27,6 +25,7 @@ function initShaders() {
 	normal_prog.addUniform( "u_ModelMat" );
 	normal_prog.addUniform( "u_NormalMat" );
 	normal_prog.addUniform( "u_Color" );
+	normal_prog.addUniform( "u_FogColor" );
 
 
 	// FBO
@@ -60,6 +59,7 @@ function initShaders() {
 	texture_prog.addUniform( "u_NormalMat" );
 	texture_prog.addUniform( "u_Sampler" );
 	texture_prog.addUniform( "u_Color" );
+	texture_prog.addUniform( "u_FogColor" );
 
 
 	// Skybox
@@ -112,8 +112,8 @@ function updateLoop( elapsedTime ) {
 		return distA < distB ? 1 : -1;
 	});
 
-	currentScene.update();
-	currentScene.draw( playerCamera, elapsedTime / 1000 );
+	window.currentScene.update();
+	window.currentScene.draw( playerCamera, elapsedTime / 1000 );
 
 	requestAnimationFrame(updateLoop);
 	previousTime = elapsedTime;
@@ -157,7 +157,8 @@ function loadWebGL() {
 	//initBuffers();
 	initCannon();
 	initKeybinds();
-	currentScene.init();
+
+	initScene(scene01);
 
 	gl.enable(gl.DEPTH_TEST);
 

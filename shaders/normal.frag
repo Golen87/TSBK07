@@ -8,6 +8,7 @@ in vec3 v_Distance;
 
 uniform sampler2D u_Sampler;
 uniform vec4 u_Color;
+uniform vec4 u_FogColor;
 
 out vec4 o_FragColor;
 
@@ -64,8 +65,6 @@ vec3 add_directional_light( LightSource light )
 }
 
 vec4 add_fog(vec4 color) {
-	//vec4 fogColor = vec4(0.573, 0.886, 0.992, 1.0);
-	const vec4 fogColor = vec4(0.85, 0.85, 0.85, 1.0);
 	const float fogDensity = 0.03;
 	const float dmin = 20.0;
 	const float dmax = 40.0;
@@ -76,7 +75,7 @@ vec4 add_fog(vec4 color) {
 	fogFactor *= (dmax - dist)/(dmax - dmin);
 	fogFactor = clamp( fogFactor, 0.0, 1.0 );
 
-	return mix(fogColor, color, fogFactor);
+	return mix(u_FogColor, color, fogFactor);
 }
 
 void main(void)

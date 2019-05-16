@@ -21,13 +21,17 @@ Scene.prototype.update = function( dt ) {
 		newScene = scene06;
 	else if ( Key.isDown(Key.NUM_7) )
 		newScene = scene07;
-	else
-		return;
 
-	if (newScene && newScene != currentScene) {
-		currentScene = newScene;
-		currentScene.init();
+	if (newScene && newScene != window.currentScene) {
+		initScene(newScene);
 	}
+}
+
+function initScene(scene) {
+	window.currentScene = scene;
+	window.fogColor = [0.85, 0.85, 0.85, 1.0];
+
+	scene.init();
 }
 
 /**
@@ -198,7 +202,7 @@ function connectPortals(portal1, portal2, deltaRotation, rotationAxis, portal1ba
 
 Scene.prototype.draw = function( camera, time ) {
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-	gl.clearColor(0.573, 0.886, 0.992, 1.0);
+	gl.clearColor(...window.fogColor);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	//Draw models

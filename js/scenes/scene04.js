@@ -1,5 +1,6 @@
 var scene04 = new Scene(function() {
 	window.CURRENT_PORTAL_DEPTH = 20;
+	window.fogColor = [0.573, 0.886, 0.992, 1.0];
 	clearPhysics();
 
 	// Init models

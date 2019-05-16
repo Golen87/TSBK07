@@ -147,6 +147,9 @@ Model.prototype.draw = function(camera) {
 		gl.uniform1i(this.shader.u_Debug, window.shaderDebug);
 	}
 
+	if (this.shader.u_FogColor) {
+		gl.uniform4fv(this.shader.u_FogColor, window.fogColor);
+	}
 
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.indexBuffer);
 	gl.drawElements(gl.TRIANGLES, this.mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);

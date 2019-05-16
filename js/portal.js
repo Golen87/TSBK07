@@ -61,7 +61,7 @@ Portal.prototype.isVisible = function( camera ) {
 Portal.prototype.createQuery = function( parent ) {
 	this.queries[parent] = gl.createQuery();
 	this.queries[parent].inProgress = false;
-	this.queries[parent].occluded = true;
+	this.queries[parent].occluded = (parent != "");
 }
 
 Portal.prototype.checkOcclusionCulling = function( parent, camera ) {
