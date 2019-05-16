@@ -4,7 +4,6 @@ precision mediump float;
 in vec3 v_Normal;
 in vec2 v_TexCoord;
 in vec3 v_CamPos;
-in vec4 v_Position;
 in vec3 v_Distance;
 
 uniform sampler2D u_Sampler;
@@ -68,8 +67,8 @@ vec4 add_fog(vec4 color) {
 	//const vec4 fogColor = vec4(0.573, 0.886, 0.992, 1.0);
 	const vec4 fogColor = vec4(0.85, 0.85, 0.85, 1.0);
 	const float fogDensity = 0.03;
-	const float dmin = 25.0;
-	const float dmax = 50.0;
+	const float dmin = 20.0;
+	const float dmax = 40.0;
 
 	float dist = length(v_Distance);
 
@@ -87,15 +86,6 @@ void main(void)
 		add_directional_light( light_2 );
 
 	vec4 color = texture(u_Sampler, v_TexCoord) * u_Color * vec4( lightColor, 1.0 );
-
-	vec2 uv = (v_Position.xy / v_Position.w);
-	uv = uv*0.5 + 0.5;
-		float sum = color[0] + color[1] + color[2];
-		float x = 0.6*1410.0*uv[0];
-		float y = 0.6*984.0*uv[1];
-		if ( sin(x+y) > sum*sum ) {
-			color *= 1.0;
-		}
 
 	color = add_fog(color);
 

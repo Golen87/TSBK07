@@ -67,8 +67,8 @@ vec4 add_fog(vec4 color) {
 	//vec4 fogColor = vec4(0.573, 0.886, 0.992, 1.0);
 	const vec4 fogColor = vec4(0.85, 0.85, 0.85, 1.0);
 	const float fogDensity = 0.03;
-	const float dmin = 25.0;
-	const float dmax = 50.0;
+	const float dmin = 20.0;
+	const float dmax = 40.0;
 
 	float dist = length(v_Distance);
 

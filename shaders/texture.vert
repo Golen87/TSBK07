@@ -12,14 +12,12 @@ uniform mat3 u_NormalMat;
 out vec3 v_Normal;
 out vec2 v_TexCoord;
 out vec3 v_CamPos;
-out vec4 v_Position;
 out vec3 v_Distance;
 
 
 void main(void)
 {
 	gl_Position = u_ProjMat * u_ViewMat * u_ModelMat * vec4(Position, 1.0);
-	v_Position = gl_Position;
 	v_Normal = u_NormalMat * Normal;
 	v_TexCoord = TexCoord;
 	v_CamPos = vec3( inverse(u_ViewMat * u_ModelMat) * vec4(0,0,0,1) ) - Position;
