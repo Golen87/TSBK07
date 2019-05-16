@@ -1,5 +1,5 @@
 var scene02 = new Scene(function() {
-	window.CURRENT_PORTAL_DEPTH = 2;
+	window.CURRENT_PORTAL_DEPTH = 13;
 	clearPhysics();
 
 	// Init models
