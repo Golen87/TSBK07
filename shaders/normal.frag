@@ -3,7 +3,6 @@ precision mediump float;
 
 in vec3 v_Normal;
 in vec3 v_CamPos;
-in vec4 v_Position;
 in vec3 v_Distance;
 
 uniform sampler2D u_Sampler;
@@ -85,18 +84,6 @@ void main(void)
 		add_directional_light( light_2 );
 
 	vec4 color = u_Color * vec4( lightColor, 1.0 );
-
-	vec2 uv = (v_Position.xy / v_Position.w);
-	uv = uv*0.5 + 0.5;
-	if (color[0] < 0.5 && color[1] < 0.5 && color[2] < 0.5) {
-		float sum = color[0] + color[1] + color[2];
-		float x = 0.6*1410.0*uv[0];
-		float y = 0.6*984.0*uv[1];
-		if ( sin(x+y) > sum*sum ) {
-			color *= 1.0;
-		}
-	}
-
 	color = add_fog(color);
 
 	// Gamma correction

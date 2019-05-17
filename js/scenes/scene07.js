@@ -20,6 +20,7 @@ var scene07 = new Scene(function() {
     // Clear portals
     portals = [];
 
+    var texs = [textures.soil, textures.leaves, textures.grass_lab];
     for (let i = 0; i < roomCount; ++i) {
 
         const x = i * 5.0;
@@ -39,8 +40,7 @@ var scene07 = new Scene(function() {
             .setTexture(textures.concrete);
 
         addModel(roomObjectMeshes[i], [x, 1, 3])
-            .setTexture(textures.debug)
-            .setColor(roomObjectColors[i]);
+            .setTexture(texs[i])
 
         addPortal([x, 0.0, -1], 0.5 * Math.PI, 2 - 2 * wallThickness, 3 );
         addPortal([x, 0.0, -1], -0.5 * Math.PI, 2 - 2 * wallThickness, 3 );

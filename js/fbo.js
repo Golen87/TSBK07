@@ -117,7 +117,7 @@ function drawFBOScene(camera, time, portal, portalDepth, depthKey) {
 		if (portals[i] != portal.targetBack &&
 			portals[i].isVisible( portalCam )) {
 
-			if (portalDepth < window.CURRENT_PORTAL_DEPTH - 1) {
+			if (portalDepth < window.CURRENT_PORTAL_DEPTH - 1 && (portal == portals[i] || portalDepth < 2) ) {
 				debugFrustumCount++;
 
 				if ( portals[i].checkOcclusionCulling( depthKey, portalCam ) ) {

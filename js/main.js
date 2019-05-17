@@ -13,6 +13,9 @@ var playerCamera;
 var debugFrustumCount = 0;
 var debugOcclusionCount = 0;
 
+window.fogColor = [1,1,1,1];
+window.clearColor = [1,1,1,1];
+
 
 function initShaders() {
 
@@ -37,6 +40,7 @@ function initShaders() {
 	fbo_prog.addUniform( "u_ModelMat" );
 	fbo_prog.addUniform( "u_Sampler" );
 	fbo_prog.addUniform( "u_Debug" );
+	fbo_prog.addUniform( "u_FogColor" );
 
 
 	// Unlit color

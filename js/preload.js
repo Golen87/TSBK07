@@ -40,31 +40,34 @@ preload( objects, "surface", "obj/surface.obj" );
 preload( objects, "cube", "obj/cube.obj" );
 preload( objects, "monkey", "obj/monkey.obj" );
 
-textures.debug		= "tex/debug.png";
-textures.grass_lab	= "tex/grass_lab.png";
-textures.wall		= "tex/wall.png";
-textures.skybox		= "tex/skybox.png";
+textures.debug			= "tex/debug.png";
+textures.grass_lab		= "tex/grass_lab.png";
+textures.wall			= "tex/wall.png";
+textures.skybox			= "tex/skybox.png";
 
-textures.mc_grass	= "tex/minecraft/grass.png";
-textures.mc_dirt	= "tex/minecraft/dirt.png";
-textures.mc_stone	= "tex/minecraft/stone.png";
-textures.mc_snow	= "tex/minecraft/snow.png";
-textures.mc_sand	= "tex/minecraft/sand.png";
-textures.mc_water	= "tex/minecraft/water.png";
+textures.mc_grass		= "tex/minecraft/grass.png";
+textures.mc_dirt		= "tex/minecraft/dirt.png";
+textures.mc_stone		= "tex/minecraft/stone.png";
+textures.mc_snow		= "tex/minecraft/snow.png";
+textures.mc_sand		= "tex/minecraft/sand.png";
+textures.mc_water		= "tex/minecraft/water.png";
 
-textures.grass		= "tex/fancy/grass.jpg";
-textures.soil		= "tex/fancy/soil.jpg";
-textures.snow		= "tex/fancy/snow.jpg";
-textures.leaves		= "tex/fancy/leaves.jpg";
-textures.gravel		= "tex/fancy/gravel.jpg";
-
-textures.plywood	= "tex/fancy/plywood.jpg";
-textures.wood		= "tex/fancy/wood.jpg";
-textures.wood_wall	= "tex/fancy/wood_wall.jpg";
-textures.brick		= "tex/fancy/brick.jpg";
-textures.concrete	= "tex/fancy/concrete.jpg";
-textures.metal_holes= "tex/fancy/metal.jpg";
-textures.metal		= "tex/fancy/metal_scratches.jpg";
+textures.grass			= "tex/fancy/grass.jpg";
+textures.soil			= "tex/fancy/soil.jpg";
+textures.snow			= "tex/fancy/snow.jpg";
+textures.leaves			= "tex/fancy/leaves.jpg";
+textures.gravel			= "tex/fancy/gravel.jpg";
+textures.plywood		= "tex/fancy/plywood.jpg";
+textures.wood			= "tex/fancy/wood.jpg";
+textures.wood_wall		= "tex/fancy/wood_wall.jpg";
+textures.brick			= "tex/fancy/brick.jpg";
+textures.concrete		= "tex/fancy/concrete.jpg";
+textures.metal_holes	= "tex/fancy/metal.jpg";
+textures.metal			= "tex/fancy/metal_scratches.jpg";
+textures.stone			= "tex/fancy/stone.png";
+textures.planks			= "tex/fancy/planks.jpg";
+textures.wood_ceiling	= "tex/fancy/wood_ceiling.jpg";
+textures.wood_tiles		= "tex/fancy/wood_tiles.jpg";
 
 
 // Meshes

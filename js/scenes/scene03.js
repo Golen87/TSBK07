@@ -78,6 +78,12 @@ var scene03 = new Scene(function() {
 	connectPortals( topFront, bottomFront, Math.PI, [0, 1, 0], topBack, bottomBack );
 	connectPortals( topBack, bottomBack, Math.PI, [0, 1, 0], topFront, bottomFront );
 
+
+	// Decoration
+	addModel(cube_mesh, [20, 8-10, 5], [5, 8, 5]).setTexture(textures.metal);
+	addModel(cube_mesh, [-10, 15-10, -10], [3, 15, 3]).setTexture(textures.metal);
+	addModel(cube_mesh, [-3, 10-10, 30], [2, 10, 2]).setTexture(textures.metal);
+
 	// Player
 	playerCamera = new PlayerCamera(
 		vec3.fromValues(0.0, 1.46 + slopeEdgeHeight + 0.5 * groundHeight, -7.0), Math.PI);
