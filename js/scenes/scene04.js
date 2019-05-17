@@ -124,5 +124,5 @@ var scene04 = new Scene(function() {
 	addModel(sphere_mesh, [10, 25, 35], [20, 20, 20]).setTexture(textures.stone);
 
 	// Player
-	playerCamera = new PlayerCamera(vec3.fromValues(-0.25, 1.46, 6.0), 0);
+	playerCamera = new PlayerCamera(vec3.fromValues(-0.25, 1.46, 10.0), 0);
 });
