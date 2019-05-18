@@ -10,17 +10,17 @@ Scene.prototype.update = function( dt ) {
 	if ( Key.isDown(Key.NUM_1) )
 		newScene = scene01;
 	else if ( Key.isDown(Key.NUM_2) )
-		newScene = scene02;
-	else if ( Key.isDown(Key.NUM_3) )
 		newScene = scene03;
+	else if ( Key.isDown(Key.NUM_3) )
+		newScene = scene02;
 	else if ( Key.isDown(Key.NUM_4) )
-		newScene = scene04;
+		newScene = scene07;
 	else if ( Key.isDown(Key.NUM_5) )
 		newScene = scene05;
 	else if ( Key.isDown(Key.NUM_6) )
 		newScene = scene06;
 	else if ( Key.isDown(Key.NUM_7) )
-		newScene = scene07;
+		newScene = scene04;
 
 	if (newScene && newScene != window.currentScene) {
 		initScene(newScene);
