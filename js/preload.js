@@ -103,6 +103,7 @@ function preloadTextures() {
 		var tex = textures[Object.keys(textures)[i]];
 		window.textureCache[tex] = loadTexture(gl, tex);
 	}
+	$("#loading").html("");
 }
 
 function onPreload( func ) {

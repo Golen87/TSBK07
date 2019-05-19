@@ -17,3 +17,13 @@ canvas {
 	color: white;
 	white-space: pre;
 }
+
+.loading {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	font-family: monospace;
+	font-size: 3em;
+	color: white;
+	white-space: pre;
+}
