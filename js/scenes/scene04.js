@@ -13,13 +13,13 @@ var scene04 = new Scene(function() {
 	function createPortalFrame() {
 		const t = 0.1;
 
-		var edge1 = addModel(cube_mesh, [0, -1-t, 0], [1.0+2*t, 0.1, 0.1])
+		var edge1 = addModel(cube_mesh, [0, -1-t, 0], [1.0+2*t, 0.1, 0.1], [0,0,0], false)
 			.setTexture(textures.wood)
-		var edge2 = addModel(cube_mesh, [0, 1+t, 0], [1.0+2*t, 0.1, 0.1])
+		var edge2 = addModel(cube_mesh, [0, 1+t, 0], [1.0+2*t, 0.1, 0.1], [0,0,0], false)
 			.setTexture(textures.wood);
-		var edge3 = addModel(cube_mesh, [1+t, 0, 0], [0.1, 0.8+2*t, 0.1])
+		var edge3 = addModel(cube_mesh, [1+t, 0, 0], [0.1, 0.8+2*t, 0.1], [0,0,0], false)
 			.setTexture(textures.wood);
-		var edge4 = addModel(cube_mesh, [-1-t, 0, 0], [0.1, 0.8+2*t, 0.1])
+		var edge4 = addModel(cube_mesh, [-1-t, 0, 0], [0.1, 0.8+2*t, 0.1], [0,0,0], false)
 			.setTexture(textures.wood);
 		var portal = addPortal( [0,-1,0], 0, 2, 2 );
 
@@ -85,7 +85,7 @@ var scene04 = new Scene(function() {
 		var trans = mat4.create();
 		mat4.translate( trans, trans, [18.25, 1.6, 0] );
 		mat4.rotateY( trans, trans, -0.5 * Math.PI );
-		mat4.scale( trans, trans, [1.2, 1.2, 1.2] );
+		mat4.scale( trans, trans, [1.3, 1.3, 1.3] );
 		var portal2 = applyGroupTransform( createPortalFrame(), trans )[0];
 
 		connectPortals( portal1, portal2, 1*Math.PI, [0, 1, 0] );

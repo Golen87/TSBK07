@@ -46,7 +46,7 @@ function setFogColor(color) {
  *
  * Returns the model.
  */
-function addModel(mesh, pos=[0,0,0], scale=[1,1,1], rot=[0,0,0]) {
+function addModel(mesh, pos=[0,0,0], scale=[1,1,1], rot=[0,0,0], physics=true) {
 	const width = scale[0] * mesh.dims[0];
 	const height = scale[1] * mesh.dims[1];
 	const depth = scale[2] *mesh.dims[0];
@@ -65,13 +65,15 @@ function addModel(mesh, pos=[0,0,0], scale=[1,1,1], rot=[0,0,0]) {
 	models.push( model );
 
 	// Physics
-	cubeShape = new CANNON.Box(new CANNON.Vec3(
-		0.5 * width,
-		0.5 * height,
-		0.5 * depth));
-	var rotation = new CANNON.Quaternion();
-	rotation.setFromEuler(rot[0], rot[1], rot[2], "XYZ");
-	initStaticBoxBody(cubeShape, pos, rotation);
+	if (physics) {
+		cubeShape = new CANNON.Box(new CANNON.Vec3(
+			0.5 * width,
+			0.5 * height,
+			0.5 * depth));
+		var rotation = new CANNON.Quaternion();
+		rotation.setFromEuler(rot[0], rot[1], rot[2], "XYZ");
+		initStaticBoxBody(cubeShape, pos, rotation);
+	}
 
 	return model;
 }

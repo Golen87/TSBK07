@@ -67,7 +67,7 @@ var scene05 = new Scene(function() {
 		var p2 = doors[i][1];
 		var d = doors[i][2];
 
-		var edge = 0.002;
+		var edge = 0.0;
 		var pos1 = [
 			scale[0] * 2 * (p1[0] - 0.5),
 			edge,
